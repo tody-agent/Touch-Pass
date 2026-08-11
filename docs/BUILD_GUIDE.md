@@ -106,6 +106,12 @@ Keep this Terminal window open until you finish configuring the firmware: the
 `PAIRING_KEY` variable exists only in this shell. Do not paste the key into a
 chat, issue, or commit.
 
+The helper confirms the Keychain step by printing:
+
+```text
+pairing key stored in Keychain
+```
+
 Copy the firmware template to the ignored local secret file:
 
 ```bash
@@ -114,9 +120,10 @@ cp firmware/tiny_touch_keyboard/secrets.example.h \
 ```
 
 Open `firmware/tiny_touch_keyboard/secrets.h`. Replace the 32 `0x00` values
-inside `PAIRING_KEY` with the comma-separated `0xNN` values printed by the
-second command above. Keep the surrounding braces and semicolon. The local
-`secrets.h` file is ignored by Git; never commit or share it.
+inside `PAIRING_KEY` with the comma-separated `0xNN` values output by the
+`sed` command (the third command in the block above). Keep the surrounding
+braces and semicolon. The local `secrets.h` file is ignored by Git; never
+commit or share it.
 
 ## Configure Arduino
 
@@ -156,8 +163,9 @@ and listens only on your Mac's loopback address:
 ```
 
 Open [http://127.0.0.1:8787](http://127.0.0.1:8787) in a browser. If more than
-one `/dev/cu.usbmodem*` device is attached, or if the helper asks you to choose
-a port, stop it with `Control-C` and run it with the board's actual port:
+one `/dev/cu.usbmodem*` device is attached, the helper reports the multiple
+devices and tells you to rerun with `--port`. Stop it with `Control-C` and run
+it with the board's actual port:
 
 ```bash
 .venv/bin/python software/macos-helper/tinytouch_helper.py \
@@ -170,10 +178,16 @@ can own the serial port at a time.
 
 ## First-build checklist
 
-### Automated checks
+### Automated file checks
 
 - The four `test -f` commands in **Prepare your Mac** each exited with `0`.
+
+### Build checkpoint
+
 - Arduino IDE completed **Verify** and **Upload** without an error.
+
+### Software checkpoint
+
 - The helper printed a portal address and the browser opened
   `http://127.0.0.1:8787`.
 
