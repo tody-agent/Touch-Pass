@@ -22,6 +22,10 @@ class DocumentationTests(unittest.TestCase):
         actual = {p.name for p in (ROOT / "assets" / "demo").glob("*.png")}
         self.assertEqual(actual, APPROVED_IMAGES)
 
+    def test_user_guide_has_no_escaped_backticks(self):
+        text = USER_GUIDE.read_text(encoding="utf-8")
+        self.assertNotIn(r"\`", text)
+
     def test_readme_routes_and_credits(self):
         text = README.read_text(encoding="utf-8")
         self.assertIn("docs/BUILD_GUIDE.md", text)

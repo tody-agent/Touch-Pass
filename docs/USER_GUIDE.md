@@ -12,9 +12,9 @@ and keep each touch intentional. For hardware setup, start with the
 1. Plug in the Touch Pass board and start the helper if it is not already
    running:
 
-   \`\`\`bash
+   ```bash
    .venv/bin/python software/macos-helper/tinytouch_helper.py
-   \`\`\`
+   ```
 
 2. In a browser on that same Mac, open
    [http://127.0.0.1:8787](http://127.0.0.1:8787).
@@ -42,16 +42,16 @@ one harmless action, test it in a text editor, then add more slots gradually.
 
 ## Enroll
 
-1. On the slot you want to use, select **Configure** (\`Cấu hình\`), give it a
+1. On the slot you want to use, select **Configure** (`Cấu hình`), give it a
    name, choose an action, and save.
-2. Select **Enroll** (\`Đăng ký\`).
+2. Select **Enroll** (`Đăng ký`).
 3. Follow the on-screen prompts: place that finger on the sensor, lift it when
    asked, then place the **same** finger a second time.
-4. Wait for “Enrollment complete” (\`Đăng ký hoàn tất\`). The slot will then be
+4. Wait for “Enrollment complete” (`Đăng ký hoàn tất`). The slot will then be
    marked enrolled.
 
 Only one enrollment or deletion can run at a time. If you began the wrong one,
-use **Cancel** (\`Hủy\`) in the progress window, wait until it reports cancelled,
+use **Cancel** (`Hủy`) in the progress window, wait until it reports cancelled,
 and then start again. A failed enrollment does not make the action run; clean
 the sensor surface, use a relaxed full touch, and retry.
 
@@ -63,14 +63,14 @@ actions: Touch Pass sends the listed keys to the Mac’s currently focused field
 | Action | What Touch Pass sends | Good use |
 | --- | --- | --- |
 | **Password + Enter** | Your saved password, then Return | A login field that you have checked yourself |
-| **Accept** | \`y\`, then Return | A prompt that visibly asks for \`y\` to continue |
+| **Accept** | `y`, then Return | A prompt that visibly asks for `y` to continue |
 | **Enter** | Return | Advance a selected dialog or submit a harmless form |
 | **Escape** | Escape | Dismiss a dialog or cancel a command prompt |
 | **Custom** | Your Text, Key, and Delay steps | A short, repeatable keyboard sequence |
 
 ### Password + Enter
 
-Select **Password + Enter** (\`Mật khẩu + Enter\`) and enter the password the
+Select **Password + Enter** (`Mật khẩu + Enter`) and enter the password the
 first time you save the slot. Password actions accept only ASCII characters
 (the common English/US characters), with a length of 1–128 characters. When
 you open the slot again, leave the password box empty to keep the password
@@ -83,8 +83,8 @@ before touching the sensor.
 ### Accept, Enter, and Escape
 
 Use **Accept** for a prompt where the expected response really is lowercase
-\`y\` followed by Return. For example, a Codex or Claude workflow may show a
-terminal or browser prompt that accepts \`y\`; Touch Pass does not know which app
+`y` followed by Return. For example, a Codex or Claude workflow may show a
+terminal or browser prompt that accepts `y`; Touch Pass does not know which app
 or prompt is open, so read the prompt and focus it before you use the action.
 
 **Enter** sends Return and **Escape** sends Escape. Both, like Accept, require
@@ -92,18 +92,18 @@ a confirming second touch; see the next section.
 
 ### Custom sequences
 
-Choose **Custom macro** (\`Macro tùy chỉnh\`) to make a sequence of up to **16
+Choose **Custom macro** (`Macro tùy chỉnh`) to make a sequence of up to **16
 steps**. Add only the steps you need:
 
 - **Text** types ASCII text. Use plain ABC/US characters; accented or other
   non-ASCII characters are rejected.
-- **Key** can be \`enter\`, \`escape\`, \`tab\`, \`space\`, \`up\`, \`down\`, \`left\`, or
-  \`right\`.
+- **Key** can be `enter`, `escape`, `tab`, `space`, `up`, `down`, `left`, or
+  `right`.
 - **Delay** pauses for 0–5000 milliseconds, which can give a visible dialog
   time to appear before the next key.
 
-A practical sequence might be \`Text: yes\`, \`Key: enter\`; a navigation sequence
-might be \`Key: tab\`, \`Key: tab\`, \`Key: enter\`. Keep macros short and test them
+A practical sequence might be `Text: yes`, `Key: enter`; a navigation sequence
+might be `Key: tab`, `Key: tab`, `Key: enter`. Keep macros short and test them
 in a harmless document first. A custom sequence is a control action, so it
 also needs the two-touch confirmation.
 
@@ -133,11 +133,11 @@ focus on your Mac.
 | Slot name | Suggested finger | Action | When it is useful |
 | --- | --- | --- | --- |
 | Mac login | Thumb | Password + Enter | The correct macOS or website password field is visibly selected. |
-| Codex accept | Index finger | Accept | A visible Codex-related prompt expects \`y\` then Return. |
-| Claude accept | Index finger on the other hand | Accept | A visible Claude-related prompt expects \`y\` then Return. |
+| Codex accept | Index finger | Accept | A visible Codex-related prompt expects `y` then Return. |
+| Claude accept | Index finger on the other hand | Accept | A visible Claude-related prompt expects `y` then Return. |
 | Terminal Enter | Middle finger | Enter | You have read the command and want to submit it. |
 | Back out | Ring finger | Escape | A dialog or command prompt needs dismissal. |
-| Test macro | Little finger | Custom: \`Text: hello\`, \`Key: enter\` | A scratch text document while learning. |
+| Test macro | Little finger | Custom: `Text: hello`, `Key: enter` | A scratch text document while learning. |
 
 Do not copy a layout just because it looks convenient. In particular, only set
 up a password for a service you are comfortable having typed through a USB HID
@@ -149,7 +149,7 @@ Use **Configure** to rename a slot or replace its action. Save the new settings
 before you test them. Replacing a password with Accept, Enter, Escape, or
 Custom removes that slot’s old password from Keychain.
 
-To change the fingerprint itself, select **Delete fingerprint** (\`Xóa vân\`) on
+To change the fingerprint itself, select **Delete fingerprint** (`Xóa vân`) on
 the enrolled slot and confirm the warning. The portal asks the sensor to erase
 the fingerprint, then resets the slot to its default empty state and removes
 any password saved for it. Configure the slot again and enrol the new finger.
@@ -198,7 +198,7 @@ Before every touch that can type or approve something, take a short pause:
 
 - Is this the expected window and is the exact field focused?
 - Is macOS using the ABC or US keyboard layout?
-- Have I read the prompt myself and confirmed that \`y\` + Return, Enter, or
+- Have I read the prompt myself and confirmed that `y` + Return, Enter, or
   Escape is really the response I want?
 - For a password, am I comfortable entering it through this convenience device?
 - For a control action, am I ready to make the intentional second touch within
