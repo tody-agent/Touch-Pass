@@ -6,9 +6,9 @@
 
 ## What is Touch Pass?
 
-Touch Pass turns a small fingerprint reader into a personal command surface for your Mac. Enrol a fingerprint, choose what it should do, and make everyday moments—signing in, approving a prompt, opening a tool, or starting a flow—feel as immediate as a touch.
+Touch Pass turns an **ESP32-S3 Super Mini** and a **ZW101** fingerprint sensor into a personal command surface for your Mac. Enrol a fingerprint, choose what it should do, and make everyday moments—signing in, approving a prompt, opening a tool, or starting a flow—feel as immediate as a touch.
 
-It is a TinyTouch-based project for people who would rather reach for a finger than remember one more shortcut.
+It combines USB HID, a macOS helper, and a loopback ten-finger portal into a TinyTouch-based project for people who would rather reach for a finger than remember one more shortcut.
 
 ## Ten fingers, ten useful actions
 
@@ -31,7 +31,7 @@ Whether you are prototyping a desk companion, smoothing out a creative workflow,
 
 ## How it works
 
-The sensor recognizes an enrolled finger and reports its template ID to the controller. Touch Pass maps that ID to an action, then presents itself to your computer as a USB device.
+The ZW101 recognizes an enrolled finger and reports its template ID to the ESP32-S3 Super Mini. The loopback ten-finger portal maps that ID to an action. For Mac-side actions, the macOS helper owns the encrypted action flow and retrieves Password actions from the macOS Keychain; the ESP32-S3 then delivers the resulting action over USB HID.
 
 For actions delivered through keyboard emulation, HID types into the **focused field**. That makes setup wonderfully flexible—and it also means you should always check where the cursor is before you touch the sensor.
 
@@ -39,9 +39,11 @@ For actions delivered through keyboard emulation, HID types into the **focused f
 
 ![Touch Pass approving a Claude prompt on a Mac mini](assets/demo/02-mac-mini-claude-accept-v2.png)
 
-From a fingerprint touch to a ready-to-go action, the experience is meant to disappear into the rhythm of your desk.
+Non-password control actions—including **Accept**—need a deliberate confirmation: touch the same finger twice within three seconds. From a fingerprint touch to a ready-to-go action, the experience is meant to disappear into the rhythm of your desk.
 
 ![Touch Pass feature overview](assets/demo/04-features.png)
+
+The “secure” language in this overview refers to local encrypted helper and Keychain handling. It does **not** mean Touch Pass is a secure enclave or that the sensor UART is authenticated.
 
 ## Start here
 
@@ -53,9 +55,9 @@ Choose the path that matches where you are:
 
 ## Before you trust it
 
-Touch Pass is a convenient physical interface, not a security boundary. HID types into the focused field, so an unexpected or malicious prompt can receive whatever the action is configured to type.
+Touch Pass is a convenient physical interface, not a security boundary. Password actions can be stored in and retrieved from the macOS Keychain through the local helper; avoid putting sensitive values into custom text actions. In either case, HID ultimately types into the focused field, so an unexpected or malicious prompt can receive whatever the action is configured to type.
 
-The ZW101 UART is unauthenticated. A person with physical access to the device can potentially spoof sensor traffic; treat the hardware and the environment around it accordingly. Do not use Touch Pass for secrets or situations whose risk you have not assessed.
+The ZW101 UART is unauthenticated. A person with physical access to the device can potentially spoof sensor traffic; treat the hardware and the environment around it accordingly and assess whether it is appropriate for your situation.
 
 ## Project status
 
