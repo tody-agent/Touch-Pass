@@ -5,7 +5,7 @@ up. This is the everyday guide: name your fingers, give them useful actions,
 and keep each touch intentional. For hardware setup, start with the
 [build guide](BUILD_GUIDE.md).
 
-![A Touch Pass login action ready at a Mac](../assets/demo/03-login-success.png)
+![A Touch Pass session-unlock action ready at a Mac](../assets/demo/03-login-success.png)
 
 ## Open the portal
 
@@ -34,8 +34,8 @@ fingerprint is enrolled; a configured slot shows its name and selected action.
 
 Treat the slot number as a simple label, not a specific anatomical finger. For
 example, slot 01 can be your right thumb today and a different finger after you
-delete and enrol it again. Give each slot a short, clear name such as “Mac
-login”, “Claude accept”, or “Terminal Enter” so you can recognise it later.
+delete and enrol it again. Give each slot a short, clear name such as “Session
+unlock”, “Claude accept”, or “Terminal Enter” so you can recognise it later.
 
 It is fine to configure an action before enrolling the finger. Begin with just
 one harmless action, test it in a text editor, then add more slots gradually.
@@ -62,7 +62,7 @@ actions: Touch Pass sends the listed keys to the Mac’s currently focused field
 
 | Action | What Touch Pass sends | Good use |
 | --- | --- | --- |
-| **Password + Enter** | Your saved password, then Return | A login field that you have checked yourself |
+| **Password + Enter** | Your saved password, then Return | A password field in your active user session that you have checked yourself |
 | **Accept** | `y`, then Return | A prompt that visibly asks for `y` to continue |
 | **Enter** | Return | Advance a selected dialog or submit a harmless form |
 | **Escape** | Escape | Dismiss a dialog or cancel a command prompt |
@@ -77,15 +77,28 @@ you open the slot again, leave the password box empty to keep the password
 already stored; type a new value only when you mean to replace it.
 
 Touch Pass sends this action with a single recognised touch. That is convenient
-for a login screen, so always make sure the intended password field is focused
-before touching the sensor.
+for password fields, so always make sure the intended field is focused before
+touching the sensor.
+
+### Lock-screen/session unlock limits
+
+Touch Pass may be used for **lock-screen/session unlock** only when that same
+user is already logged in, the per-user helper was started before the session
+was locked, and the user's Keychain remains available and unlocked. This is
+not a persistent pre-login feature.
+
+It is unsupported at the FileVault screen after a cold boot, and unsupported
+after logout. At those points the per-user helper is not running and its
+Keychain is not already available and unlocked. Start the normal macOS session
+and helper by another supported method before expecting Touch Pass actions.
 
 ### Accept, Enter, and Escape
 
 Use **Accept** for a prompt where the expected response really is lowercase
 `y` followed by Return. For example, a Codex or Claude workflow may show a
-terminal or browser prompt that accepts `y`; Touch Pass does not know which app
-or prompt is open, so read the prompt and focus it before you use the action.
+terminal-style prompt that accepts `y`; Touch Pass does not know which app or
+prompt is open, so read and focus it before using the action. Accept cannot
+click an arbitrary GUI button.
 
 **Enter** sends Return and **Escape** sends Escape. Both, like Accept, require
 a confirming second touch; see the next section.
@@ -101,6 +114,12 @@ steps**. Add only the steps you need:
   `right`.
 - **Delay** pauses for 0–5000 milliseconds, which can give a visible dialog
   time to appear before the next key.
+
+There is also a **256-byte total encoded-action limit**, including the action
+header and all Text, Key, and Delay step data. A long Text value can reach this
+byte limit even with fewer than 16 steps. If either limit is exceeded, **Save
+fails**: the profile dialog stays open and shows an error. Shorten the Text or
+remove steps, then save again.
 
 A practical sequence might be `Text: yes`, `Key: enter`; a navigation sequence
 might be `Key: tab`, `Key: tab`, `Key: enter`. Keep macros short and test them
@@ -132,7 +151,7 @@ focus on your Mac.
 
 | Slot name | Suggested finger | Action | When it is useful |
 | --- | --- | --- | --- |
-| Mac login | Thumb | Password + Enter | The correct macOS or website password field is visibly selected. |
+| Session unlock | Thumb | Password + Enter | The existing macOS session is locked, the helper is already running, and the password field is visibly selected. It is not for FileVault, cold boot, or after logout. |
 | Codex accept | Index finger | Accept | A visible Codex-related prompt expects `y` then Return. |
 | Claude accept | Index finger on the other hand | Accept | A visible Claude-related prompt expects `y` then Return. |
 | Terminal Enter | Middle finger | Enter | You have read the command and want to submit it. |
@@ -190,7 +209,7 @@ into the wrong symbols even when the saved value is correct.
 | The action went to the wrong app | Stop and refocus the right window or field. This is expected focused-window HID behavior; Touch Pass cannot choose the destination for you. |
 | I need to remove a finger or a saved password | Delete that slot in the portal. This clears its fingerprint profile and its slot-specific Keychain password. |
 | I cannot save a new password action | Enter a non-empty ASCII password the first time. Leaving the box blank only keeps a password that was already configured. |
-| A custom macro will not save | Check for at most 16 steps, ASCII Text, a supported Key name, and a Delay between 0 and 5000 ms. |
+| A custom macro will not save | Check for at most 16 steps and 256 encoded bytes, ASCII Text, a supported Key name, and a Delay between 0 and 5000 ms. The dialog shows the save error. |
 
 ## Safe-use checklist
 

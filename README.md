@@ -2,11 +2,11 @@
 
 > Give every finger a superpower.
 
-![Touch Pass: a fingerprint sensor beside a Mac mini](assets/demo/01-hero-showcase-v2.png)
+![Touch Pass enclosure](assets/demo/01-hero-showcase-v2.png)
 
 ## What is Touch Pass?
 
-Touch Pass turns an **ESP32-S3 Super Mini** and a **ZW101** fingerprint sensor into a personal command surface for your Mac. Enrol a fingerprint, choose what it should do, and make everyday moments—signing in, approving a prompt, opening a tool, or starting a flow—feel as immediate as a touch.
+Touch Pass turns an **ESP32-S3 Super Mini** and a **ZW101** fingerprint sensor into a personal command surface for your Mac. Enrol a fingerprint, choose what it should do, and make everyday moments—typing prepared text, confirming a prompt, sending Return or Escape, or running a short key sequence—feel as immediate as a touch.
 
 It combines USB HID, a macOS helper, and a loopback ten-finger portal into a TinyTouch-based project for people who would rather reach for a finger than remember one more shortcut.
 
@@ -16,10 +16,10 @@ Each enrolled finger can be its own shortcut. Use the local portal to give every
 
 | A finger can become | For example |
 | --- | --- |
-| a sign-in gesture | enter a prepared value when a login prompt is ready |
-| a maker shortcut | open a frequently used project or command |
-| a focus switch | jump into the next tool in your workflow |
-| a small ritual | start the task you repeat every morning |
+| a focused-field text action | type a short ASCII phrase into the field you checked |
+| a terminal confirmation | send `y`, then Return when a prompt visibly asks for it |
+| a basic key action | send Enter (Return) or Escape |
+| a short macro | combine supported Text, Key, and Delay steps |
 
 The point is not to automate everything. It is to make the ten actions you already reach for feel natural.
 
@@ -31,7 +31,9 @@ Whether you are prototyping a desk companion, smoothing out a creative workflow,
 
 ## How it works
 
-The ZW101 recognizes an enrolled finger and reports its template ID to the ESP32-S3 Super Mini. The loopback ten-finger portal maps that ID to an action. For Mac-side actions, the macOS helper owns the encrypted action flow and retrieves Password actions from the macOS Keychain; the ESP32-S3 then delivers the resulting action over USB HID.
+1. **Sensor:** the ZW101 recognizes an enrolled finger and reports its template ID to the ESP32-S3 Super Mini.
+2. **Helper and profile:** the ESP32-S3 sends the event to the local macOS helper. The helper looks up that slot's profile and retrieves a Password action from macOS Keychain when needed.
+3. **USB HID:** the helper returns the encrypted action to the ESP32-S3, which performs its supported Text, basic Key, and Delay steps as a USB keyboard.
 
 For actions delivered through keyboard emulation, HID types into the **focused field**. That makes setup wonderfully flexible—and it also means you should always check where the cursor is before you touch the sensor.
 
@@ -39,7 +41,10 @@ For actions delivered through keyboard emulation, HID types into the **focused f
 
 ![Touch Pass approving a Claude prompt on a Mac mini](assets/demo/02-mac-mini-claude-accept-v2.png)
 
-Non-password control actions—including **Accept**—need a deliberate confirmation: touch the same finger twice within three seconds. From a fingerprint touch to a ready-to-go action, the experience is meant to disappear into the rhythm of your desk.
+**Accept** sends only lowercase `y` + Return. Use it only in a focused
+terminal-style prompt that visibly expects that input; Touch Pass cannot click
+arbitrary GUI buttons. Accept and the other non-password control actions need
+a deliberate confirmation: touch the same finger twice within three seconds.
 
 ![Touch Pass feature overview](assets/demo/04-features.png)
 
