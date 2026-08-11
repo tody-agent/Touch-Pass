@@ -5,6 +5,7 @@ import hashlib
 import hmac
 import json
 import os
+import queue
 import subprocess
 import sys
 import threading
@@ -13,6 +14,20 @@ from pathlib import Path
 
 import serial
 import serial.tools.list_ports
+
+HELPER_DIR = Path(__file__).resolve().parent
+if str(HELPER_DIR) not in sys.path:
+    sys.path.insert(0, str(HELPER_DIR))
+
+from tinytouch_portal import (
+    AdminJobDevice,
+    KeychainSecretStore,
+    PortalAPI,
+    ProfileStore,
+    TriggerGate,
+    create_http_server,
+    encode_action,
+)
 
 
 SERVICE = "tinyTouch"
@@ -270,6 +285,56 @@ def handle_event(
     return f"PW {nonce} {iv_hex} {ct_hex} {reply_mac}\n"
 
 
+def handle_action_event(
+    line: str,
+    pairing_key: bytes,
+    state: dict,
+    profile_resolver,
+    secret_resolver,
+    gate: TriggerGate,
+    *,
+    now: float | None = None,
+    persist_state: bool = True,
+    device_id: str | None = None,
+) -> str | None:
+    """Authenticate a sensor event and return an ARM or encrypted ACT response."""
+    parts = line.strip().split()
+    if len(parts) != 6 or parts[0] != "EV":
+        return None
+    _, nonce, counter, slot_text, score, got_mac = parts
+    if not valid_hex(nonce, 16):
+        return None
+    expected = mac_hex(pairing_key, f"EV|{nonce}|{counter}|{slot_text}|{score}")
+    if not hmac.compare_digest(expected, got_mac.lower()):
+        return None
+    seen_nonces = state.setdefault("seen_nonces", [])
+    if nonce in seen_nonces:
+        return None
+    try:
+        slot = int(slot_text)
+    except ValueError:
+        return None
+    profile = profile_resolver(slot)
+    if not profile:
+        return None
+
+    seen_nonces.append(nonce)
+    state["seen_nonces"] = seen_nonces[-MAX_SEEN_NONCES:]
+    if persist_state:
+        save_state(state, device_id)
+
+    decision = gate.touch(slot, profile.get("action", {}), time.monotonic() if now is None else now)
+    if decision == "armed":
+        expires_ms = int(gate.window_seconds * 1000)
+        reply_mac = mac_hex(pairing_key, f"ARM|{nonce}|{slot}|{expires_ms}")
+        return f"ARM {nonce} {slot} {expires_ms} {reply_mac}\n"
+
+    payload = encode_action(profile.get("action", {}), secret_resolver)
+    iv_hex, ciphertext_hex = encrypt_password(pairing_key, nonce, payload)
+    reply_mac = mac_hex(pairing_key, f"ACT|{nonce}|{iv_hex}|{ciphertext_hex}")
+    return f"ACT {nonce} {iv_hex} {ciphertext_hex} {reply_mac}\n"
+
+
 def open_serial(port: str) -> serial.Serial:
     ser = serial.Serial()
     ser.port = port
@@ -323,6 +388,17 @@ def device_ports() -> list[str]:
                   if port.device.startswith("/dev/cu.usbmodem"))
 
 
+def select_device_port(explicit_port: str | None, available_ports: list[str] | None = None) -> str:
+    if explicit_port:
+        return explicit_port
+    ports = device_ports() if available_ports is None else sorted(available_ports)
+    if not ports:
+        raise RuntimeError("No ESP32-S3 USB CDC device was found")
+    if len(ports) > 1:
+        raise RuntimeError("Multiple ESP32-S3 USB CDC devices found; use --port: " + ", ".join(ports))
+    return ports[0]
+
+
 def credentials_exist(device_id: str) -> bool:
     for service in (PAIRING_SERVICE, SERVICE):
         result = subprocess.run(
@@ -362,6 +438,107 @@ def managed_worker(port: str) -> None:
         print(f"worker for {port} stopped: {exc}", file=sys.stderr, flush=True)
 
 
+def _configured_profile(profiles: ProfileStore, slot: int) -> dict | None:
+    try:
+        profile = profiles.get_profile(slot)
+    except ValueError:
+        return None
+    return profile if profile.get("enrolled") else None
+
+
+def portal_serial_worker(
+    device: AdminJobDevice,
+    profiles: ProfileStore,
+    secret_store: KeychainSecretStore,
+    explicit_port: str | None,
+    credential_device_id: str,
+) -> None:
+    """Own the CDC connection, route admin progress, and answer fingerprint events."""
+    while True:
+        pairing_key = b""
+        try:
+            port = select_device_port(explicit_port)
+            actual_device_id = port_identity(port)
+            try:
+                pairing_key = pairing_keychain_get(actual_device_id)
+            except subprocess.CalledProcessError:
+                pairing_key = pairing_keychain_get(credential_device_id)
+            state = load_state(actual_device_id)
+            gate = TriggerGate()
+            with open_serial(port) as ser:
+                device.set_connection(True, port, "checking")
+                ser.write(b"STATUS\n")
+                ser.flush()
+                while True:
+                    try:
+                        command = device.next_command(timeout=0)
+                    except queue.Empty:
+                        command = None
+                    if command:
+                        ser.write((command + "\n").encode("ascii"))
+                        ser.flush()
+                    raw = ser.readline()
+                    if not raw:
+                        continue
+                    line = raw.decode("utf-8", "replace").strip()
+                    if not line:
+                        continue
+                    print(f"{actual_device_id}: {line}", flush=True)
+                    if device.feed_line(line):
+                        continue
+                    if line.startswith("OK STATUS"):
+                        device.set_connection(True, port, "ok" if "sensor=ok" in line else "error")
+                        continue
+                    if line.startswith("ERR STATUS"):
+                        device.set_connection(True, port, "error")
+                        continue
+                    if line.startswith("EV "):
+                        reply = handle_action_event(
+                            line,
+                            pairing_key,
+                            state,
+                            lambda slot: _configured_profile(profiles, slot),
+                            secret_store.get,
+                            gate,
+                            device_id=actual_device_id,
+                        )
+                        if reply:
+                            ser.write(reply.encode("ascii"))
+                            ser.flush()
+        except (RuntimeError, OSError, serial.SerialException, subprocess.CalledProcessError) as exc:
+            device.set_connection(False, None, "unavailable")
+            print(f"portal serial reconnect after error: {exc}", file=sys.stderr, flush=True)
+            time.sleep(1)
+        finally:
+            pairing_key = b"\x00" * len(pairing_key)
+
+
+def run_portal(
+    explicit_port: str | None,
+    credential_device_id: str,
+    host: str,
+    port: int,
+) -> None:
+    secret_store = KeychainSecretStore(credential_device_id)
+    profiles = ProfileStore(STATE_DIR / f"profiles-{normalize_serial(credential_device_id)}.json", secret_store)
+    device = AdminJobDevice()
+    api = PortalAPI(profiles, device)
+    assets = HELPER_DIR / "portal"
+    server = create_http_server(api, assets, host=host, port=port)
+    worker = threading.Thread(
+        target=portal_serial_worker,
+        args=(device, profiles, secret_store, explicit_port, credential_device_id),
+        daemon=True,
+        name="tinyTouch-portal-serial",
+    )
+    worker.start()
+    print(f"tinyTouch portal: http://{host}:{server.server_port}", flush=True)
+    try:
+        server.serve_forever()
+    finally:
+        server.server_close()
+
+
 def run(port: str | None, once: bool) -> None:
     if port:
         while True:
@@ -396,7 +573,7 @@ def self_test(device_id: str = PREFERRED_SERIAL) -> None:
     print("self-test ok")
 
 
-def main() -> None:
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument("--port")
     parser.add_argument("--set-password")
@@ -404,7 +581,14 @@ def main() -> None:
     parser.add_argument("--device-id", default=PREFERRED_SERIAL)
     parser.add_argument("--once", action="store_true")
     parser.add_argument("--self-test", action="store_true")
-    args = parser.parse_args()
+    parser.add_argument("--portal", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--portal-host", choices=("127.0.0.1", "localhost"), default="127.0.0.1")
+    parser.add_argument("--portal-port", type=int, default=8787)
+    return parser
+
+
+def main() -> None:
+    args = build_parser().parse_args()
 
     if args.set_password is not None:
         keychain_set(args.set_password, args.device_id)
@@ -416,6 +600,9 @@ def main() -> None:
         self_test(args.device_id)
         return
     if args.set_password is None and args.set_pairing_key is None:
+        if args.portal:
+            run_portal(args.port, args.device_id, args.portal_host, args.portal_port)
+            return
         while True:
             try:
                 run(args.port, args.once)

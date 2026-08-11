@@ -4,6 +4,7 @@
 #include "mbedtls/aes.h"
 #include "mbedtls/md.h"
 #include "esp_system.h"
+#include "action_protocol.h"
 #include "secrets.h"
 
 #if !ARDUINO_USB_MODE && !ARDUINO_USB_CDC_ON_BOOT
@@ -11,16 +12,15 @@ USBCDC USBSerial;
 #endif
 
 static const uint32_t UART_BAUD = 57600;
-static const int FP_TX_PIN = 43;
-static const int FP_RX_PIN = 44;
-static const int FP_INT_PIN = 2;
+static const int FP_TX_PIN = 7;
+static const int FP_RX_PIN = 6;
+static const int FP_INT_PIN = 1;
 static const int INT_ACTIVE_VALUE = 1;
 static const bool USE_INT_PIN = true;
 static const uint16_t START_SLOT = 1;
-static const uint16_t END_SLOT = 5;
+static const uint16_t END_SLOT = 10;
 static const uint32_t RESULT_HOLD_MS = 500;
 static const uint32_t HELPER_TIMEOUT_MS = 6000;
-static const bool TYPE_RETURN_AFTER_PASSWORD = true;
 static const bool ENABLE_TEST_COMMANDS = false;
 static const bool DEBUG_FP_PACKETS = false;
 
@@ -36,6 +36,8 @@ uint8_t currentLed = 0xff;
 uint32_t eventCounter = 0;
 uint8_t lastScanStatus = 0;
 String serialCommand;
+String adminCancelInput;
+bool adminWasCancelled = false;
 
 static int hexVal(char c) {
   if (c >= '0' && c <= '9') return c - '0';
@@ -206,9 +208,30 @@ static bool verifySensor() {
   return fpCommand(0x13, params, sizeof(params), &confirm, nullptr, nullptr, 2000) && confirm == 0x00;
 }
 
-static bool waitForFingerState(bool present, uint32_t timeoutMs) {
+static bool pollAdminCancel(const String &jobId) {
+  if (!jobId.length()) return false;
+  while (Serial.available()) {
+    char c = (char)Serial.read();
+    if (c == '\r') continue;
+    if (c == '\n') {
+      adminCancelInput.trim();
+      bool cancelled = adminCancelInput == "ADMIN CANCEL " + jobId;
+      adminCancelInput = "";
+      if (cancelled) {
+        adminWasCancelled = true;
+        return true;
+      }
+    } else if (adminCancelInput.length() < 96) {
+      adminCancelInput += c;
+    }
+  }
+  return false;
+}
+
+static bool waitForFingerState(bool present, uint32_t timeoutMs, const String &jobId = "") {
   uint32_t start = millis();
   while (millis() - start < timeoutMs) {
+    if (pollAdminCancel(jobId)) return false;
     if (fingerPresent() == present) return true;
     delay(50);
   }
@@ -224,21 +247,25 @@ static bool captureTemplate(uint8_t bufferId) {
   return fpCommand(0x02, params, sizeof(params), &confirm, nullptr, nullptr, 2000) && confirm == 0x00;
 }
 
-static bool enrollFingerprint(uint16_t slot) {
+static bool enrollFingerprint(uint16_t slot, const String &jobId = "") {
   if (slot < START_SLOT || slot > END_SLOT) return false;
+  if (jobId.length()) adminWasCancelled = false;
   setAura(FP_LED_WHITE);
-  Serial.println("PROMPT TOUCH");
+  if (jobId.length()) Serial.printf("ADMIN %s PLACE_FIRST\n", jobId.c_str());
+  else Serial.println("PROMPT TOUCH");
   Serial.flush();
-  if (!waitForFingerState(true, 15000) || !captureTemplate(1)) return false;
+  if (!waitForFingerState(true, 15000, jobId) || !captureTemplate(1)) return false;
 
-  Serial.println("PROMPT LIFT");
+  if (jobId.length()) Serial.printf("ADMIN %s REMOVE\n", jobId.c_str());
+  else Serial.println("PROMPT LIFT");
   Serial.flush();
-  if (!waitForFingerState(false, 10000)) return false;
+  if (!waitForFingerState(false, 10000, jobId)) return false;
   delay(250);
 
-  Serial.println("PROMPT TOUCH_AGAIN");
+  if (jobId.length()) Serial.printf("ADMIN %s PLACE_SECOND\n", jobId.c_str());
+  else Serial.println("PROMPT TOUCH_AGAIN");
   Serial.flush();
-  if (!waitForFingerState(true, 15000) || !captureTemplate(2)) return false;
+  if (!waitForFingerState(true, 15000, jobId) || !captureTemplate(2)) return false;
 
   uint8_t confirm = 0xff;
   if (!fpCommand(0x05, nullptr, 0, &confirm, nullptr, nullptr, 2000) || confirm != 0x00) return false;
@@ -375,27 +402,27 @@ static bool readHelperLine(String *line, uint32_t timeoutMs) {
         line->trim();
         return line->length() > 0;
       }
-      if (c != '\r' && line->length() < 600) *line += c;
+      if (c != '\r' && line->length() < 800) *line += c;
     }
     delay(5);
   }
   return false;
 }
 
-static bool decryptPassword(const String &nonceHex, const String &line, uint8_t *password, size_t *passwordLen) {
+static bool decryptAction(const String &nonceHex, const String &line, uint8_t *action, size_t *actionLen) {
   String kind, nonce, ivHex, ctHex, macHex;
   if (!parseToken(line, 0, &kind) || !parseToken(line, 1, &nonce) ||
       !parseToken(line, 2, &ivHex) || !parseToken(line, 3, &ctHex) ||
       !parseToken(line, 4, &macHex)) return false;
-  if (kind != "PW" || nonce != nonceHex) return false;
-  String expected = hmacHex("PW|" + nonce + "|" + ivHex + "|" + ctHex);
+  if (kind != "ACT" || nonce != nonceHex) return false;
+  String expected = hmacHex("ACT|" + nonce + "|" + ivHex + "|" + ctHex);
   if (!expected.equalsIgnoreCase(macHex)) return false;
-  if ((ctHex.length() % 2) != 0 || ctHex.length() / 2 > *passwordLen) return false;
+  if ((ctHex.length() % 2) != 0 || ctHex.length() / 2 > *actionLen) return false;
 
   uint8_t iv[16];
   if (!fromHex(ivHex, iv, sizeof(iv))) return false;
   size_t ctLen = ctHex.length() / 2;
-  uint8_t ciphertext[160];
+  uint8_t ciphertext[256];
   if (ctLen > sizeof(ciphertext) || !fromHex(ctHex, ciphertext, ctLen)) return false;
 
   uint8_t key[32];
@@ -405,19 +432,56 @@ static bool decryptPassword(const String &nonceHex, const String &line, uint8_t 
   mbedtls_aes_setkey_enc(&aes, key, 256);
   size_t ncOff = 0;
   uint8_t streamBlock[16] = {0};
-  int rc = mbedtls_aes_crypt_ctr(&aes, ctLen, &ncOff, iv, streamBlock, ciphertext, password);
+  int rc = mbedtls_aes_crypt_ctr(&aes, ctLen, &ncOff, iv, streamBlock, ciphertext, action);
   mbedtls_aes_free(&aes);
   secureWipe(key, sizeof(key));
   secureWipe(ciphertext, sizeof(ciphertext));
   secureWipe(streamBlock, sizeof(streamBlock));
   if (rc != 0) return false;
-  *passwordLen = ctLen;
+  *actionLen = ctLen;
   return true;
 }
 
-static void typeAscii(const uint8_t *data, size_t len) {
+static bool actionText(void *, const uint8_t *data, size_t len) {
   for (size_t i = 0; i < len; i++) Keyboard.write(data[i]);
-  if (TYPE_RETURN_AFTER_PASSWORD) Keyboard.write(KEY_RETURN);
+  return true;
+}
+
+static uint8_t actionKeyCode(uint8_t keyCode) {
+  switch (keyCode) {
+    case 1: return KEY_RETURN;
+    case 2: return KEY_ESC;
+    case 3: return KEY_TAB;
+    case 4: return ' ';
+    case 5: return KEY_UP_ARROW;
+    case 6: return KEY_DOWN_ARROW;
+    case 7: return KEY_LEFT_ARROW;
+    case 8: return KEY_RIGHT_ARROW;
+    default: return 0;
+  }
+}
+
+static bool actionKey(void *, uint8_t modifiers, uint8_t keyCode) {
+  uint8_t key = actionKeyCode(keyCode);
+  if (!key) return false;
+  if (modifiers & 0x01) Keyboard.press(KEY_LEFT_CTRL);
+  if (modifiers & 0x02) Keyboard.press(KEY_LEFT_SHIFT);
+  if (modifiers & 0x04) Keyboard.press(KEY_LEFT_ALT);
+  if (modifiers & 0x08) Keyboard.press(KEY_LEFT_GUI);
+  Keyboard.press(key);
+  delay(20);
+  Keyboard.releaseAll();
+  return true;
+}
+
+static bool actionWait(void *, uint16_t milliseconds) {
+  delay(milliseconds);
+  return true;
+}
+
+static bool executeAction(const uint8_t *data, size_t len) {
+  TinyTouchAction::Executor executor = {nullptr, actionText, actionKey, actionWait};
+  return TinyTouchAction::execute(data, len, executor);
 }
 
 static void handleSerialCommands() {
@@ -426,45 +490,84 @@ static void handleSerialCommands() {
     if (c == '\r') continue;
     if (c == '\n') {
       serialCommand.trim();
-      if (serialCommand == "PING") {
+      String command = serialCommand;
+      serialCommand = "";
+      if (command == "PING") {
         Serial.println("PONG");
-      } else if (serialCommand == "STATUS") {
+      } else if (command == "STATUS") {
         int count = fingerprintCount();
         if (count >= 0) Serial.printf("OK STATUS mode=hid sensor=ok fingerprints=%d\n", count);
         else Serial.println("ERR STATUS sensor");
-      } else if (serialCommand.startsWith("ENROLL ")) {
-        uint16_t slot = (uint16_t)serialCommand.substring(7).toInt();
+      } else if (command.startsWith("ADMIN ENROLL ")) {
+        String jobId, slotText;
+        if (!parseToken(command, 2, &jobId) || !parseToken(command, 3, &slotText)) {
+          Serial.println("ADMIN unknown ERROR bad_request");
+        } else {
+          uint16_t slot = (uint16_t)slotText.toInt();
+          bool ok = enrollFingerprint(slot, jobId);
+          if (adminWasCancelled) Serial.printf("ADMIN %s CANCELLED\n", jobId.c_str());
+          else Serial.printf(ok ? "ADMIN %s STORED\n" : "ADMIN %s ERROR enroll_failed\n", jobId.c_str());
+          setAura(ok ? FP_LED_GREEN : FP_LED_RED);
+        }
+      } else if (command.startsWith("ADMIN DELETE ")) {
+        String jobId, slotText;
+        if (!parseToken(command, 2, &jobId) || !parseToken(command, 3, &slotText)) {
+          Serial.println("ADMIN unknown ERROR bad_request");
+        } else {
+          uint16_t slot = (uint16_t)slotText.toInt();
+          bool ok = deleteFingerprint(slot);
+          Serial.printf(ok ? "ADMIN %s DELETED\n" : "ADMIN %s ERROR delete_failed\n", jobId.c_str());
+        }
+      } else if (command.startsWith("ADMIN CANCEL ")) {
+        String jobId;
+        parseToken(command, 2, &jobId);
+        Serial.printf("ADMIN %s CANCELLED\n", jobId.c_str());
+      } else if (command.startsWith("ENROLL ")) {
+        uint16_t slot = (uint16_t)command.substring(7).toInt();
         bool ok = enrollFingerprint(slot);
         Serial.printf(ok ? "OK ENROLL slot=%u\n" : "ERR ENROLL slot=%u\n", slot);
         setAura(ok ? FP_LED_GREEN : FP_LED_RED);
-      } else if (serialCommand.startsWith("DELETE ")) {
-        uint16_t slot = (uint16_t)serialCommand.substring(7).toInt();
+      } else if (command.startsWith("DELETE ")) {
+        uint16_t slot = (uint16_t)command.substring(7).toInt();
         bool ok = deleteFingerprint(slot);
         Serial.printf(ok ? "OK DELETE slot=%u\n" : "ERR DELETE slot=%u\n", slot);
-      } else if (serialCommand == "DELETE_ALL") {
+      } else if (command == "DELETE_ALL") {
         bool ok = deleteAllFingerprints();
         Serial.println(ok ? "OK DELETE_ALL" : "ERR DELETE_ALL");
-      } else if (ENABLE_TEST_COMMANDS && serialCommand == "TYPE_TEST") {
+      } else if (ENABLE_TEST_COMMANDS && command == "TYPE_TEST") {
         const uint8_t test[] = "HID_TEST_OK";
-        typeAscii(test, sizeof(test) - 1);
+        actionText(nullptr, test, sizeof(test) - 1);
         Serial.println("TYPE_TEST_DONE");
-      } else if (serialCommand.length()) {
+      } else if (command.length()) {
         Serial.print("UNKNOWN_CMD ");
-        Serial.println(serialCommand);
+        Serial.println(command);
       }
       Serial.flush();
-      serialCommand = "";
     } else if (serialCommand.length() < 96) {
       serialCommand += c;
     }
   }
 }
 
-static bool requestAndTypePassword(uint16_t matchId, uint16_t score) {
+static const uint8_t ACTION_FAILED = 0;
+static const uint8_t ACTION_ARMED = 1;
+static const uint8_t ACTION_EXECUTED = 2;
+
+static bool verifyArmResponse(const String &nonceHex, uint16_t matchId, const String &line) {
+  String kind, nonce, slot, expires, mac;
+  if (!parseToken(line, 0, &kind) || !parseToken(line, 1, &nonce) ||
+      !parseToken(line, 2, &slot) || !parseToken(line, 3, &expires) ||
+      !parseToken(line, 4, &mac)) return false;
+  if (kind != "ARM" || nonce != nonceHex || slot.toInt() != matchId) return false;
+  String expected = hmacHex("ARM|" + nonce + "|" + slot + "|" + expires);
+  return expected.equalsIgnoreCase(mac);
+}
+
+static uint8_t requestAndExecuteAction(uint16_t matchId, uint16_t score) {
   uint8_t nonceBytes[16];
   if (!randomBytes(nonceBytes, sizeof(nonceBytes))) {
     Serial.println("ERR rng");
-    return false;
+    return ACTION_FAILED;
   }
   String nonce = toHex(nonceBytes, sizeof(nonceBytes));
   secureWipe(nonceBytes, sizeof(nonceBytes));
@@ -488,15 +591,14 @@ static bool requestAndTypePassword(uint16_t matchId, uint16_t score) {
   Serial.flush();
 
   String line;
-  if (!readHelperLine(&line, HELPER_TIMEOUT_MS)) return false;
-  uint8_t password[160];
-  size_t passwordLen = sizeof(password);
-  bool ok = decryptPassword(nonce, line, password, &passwordLen);
-  if (ok) {
-    typeAscii(password, passwordLen);
-  }
-  secureWipe(password, sizeof(password));
-  return ok;
+  if (!readHelperLine(&line, HELPER_TIMEOUT_MS)) return ACTION_FAILED;
+  if (verifyArmResponse(nonce, matchId, line)) return ACTION_ARMED;
+
+  uint8_t action[256];
+  size_t actionLen = sizeof(action);
+  bool ok = decryptAction(nonce, line, action, &actionLen) && executeAction(action, actionLen);
+  secureWipe(action, sizeof(action));
+  return ok ? ACTION_EXECUTED : ACTION_FAILED;
 }
 
 void setup() {
@@ -532,11 +634,18 @@ void loop() {
   if (scanMatch(&matchId, &score)) {
     Serial.println("TOUCH");
     Serial.flush();
-    setAura(FP_LED_GREEN);
     Serial.printf("MATCH %u %u\n", matchId, score);
-    bool typed = requestAndTypePassword(matchId, score);
-    Serial.println(typed ? "TYPED" : "ERR helper_or_crypto");
-    if (!typed) setAura(FP_LED_RED);
+    uint8_t result = requestAndExecuteAction(matchId, score);
+    if (result == ACTION_EXECUTED) {
+      setAura(FP_LED_GREEN);
+      Serial.println("ACTION_EXECUTED");
+    } else if (result == ACTION_ARMED) {
+      setAura(FP_LED_WHITE);
+      Serial.println("ACTION_ARMED touch_same_finger_again");
+    } else {
+      setAura(FP_LED_RED);
+      Serial.println("ERR helper_or_crypto");
+    }
   } else {
     if (USE_INT_PIN || lastScanStatus == 2) {
       setAura(FP_LED_RED);

@@ -7,6 +7,10 @@
 authenticate, sudo, and log in with your fingerprint wire(less)ly without having
 to spend $149.
 
+> Using an ESP32-S3 Super Mini / Waveshare ESP32-S3-Zero with a ZW101 and the
+> new local 10-finger action portal? Follow the
+> [Vietnamese hardware and portal guide](docs/esp32-s3-zw101-portal-vi.md).
+
 build guide: https://www.youtube.com/watch?v=YsP1hRg28Gw
 
 https://github.com/user-attachments/assets/efede271-6d84-441d-919c-f5532f687c4e

@@ -15,6 +15,10 @@ loader.exec_module(cli)
 
 
 class PackagingTests(unittest.TestCase):
+    def test_standalone_build_bundles_portal_assets(self):
+        build_script = (ROOT / "packaging" / "build-standalone-macos.sh").read_text()
+        self.assertIn('--add-data "$project_dir/software/macos-helper/portal:portal"', build_script)
+
     def test_launch_agent_uses_current_repository(self):
         python = Path("/tmp/example-python")
         payload = plistlib.loads(cli.launch_agent_contents(python))

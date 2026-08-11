@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>tinyTouch Portal</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">ESP32-S3 · ZW101</p>
+        <h1>tinyTouch Portal</h1>
+        <p class="subtitle">Mười ngón tay, mười hành động — bí mật vẫn nằm trong Keychain.</p>
+      </div>
+      <div id="device-status" class="status status-offline" aria-live="polite">Đang tìm thiết bị…</div>
+    </header>
+
+    <main>
+      <section class="notice" aria-label="Lưu ý an toàn">
+        <strong>Chạm kép bảo vệ thao tác xác nhận.</strong>
+        Password chạy sau một lần chạm; Accept, Enter, Escape và macro tùy chỉnh cần chạm lại cùng ngón trong 3 giây.
+      </section>
+
+      <section class="section-heading">
+        <div>
+          <p class="eyebrow">Cấu hình vân tay</p>
+          <h2>Slot 1–10</h2>
+        </div>
+        <button id="refresh" class="button button-secondary" type="button">Làm mới</button>
+      </section>
+      <section id="finger-grid" class="finger-grid" aria-live="polite"></section>
+    </main>
+
+    <dialog id="profile-dialog">
+      <form id="profile-form" method="dialog">
+        <div class="dialog-heading">
+          <div>
+            <p class="eyebrow">Hồ sơ hành động</p>
+            <h2 id="dialog-title">Cấu hình ngón tay</h2>
+          </div>
+          <button class="icon-button" value="cancel" aria-label="Đóng" type="submit">×</button>
+        </div>
+        <input id="profile-slot" type="hidden">
+        <label>
+          Tên ngón / chức năng
+          <input id="profile-label" maxlength="64" required autocomplete="off">
+        </label>
+        <label>
+          Hành động
+          <select id="profile-preset">
+            <option value="password">Mật khẩu + Enter</option>
+            <option value="accept">Accept: Y + Enter</option>
+            <option value="enter">Enter</option>
+            <option value="escape">Escape</option>
+            <option value="custom">Chuỗi tùy chỉnh</option>
+          </select>
+        </label>
+        <label id="secret-field">
+          Mật khẩu mới
+          <input id="profile-secret" type="password" maxlength="128" autocomplete="new-password">
+          <span id="secret-hint" class="field-hint">Để trống để giữ mật khẩu đang lưu.</span>
+        </label>
+        <section id="custom-builder" class="custom-builder" hidden>
+          <div class="builder-heading">
+            <strong>Các bước macro</strong>
+            <span>Tối đa 16 bước</span>
+          </div>
+          <div id="custom-steps"></div>
+          <div class="step-actions">
+            <button class="button button-quiet" data-add-step="text" type="button">+ Text</button>
+            <button class="button button-quiet" data-add-step="key" type="button">+ Phím</button>
+            <button class="button button-quiet" data-add-step="delay" type="button">+ Delay</button>
+          </div>
+        </section>
+        <p id="form-error" class="error" role="alert"></p>
+        <div class="dialog-actions">
+          <button class="button button-secondary" value="cancel" type="submit">Hủy</button>
+          <button id="save-profile" class="button button-primary" value="default" type="submit">Lưu cấu hình</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="job-dialog">
+      <div class="job-content">
+        <div class="sensor-orbit"><span></span></div>
+        <p class="eyebrow">ZW101</p>
+        <h2 id="job-title">Đang đăng ký</h2>
+        <p id="job-message" aria-live="assertive">Đặt ngón tay lên cảm biến.</p>
+        <button id="cancel-job" class="button button-secondary" type="button">Hủy</button>
+      </div>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>

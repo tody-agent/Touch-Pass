@@ -29,6 +29,7 @@ mkdir -p "$build_dir" "$dist_dir"
   --workpath "$build_dir/work-cli" \
   --specpath "$build_dir/spec-cli" \
   --paths "$project_dir/software/macos-helper" \
+  --add-data "$project_dir/software/macos-helper/portal:portal" \
   --hidden-import tinytouch_helper \
   --hidden-import serial.tools.list_ports \
   "$project_dir/tinytouch"

@@ -59,6 +59,91 @@ class HelperProtocolTests(unittest.TestCase):
         )
         self.assertIsNone(response)
 
+    def test_password_profile_returns_decryptable_action_payload(self):
+        key = bytes(range(32))
+        nonce = "03" * 16
+        event_mac = helper.mac_hex(key, f"EV|{nonce}|2|1|99")
+        profile = {"slot": 1, "action": {"preset": "password", "secret_ref": "slot-1"}}
+
+        response = helper.handle_action_event(
+            f"EV {nonce} 2 1 99 {event_mac}",
+            key,
+            {"seen_nonces": []},
+            lambda slot: profile if slot == 1 else None,
+            lambda reference: b"password" if reference == "slot-1" else b"",
+            helper.TriggerGate(),
+            now=10,
+            persist_state=False,
+        )
+
+        kind, got_nonce, iv_hex, ciphertext_hex, response_mac = response.split()
+        self.assertEqual((kind, got_nonce), ("ACT", nonce))
+        self.assertEqual(
+            response_mac,
+            helper.mac_hex(key, f"ACT|{nonce}|{iv_hex}|{ciphertext_hex}"),
+        )
+        payload = helper.aes_ctr_crypt(
+            helper.session_key(key, nonce), bytes.fromhex(iv_hex), bytes.fromhex(ciphertext_hex)
+        )
+        self.assertEqual(payload, helper.encode_action(profile["action"], lambda _ref: b"password"))
+
+    def test_accept_profile_arms_then_executes_on_second_touch(self):
+        key = bytes(range(32))
+        state = {"seen_nonces": []}
+        gate = helper.TriggerGate()
+        profile = {"slot": 2, "action": {"preset": "accept"}}
+
+        first_nonce = "04" * 16
+        first_mac = helper.mac_hex(key, f"EV|{first_nonce}|1|2|100")
+        first = helper.handle_action_event(
+            f"EV {first_nonce} 1 2 100 {first_mac}",
+            key,
+            state,
+            lambda slot: profile if slot == 2 else None,
+            lambda _ref: b"",
+            gate,
+            now=10,
+            persist_state=False,
+        )
+
+        second_nonce = "05" * 16
+        second_mac = helper.mac_hex(key, f"EV|{second_nonce}|2|2|101")
+        second = helper.handle_action_event(
+            f"EV {second_nonce} 2 2 101 {second_mac}",
+            key,
+            state,
+            lambda slot: profile if slot == 2 else None,
+            lambda _ref: b"",
+            gate,
+            now=12,
+            persist_state=False,
+        )
+
+        self.assertTrue(first.startswith(f"ARM {first_nonce} 2 3000 "))
+        self.assertTrue(second.startswith(f"ACT {second_nonce} "))
+
+    def test_port_selection_prefers_explicit_port(self):
+        self.assertEqual(
+            helper.select_device_port("/dev/cu.custom", ["/dev/cu.usbmodem1"]),
+            "/dev/cu.custom",
+        )
+
+    def test_port_selection_accepts_one_usbmodem(self):
+        self.assertEqual(helper.select_device_port(None, ["/dev/cu.usbmodem1"]), "/dev/cu.usbmodem1")
+
+    def test_port_selection_rejects_zero_or_multiple_devices(self):
+        with self.assertRaisesRegex(RuntimeError, "No ESP32-S3"):
+            helper.select_device_port(None, [])
+        with self.assertRaisesRegex(RuntimeError, "Multiple ESP32-S3"):
+            helper.select_device_port(None, ["/dev/cu.usbmodem1", "/dev/cu.usbmodem2"])
+
+    def test_portal_cli_defaults_to_loopback_portal(self):
+        args = helper.build_parser().parse_args([])
+
+        self.assertTrue(args.portal)
+        self.assertEqual(args.portal_host, "127.0.0.1")
+        self.assertEqual(args.portal_port, 8787)
+
 
 if __name__ == "__main__":
     unittest.main()
