@@ -1,0 +1,10 @@
+C:\Adruino\TouchPass\software\rust-helper\target\debug\deps\serialport-15ba0449f7ef5e49.d: C:\Users\block\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serialport-4.9.0\src\lib.rs C:\Users\block\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serialport-4.9.0\src\windows\mod.rs C:\Users\block\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serialport-4.9.0\src\windows\com.rs C:\Users\block\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serialport-4.9.0\src\windows\dcb.rs C:\Users\block\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serialport-4.9.0\src\windows\enumerate.rs C:\Users\block\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serialport-4.9.0\src\windows\error.rs
+
+C:\Adruino\TouchPass\software\rust-helper\target\debug\deps\libserialport-15ba0449f7ef5e49.rmeta: C:\Users\block\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serialport-4.9.0\src\lib.rs C:\Users\block\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serialport-4.9.0\src\windows\mod.rs C:\Users\block\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serialport-4.9.0\src\windows\com.rs C:\Users\block\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serialport-4.9.0\src\windows\dcb.rs C:\Users\block\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serialport-4.9.0\src\windows\enumerate.rs C:\Users\block\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serialport-4.9.0\src\windows\error.rs
+
+C:\Users\block\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serialport-4.9.0\src\lib.rs:
+C:\Users\block\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serialport-4.9.0\src\windows\mod.rs:
+C:\Users\block\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serialport-4.9.0\src\windows\com.rs:
+C:\Users\block\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serialport-4.9.0\src\windows\dcb.rs:
+C:\Users\block\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serialport-4.9.0\src\windows\enumerate.rs:
+C:\Users\block\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\serialport-4.9.0\src\windows\error.rs:

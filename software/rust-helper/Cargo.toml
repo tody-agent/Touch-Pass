@@ -1,0 +1,26 @@
+[package]
+name = "touchpass-helper"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.38", features = ["full"] }
+axum = "0.7"
+tower-http = { version = "0.5", features = ["fs", "cors"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serialport = "4.3"
+hmac = "0.12"
+sha2 = "0.10"
+aes = "0.8"
+ctr = "0.9"
+hex = "0.4"
+keyring = "2.1"
+rand = "0.8"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+rust-embed = "8.4"
+
+[dev-dependencies]
+tempfile = "3.10"
+axum-test = "14.0"
