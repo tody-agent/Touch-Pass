@@ -9,6 +9,8 @@ BUILD_GUIDE = ROOT / "docs" / "BUILD_GUIDE.md"
 USER_GUIDE = ROOT / "docs" / "USER_GUIDE.md"
 SECURITY = ROOT / "SECURITY.md"
 SECURITY_VI = ROOT / "SECURITY.vi.md"
+AI_AGENT_PROMPT = ROOT / "docs" / "AI_AGENT_PROMPT.md"
+AI_AGENT_PROMPT_VI = ROOT / "docs" / "AI_AGENT_PROMPT.vi.md"
 APPROVED_IMAGES = {
     "01-hero-showcase-v2.png",
     "02-mac-mini-claude-accept-v2.png",
@@ -23,6 +25,8 @@ class DocumentationTests(unittest.TestCase):
     def test_required_guides_and_images_exist(self):
         self.assertTrue(BUILD_GUIDE.is_file())
         self.assertTrue(USER_GUIDE.is_file())
+        self.assertTrue(AI_AGENT_PROMPT.is_file())
+        self.assertTrue(AI_AGENT_PROMPT_VI.is_file())
         actual = {p.name for p in (ROOT / "assets" / "demo").glob("*.png")}
         self.assertEqual(actual, APPROVED_IMAGES)
 
@@ -95,7 +99,7 @@ class DocumentationTests(unittest.TestCase):
         self.assertRegex(text, r"save[\s\S]{0,180}(?:fails|error|reject)")
 
     def test_local_markdown_links_resolve(self):
-        for document in (README, README_VI, BUILD_GUIDE, USER_GUIDE, SECURITY, SECURITY_VI):
+        for document in (README, README_VI, BUILD_GUIDE, USER_GUIDE, SECURITY, SECURITY_VI, AI_AGENT_PROMPT, AI_AGENT_PROMPT_VI):
             text = document.read_text(encoding="utf-8")
             for target in re.findall(r"!?\[[^]]*\]\(([^)]+)\)", text):
                 if target.startswith(("http://", "https://", "#")):
@@ -145,5 +149,24 @@ class DocumentationTests(unittest.TestCase):
                 self.assertIn("NGUYÊN TRẠNG", text)
                 for expected_link in expected_links:
                     self.assertIn(expected_link, text)
+
+    def test_ai_agent_prompt_docs_contents(self):
+        en_text = AI_AGENT_PROMPT.read_text(encoding="utf-8")
+        vi_text = AI_AGENT_PROMPT_VI.read_text(encoding="utf-8")
+
+        for agent in ("Claude Code", "Cursor", "Antigravity", "OpenCode", "ChatGPT CLI"):
+            self.assertIn(agent, en_text)
+            self.assertIn(agent, vi_text)
+
+        self.assertIn("https://tody-agent.github.io/Touch-Pass/web/flasher/", en_text)
+        self.assertIn("https://tody-agent.github.io/Touch-Pass/web/flasher/", vi_text)
+
+        self.assertIn("http://127.0.0.1:8787/", en_text)
+        self.assertIn("http://127.0.0.1:8787/", vi_text)
+
+        for phase in ("Phase 1", "Phase 2", "Phase 3", "Phase 4"):
+            self.assertIn(phase, en_text)
+        for pha in ("Pha 1", "Pha 2", "Pha 3", "Pha 4"):
+            self.assertIn(pha, vi_text)
 
 
