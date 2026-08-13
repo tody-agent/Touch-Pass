@@ -158,6 +158,43 @@ async function refresh() {
   }
 }
 
+function formatKeyStep(step) {
+  if (!step) return "enter";
+  let key = (step.key || "enter").trim().toLowerCase();
+  let mods = Number(step.modifiers || 0);
+  if (!mods) return key;
+
+  const modParts = [];
+  if (mods & 0x01) modParts.push("ctrl");
+  if (mods & 0x02) modParts.push("shift");
+  if (mods & 0x04) modParts.push("alt");
+  if (mods & 0x08) modParts.push("cmd");
+
+  if (key.includes("+")) return key;
+  return [...modParts, key].join("+");
+}
+
+function parseKeyInput(inputStr) {
+  const str = (inputStr || "").trim().toLowerCase();
+  if (!str) return { type: "key", key: "enter", modifiers: 0 };
+
+  const parts = str.split("+").map((p) => p.trim()).filter(Boolean);
+  if (parts.length === 1) {
+    return { type: "key", key: parts[0], modifiers: 0 };
+  }
+
+  let modifiers = 0;
+  let key = parts[parts.length - 1];
+  for (let i = 0; i < parts.length - 1; i++) {
+    const part = parts[i];
+    if (part === "ctrl" || part === "control") modifiers |= 0x01;
+    else if (part === "shift") modifiers |= 0x02;
+    else if (part === "alt" || part === "opt" || part === "option") modifiers |= 0x04;
+    else if (part === "cmd" || part === "meta" || part === "super" || part === "win") modifiers |= 0x08;
+  }
+  return { type: "key", key, modifiers };
+}
+
 function addCustomStep(step = { type: "text", value: "" }) {
   if (customSteps.children.length >= 16) return;
   const row = document.createElement("div");
@@ -175,7 +212,7 @@ function addCustomStep(step = { type: "text", value: "" }) {
   const sync = () => {
     value.type = type.value === "delay" ? "number" : "text";
     value.placeholder = type.value === "text" ? "ASCII text" : type.value === "key" ? "enter / escape / tab…" : "0–5000 ms";
-    value.value = type.value === "text" ? (step.value || "") : type.value === "key" ? (step.key || "enter") : String(step.milliseconds ?? 250);
+    value.value = type.value === "text" ? (step.value || "") : type.value === "key" ? formatKeyStep(step) : String(step.milliseconds ?? 250);
   };
   type.addEventListener("change", () => { step = { type: type.value }; sync(); });
   sync();
@@ -187,12 +224,13 @@ function readCustomSteps() {
   return [...customSteps.children].map((row) => {
     const [type, value] = row.querySelectorAll("select, input");
     if (type.value === "text") return { type: "text", value: value.value };
-    if (type.value === "key") return { type: "key", key: value.value.trim().toLowerCase(), modifiers: 0 };
+    if (type.value === "key") return parseKeyInput(value.value);
     return { type: "delay", milliseconds: Number(value.value) };
   });
 }
 
 function openProfile(finger) {
+  stopRecordingMode();
   document.querySelector("#profile-slot").value = finger.slot;
   document.querySelector("#dialog-title").textContent = `Slot ${finger.slot}`;
   document.querySelector("#profile-label").value = finger.label;
@@ -458,6 +496,166 @@ function initGuideCards() {
   });
 }
 
+/* Shortcut Recorder & AI Tool Presets */
+let isRecording = false;
+
+function stopRecordingMode() {
+  isRecording = false;
+  const recorderBox = document.querySelector("#shortcut-recorder");
+  if (recorderBox) {
+    recorderBox.classList.remove("recording-active");
+    recorderBox.innerHTML = '<span class="recorder-prompt">🔴 Bấm vào đây và nhấn tổ hợp phím để bắt phím tự động</span>';
+  }
+}
+
+function getShortcutLabel(modifiers, rawKey, mappedKey) {
+  const parts = [];
+  if (modifiers & 0x01) parts.push("Ctrl");
+  if (modifiers & 0x02) parts.push("Shift");
+  if (modifiers & 0x04) parts.push("Alt");
+  if (modifiers & 0x08) parts.push("Cmd");
+
+  let mainKey = rawKey;
+  if (mappedKey === "enter") mainKey = "Enter";
+  else if (mappedKey === "escape") mainKey = "Escape";
+  else if (mappedKey === "tab") mainKey = "Tab";
+  else if (mappedKey === "space") mainKey = "Space";
+  else if (mappedKey === "up") mainKey = "ArrowUp";
+  else if (mappedKey === "down") mainKey = "ArrowDown";
+  else if (mappedKey === "left") mainKey = "ArrowLeft";
+  else if (mappedKey === "right") mainKey = "ArrowRight";
+  else if (typeof mainKey === "string" && mainKey.length === 1) mainKey = mainKey.toUpperCase();
+
+  parts.push(mainKey);
+  return parts.join("+");
+}
+
+function initShortcutRecorder() {
+  const recorderBox = document.querySelector("#shortcut-recorder");
+  if (!recorderBox) return;
+
+  recorderBox.addEventListener("click", (e) => {
+    e.stopPropagation();
+    isRecording = !isRecording;
+    if (isRecording) {
+      recorderBox.classList.add("recording-active");
+      recorderBox.innerHTML = '<span class="recorder-prompt">🔴 Hãy nhấn tổ hợp phím bất kỳ trên bàn phím...</span>';
+    } else {
+      stopRecordingMode();
+    }
+  });
+
+  window.addEventListener("keydown", (e) => {
+    if (!isRecording) return;
+
+    // Prevent default browser shortcut action
+    e.preventDefault();
+
+    // Ignore standalone modifier presses
+    if (["Control", "Shift", "Alt", "Meta"].includes(e.key)) return;
+
+    // Extract modifier flags: Ctrl: 0x01, Shift: 0x02, Alt: 0x04, Meta/Cmd: 0x08
+    let modifiers = 0;
+    if (e.ctrlKey) modifiers |= 0x01;
+    if (e.shiftKey) modifiers |= 0x02;
+    if (e.altKey) modifiers |= 0x04;
+    if (e.metaKey) modifiers |= 0x08;
+
+    // Map key code / key name to TouchPass opcode
+    const specialKeyMap = {
+      "Enter": "enter",
+      "Escape": "escape",
+      "Tab": "tab",
+      " ": "space",
+      "Space": "space",
+      "Spacebar": "space",
+      "ArrowUp": "up",
+      "ArrowDown": "down",
+      "ArrowLeft": "left",
+      "ArrowRight": "right",
+    };
+
+    const rawKey = e.key;
+    const isSpecial = Boolean(specialKeyMap[rawKey]);
+    const mappedKey = specialKeyMap[rawKey] || rawKey.toLowerCase();
+
+    let step;
+    if (isSpecial || modifiers > 0) {
+      step = { type: "key", key: mappedKey, modifiers: modifiers };
+    } else {
+      step = { type: "text", value: rawKey };
+    }
+
+    const shortcutLabel = getShortcutLabel(modifiers, rawKey, mappedKey);
+
+    // Append step to custom-steps automatically
+    addCustomStep(step);
+
+    // Deactivate recording mode upon keystroke capture
+    isRecording = false;
+    recorderBox.classList.remove("recording-active");
+    recorderBox.innerHTML = `<span class="recorder-prompt">✅ Đã ghi nhận: <strong>${shortcutLabel}</strong> (Bấm để ghi lại)</span>`;
+  });
+}
+
+const aiPresetActions = {
+  claude_cancel: [{ type: "key", key: "c", modifiers: 1 }],
+  claude_clear: [{ type: "key", key: "l", modifiers: 1 }],
+  claude_compact: [{ type: "text", value: "/compact" }, { type: "key", key: "enter" }],
+  cursor_edit: [{ type: "key", key: "k", modifiers: 2 }],
+  cursor_composer: [{ type: "key", key: "i", modifiers: 2 }],
+  cursor_chat: [{ type: "key", key: "l", modifiers: 2 }],
+  antigravity_bar: [{ type: "key", key: "a", modifiers: 3 }],
+  antigravity_logs: [{ type: "key", key: "l", modifiers: 3 }],
+  codex_run: [{ type: "key", key: "enter", modifiers: 2 }],
+  claude_desktop_new: [{ type: "key", key: "o", modifiers: 3 }]
+};
+
+function parsePresetAction(actionAttr) {
+  if (!actionAttr) return [];
+  if (aiPresetActions[actionAttr]) {
+    return aiPresetActions[actionAttr];
+  }
+  try {
+    const parsed = JSON.parse(actionAttr);
+    if (Array.isArray(parsed)) return parsed;
+    if (typeof parsed === "object") return [parsed];
+  } catch (e) {
+    // String fallback or parse error
+  }
+  return [];
+}
+
+function initAIToolPresets() {
+  document.querySelectorAll(".btn-apply-preset").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const rawAction = btn.dataset.presetAction;
+      const label = btn.dataset.label || "Phím tắt AI";
+      const steps = parsePresetAction(rawAction);
+
+      let targetFinger = state.fingers.find((f) => !f.enrolled) || state.fingers[0];
+      if (!targetFinger) {
+        targetFinger = { slot: 1, label: label, action: { preset: "custom", steps: [] } };
+      }
+
+      switchTab("slots");
+
+      openProfile({
+        ...targetFinger,
+        label: label,
+        action: {
+          ...targetFinger.action,
+          preset: "custom",
+          steps: steps,
+        },
+      });
+
+      showToast(`Áp dụng phím tắt AI "${label}" cho Slot ${targetFinger.slot}`);
+    });
+  });
+}
+
 document.querySelector("#profile-preset").addEventListener("change", syncPresetFields);
 document.querySelectorAll("[data-add-step]").forEach((element) => element.addEventListener("click", () => addCustomStep({ type: element.dataset.addStep })));
 document.querySelector("#refresh").addEventListener("click", refresh);
@@ -476,5 +674,7 @@ initTabNavigation();
 initOnboardingWizard();
 initDebugConsole();
 initGuideCards();
+initShortcutRecorder();
+initAIToolPresets();
 refresh();
 setInterval(refresh, 5000);
