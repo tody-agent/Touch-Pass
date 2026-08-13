@@ -1,6 +1,6 @@
 # Build Touch Pass
 
-🌐 **English** | [🇻🇳 **Tiếng Việt**](BUILD_GUIDE.vi.md)
+🌐 **English** | [🇻🇳 **Tiếng Việt**](BUILD_GUIDE.vi.md) | [🇨🇳 **简体中文**](BUILD_GUIDE.zh.md) | [🇷🇺 **Русский**](BUILD_GUIDE.ru.md)
 
 This guide takes you from loose parts to the local Touch Pass portal on Windows or macOS.
 Work through it from the root of this repository (the folder that contains

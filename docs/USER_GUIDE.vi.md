@@ -1,6 +1,6 @@
 # Cẩm Nang Sử Dụng TouchPass
 
-[🌐 **English**](USER_GUIDE.md) | 🇻🇳 **Tiếng Việt**
+[🌐 **English**](USER_GUIDE.md) | 🇻🇳 **Tiếng Việt** | [🇨🇳 **简体中文**](USER_GUIDE.zh.md) | [🇷🇺 **Русский**](USER_GUIDE.ru.md)
 
 Chào mừng bạn đến với Cẩm nang sử dụng chính thức của **TouchPass** — nền tảng tự động hóa phím tắt macro và xác thực sinh trắc học nguồn mở chạy trên vi điều khiển ESP32-S3 và cảm biến vân tay ZW101.
 

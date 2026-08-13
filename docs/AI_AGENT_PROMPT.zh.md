@@ -1,6 +1,6 @@
 # 🤖 TouchPass 1-Prompt AI Agent 集成指南
 
-[🌐 **English**](AI_AGENT_PROMPT.md) | [🇻🇳 **Tiếng Việt**](AI_AGENT_PROMPT.vi.md) | 🇨🇳 **简体中文**
+[🌐 **English**](AI_AGENT_PROMPT.md) | [🇻🇳 **Tiếng Việt**](AI_AGENT_PROMPT.vi.md) | 🇨🇳 **简体中文** | [🇷🇺 **Русский**](AI_AGENT_PROMPT.ru.md)
 
 本指南为使用 AI 编程助手和 CLI Agent（**Claude Code**、**Cursor**、**Antigravity**、**OpenCode** 以及 **ChatGPT CLI**）的非技术用户提供标准化的、即复制即用的 **1-Prompt 设置指令**。
 

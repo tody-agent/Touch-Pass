@@ -1,6 +1,6 @@
 # TouchPass 用户指南与文档
 
-[🌐 **English**](USER_GUIDE.md) | [🇻🇳 **Tiếng Việt**](USER_GUIDE.vi.md) | 🇨🇳 **简体中文**
+[🌐 **English**](USER_GUIDE.md) | [🇻🇳 **Tiếng Việt**](USER_GUIDE.vi.md) | 🇨🇳 **简体中文** | [🇷🇺 **Русский**](USER_GUIDE.ru.md)
 
 欢迎阅读 **TouchPass** 官方用户指南 — 这是一个基于 ESP32-S3 微控制器和 ZW101 指纹传感器构建的开源生物识别与开发者宏自动化平台。
 

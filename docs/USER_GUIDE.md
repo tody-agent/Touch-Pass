@@ -1,6 +1,6 @@
 # TouchPass User Guide & Documentation
 
-🌐 **English** | [🇻🇳 **Tiếng Việt**](USER_GUIDE.vi.md)
+🌐 **English** | [🇻🇳 **Tiếng Việt**](USER_GUIDE.vi.md) | [🇨🇳 **简体中文**](USER_GUIDE.zh.md) | [🇷🇺 **Русский**](USER_GUIDE.ru.md)
 
 Welcome to the official user guide for **TouchPass** — an open-source biometrics & developer macro automation platform powered by ESP32-S3 microcontrollers and ZW101 fingerprint sensors.
 

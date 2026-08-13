@@ -1,6 +1,6 @@
 # 🤖 Hướng Dẫn Cài Đặt TouchPass 1-Prompt Dành Cho AI Agent
 
-[🌐 **English**](AI_AGENT_PROMPT.md) | 🇻🇳 **Tiếng Việt**
+[🌐 **English**](AI_AGENT_PROMPT.md) | 🇻🇳 **Tiếng Việt** | [🇨🇳 **简体中文**](AI_AGENT_PROMPT.zh.md) | [🇷🇺 **Русский**](AI_AGENT_PROMPT.ru.md)
 
 Tài liệu này cung cấp hướng dẫn **cài đặt 1-prompt tự động** chuẩn hóa dành cho người dùng không chuyên về kỹ thuật khi làm việc với các trợ lý lập trình AI và công cụ CLI agent (**Claude Code**, **Cursor**, **Antigravity**, **OpenCode**, và **ChatGPT CLI**).
 

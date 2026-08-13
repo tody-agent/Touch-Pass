@@ -1,6 +1,6 @@
 # 构建 TouchPass
 
-[🌐 **English**](BUILD_GUIDE.md) | [🇻🇳 **Tiếng Việt**](BUILD_GUIDE.vi.md) | 🇨🇳 **简体中文**
+[🌐 **English**](BUILD_GUIDE.md) | [🇻🇳 **Tiếng Việt**](BUILD_GUIDE.vi.md) | 🇨🇳 **简体中文** | [🇷🇺 **Русский**](BUILD_GUIDE.ru.md)
 
 本指南将带您从零散的零部件开始，一步步在 Windows 或 macOS 上构建并运行本地 TouchPass Web 门户。
 请在本项目仓库的根目录（包含 `README.md` 的文件夹）下按照本指南进行操作。TouchPass 是一种便捷的 USB HID 键盘接口，而非安全边界：它会向您计算机上当前处于 **focused**（聚焦）激活状态的窗口/输入框中输入内容，且传感器连接使用的是 **unauthenticated UART**（未经身份验证的 UART）链路。

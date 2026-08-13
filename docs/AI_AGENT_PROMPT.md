@@ -1,6 +1,6 @@
 # 🤖 TouchPass 1-Prompt AI Agent Integration Guide
 
-🌐 **English** | [🇻🇳 **Tiếng Việt**](AI_AGENT_PROMPT.vi.md)
+🌐 **English** | [🇻🇳 **Tiếng Việt**](AI_AGENT_PROMPT.vi.md) | [🇨🇳 **简体中文**](AI_AGENT_PROMPT.zh.md) | [🇷🇺 **Русский**](AI_AGENT_PROMPT.ru.md)
 
 This guide provides a standardized, copy-paste **1-Prompt Setup instructions** for non-technical users leveraging AI coding assistants and CLI agents (**Claude Code**, **Cursor**, **Antigravity**, **OpenCode**, and **ChatGPT CLI**).
 

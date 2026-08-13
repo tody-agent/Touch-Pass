@@ -1,6 +1,6 @@
 # Hướng Dẫn Lắp Ráp & Đấu Nối TouchPass
 
-[🌐 **English**](BUILD_GUIDE.md) | 🇻🇳 **Tiếng Việt**
+[🌐 **English**](BUILD_GUIDE.md) | 🇻🇳 **Tiếng Việt** | [🇨🇳 **简体中文**](BUILD_GUIDE.zh.md) | [🇷🇺 **Русский**](BUILD_GUIDE.ru.md)
 
 Hướng dẫn này từng bước đưa bạn từ các linh kiện rời đến việc khởi chạy thành công hệ thống TouchPass trên Windows hoặc macOS. 
 
