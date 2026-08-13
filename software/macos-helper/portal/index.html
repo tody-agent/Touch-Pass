@@ -143,6 +143,8 @@
           <div class="log-header">
             <h3>Nhật ký hệ thống (Live Logs)</h3>
             <div class="log-actions">
+              <button id="btn-test-ping" class="button button-quiet" type="button">Test Ping</button>
+              <button id="btn-test-type" class="button button-quiet" type="button">Test Type</button>
               <button id="btn-clear-logs" class="button button-quiet" type="button">Xóa log</button>
               <button id="btn-pause-logs" class="button button-quiet" type="button">Tạm dừng</button>
             </div>
@@ -162,7 +164,7 @@
 
         <div class="guide-grid">
           <!-- Case 1: Terminal Sudo -->
-          <article class="guide-card">
+          <article class="guide-card" data-preset="password" data-label="Terminal Sudo">
             <div class="guide-icon">🖥️</div>
             <h3>Terminal Sudo</h3>
             <p>Nhập mật khẩu administrator tự động khi chạy lệnh <code>sudo</code> trong macOS Terminal hoặc iTerm2.</p>
@@ -170,10 +172,11 @@
               <code>Preset: Mật khẩu + Enter</code>
               <code>Chạm 1 lần -> Tự động điền mật khẩu & gửi phím Enter</code>
             </div>
+            <button class="button button-secondary btn-apply-template" data-preset="password" data-label="Terminal Sudo" type="button">Áp dụng mẫu này</button>
           </article>
 
           <!-- Case 2: Git Commit 'y/N' -->
-          <article class="guide-card">
+          <article class="guide-card" data-preset="accept" data-label="Git Commit Confirmation">
             <div class="guide-icon">🔀</div>
             <h3>Git Commit 'y/N'</h3>
             <p>Xác nhận câu hỏi 'y/N' trên Terminal khi commit code hoặc push git với chế độ chạm kép an toàn.</p>
@@ -182,10 +185,11 @@
               <code>Chạm lần 1 -> Chờ chạm xác nhận trong 3s</code>
               <code>Chạm lần 2 -> Gửi 'y' + Enter</code>
             </div>
+            <button class="button button-secondary btn-apply-template" data-preset="accept" data-label="Git Commit Confirmation" type="button">Áp dụng mẫu này</button>
           </article>
 
           <!-- Case 3: Custom Macro -->
-          <article class="guide-card">
+          <article class="guide-card" data-preset="custom" data-label="Custom Macro">
             <div class="guide-icon">⚙️</div>
             <h3>Custom Macro</h3>
             <p>Chuỗi hành động kết hợp giữa gõ chữ ASCII, phím Tab/Enter và khoảng hoãn delay thời gian tùy chỉnh.</p>
@@ -193,10 +197,11 @@
               <code>Preset: Macro tùy chỉnh</code>
               <code>Bước 1: Text 'admin' -> Bước 2: Key 'Tab' -> Bước 3: Delay 250ms -> Bước 4: Key 'Enter'</code>
             </div>
+            <button class="button button-secondary btn-apply-template" data-preset="custom" data-label="Custom Macro" type="button">Áp dụng mẫu này</button>
           </article>
 
           <!-- Case 4: Password Autofill -->
-          <article class="guide-card">
+          <article class="guide-card" data-preset="password" data-label="Password Autofill">
             <div class="guide-icon">🔐</div>
             <h3>Password Autofill</h3>
             <p>Điền mật khẩu bảo mật dài, phức tạp lưu trong Keychain một cách chính xác mà không lo bị lộ phím.</p>
@@ -204,6 +209,7 @@
               <code>Preset: Mật khẩu + Enter</code>
               <code>Lưu trữ an toàn trong macOS Keychain / Chạm ngón tay trỏ để đăng nhập ngay lập tức</code>
             </div>
+            <button class="button button-secondary btn-apply-template" data-preset="password" data-label="Password Autofill" type="button">Áp dụng mẫu này</button>
           </article>
         </div>
       </section>

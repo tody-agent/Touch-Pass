@@ -1,4 +1,4 @@
-const state = { csrf: "", fingers: [], device: null, activeJob: null, timer: null };
+const state = { csrf: "", fingers: [], device: null, activeJob: null, timer: null, logsPaused: false };
 const grid = document.querySelector("#finger-grid");
 const statusBadge = document.querySelector("#device-status");
 const profileDialog = document.querySelector("#profile-dialog");
@@ -33,6 +33,58 @@ function button(text, className, action, disabled = false) {
   return element;
 }
 
+/* Tab Navigation */
+function switchTab(tabName) {
+  if (!tabName) return;
+  localStorage.setItem("touchpass_active_tab", tabName);
+
+  document.querySelectorAll(".tab-button").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.tab === tabName);
+  });
+
+  document.querySelectorAll(".tab-content, .tab-panel").forEach((panel) => {
+    const isTarget = panel.id === `tab-${tabName}` || panel.dataset.tab === tabName;
+    panel.classList.toggle("active", isTarget);
+  });
+}
+
+function initTabNavigation() {
+  document.querySelectorAll(".tab-button").forEach((btn) => {
+    btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+  });
+
+  document.querySelectorAll("[data-nav-target]").forEach((btn) => {
+    btn.addEventListener("click", () => switchTab(btn.dataset.navTarget));
+  });
+
+  const savedTab = localStorage.getItem("touchpass_active_tab") || "onboarding";
+  switchTab(savedTab);
+}
+
+/* Onboarding Wizard */
+function initOnboardingWizard() {
+  const btnTestHid = document.querySelector("#btn-test-hid");
+  if (btnTestHid) {
+    btnTestHid.addEventListener("click", async () => {
+      try {
+        btnTestHid.disabled = true;
+        await api("/api/test", {
+          method: "POST",
+          body: JSON.stringify({ action: "type_test" }),
+        });
+        showToast("Đã gửi lệnh gõ thử USB HID!");
+        const testInput = document.querySelector("#hid-test-input");
+        if (testInput) testInput.focus();
+      } catch (err) {
+        showToast(`Lỗi gõ thử HID: ${err.message}`);
+      } finally {
+        btnTestHid.disabled = false;
+      }
+    });
+  }
+}
+
+/* Slot Grid & Profiles */
 function render() {
   grid.replaceChildren();
   for (const finger of state.fingers) {
@@ -74,6 +126,23 @@ function setDeviceStatus(device) {
   } else {
     statusBadge.classList.add("status-offline");
     statusBadge.textContent = "Chưa tìm thấy ESP32-S3";
+  }
+  updateTelemetry(device);
+}
+
+function updateTelemetry(device) {
+  const statusElem = document.querySelector("#telemetry-status");
+  const portElem = document.querySelector("#telemetry-port");
+  const sensorElem = document.querySelector("#telemetry-sensor");
+
+  if (statusElem) {
+    statusElem.textContent = device.connected ? "Đã kết nối" : "Ngoại tuyến";
+  }
+  if (portElem) {
+    portElem.textContent = device.port || "N/A";
+  }
+  if (sensorElem) {
+    sensorElem.textContent = device.sensor === "ok" ? "Hoạt động (OK)" : (device.sensor || "Chưa nhận");
   }
 }
 
@@ -233,6 +302,162 @@ document.querySelector("#cancel-job").addEventListener("click", async () => {
   jobDialog.close();
 });
 
+/* Debug Console & Live Log Streaming */
+function getTagBadgeClass(tag) {
+  const t = (tag || "").toUpperCase();
+  if (t === "TOUCH") return "log-tag-touch";
+  if (t === "MATCH") return "log-tag-match";
+  if (t === "PW" || t === "PASSWORD") return "log-tag-pw";
+  if (t === "ERR" || t === "ERROR") return "log-tag-err";
+  return "log-tag-system";
+}
+
+function formatLogTime(isoStr) {
+  if (!isoStr) return `[${new Date().toLocaleTimeString("vi-VN")}]`;
+  try {
+    const d = new Date(isoStr);
+    if (isNaN(d.getTime())) return `[${isoStr}]`;
+    const hours = String(d.getHours()).padStart(2, "0");
+    const mins = String(d.getMinutes()).padStart(2, "0");
+    const secs = String(d.getSeconds()).padStart(2, "0");
+    return `[${hours}:${mins}:${secs}]`;
+  } catch (e) {
+    return `[${isoStr}]`;
+  }
+}
+
+async function pollLogs() {
+  if (state.logsPaused) return;
+  try {
+    const data = await api("/api/logs");
+    if (data.logs) {
+      renderLogs(data.logs);
+    }
+  } catch (err) {
+    // Silent catch on log polling errors
+  }
+}
+
+function renderLogs(logs) {
+  const logConsole = document.querySelector("#log-console");
+  if (!logConsole) return;
+
+  logConsole.replaceChildren();
+  if (logs.length === 0) {
+    const emptyDiv = document.createElement("div");
+    emptyDiv.className = "log-entry";
+    const timeSpan = document.createElement("span");
+    timeSpan.className = "log-time";
+    timeSpan.textContent = "[00:00:00]";
+    const tagSpan = document.createElement("span");
+    tagSpan.className = "log-tag log-tag-system";
+    tagSpan.textContent = "SYSTEM";
+    emptyDiv.append(timeSpan, tagSpan, document.createTextNode(" Sẵn sàng kết nối TouchPass Debug Portal..."));
+    logConsole.appendChild(emptyDiv);
+    return;
+  }
+
+  for (const entry of logs) {
+    const div = document.createElement("div");
+    div.className = "log-entry";
+
+    const timeSpan = document.createElement("span");
+    timeSpan.className = "log-time";
+    timeSpan.textContent = formatLogTime(entry.timestamp);
+
+    const tagSpan = document.createElement("span");
+    const tagClass = getTagBadgeClass(entry.tag);
+    tagSpan.className = `log-tag ${tagClass}`;
+    tagSpan.textContent = (entry.tag || "SYSTEM").toUpperCase();
+
+    const msgNode = document.createTextNode(` ${entry.message || ""}`);
+
+    div.append(timeSpan, tagSpan, msgNode);
+    logConsole.appendChild(div);
+  }
+
+  logConsole.scrollTop = logConsole.scrollHeight;
+}
+
+function initDebugConsole() {
+  const clearBtn = document.querySelector("#btn-clear-logs");
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      const logConsole = document.querySelector("#log-console");
+      if (logConsole) logConsole.replaceChildren();
+      showToast("Đã xóa log console.");
+    });
+  }
+
+  const pauseBtn = document.querySelector("#btn-pause-logs");
+  if (pauseBtn) {
+    pauseBtn.addEventListener("click", () => {
+      state.logsPaused = !state.logsPaused;
+      pauseBtn.textContent = state.logsPaused ? "Tiếp tục" : "Tạm dừng";
+      pauseBtn.classList.toggle("button-primary", state.logsPaused);
+      showToast(state.logsPaused ? "Đã tạm dừng nhận log." : "Tiếp tục nhận log.");
+    });
+  }
+
+  const pingBtn = document.querySelector("#btn-test-ping");
+  if (pingBtn) {
+    pingBtn.addEventListener("click", async () => {
+      try {
+        await api("/api/test", { method: "POST", body: JSON.stringify({ action: "ping" }) });
+        showToast("Đã gửi lệnh Test Ping!");
+      } catch (err) {
+        showToast(`Lỗi Ping: ${err.message}`);
+      }
+    });
+  }
+
+  const typeBtn = document.querySelector("#btn-test-type");
+  if (typeBtn) {
+    typeBtn.addEventListener("click", async () => {
+      try {
+        await api("/api/test", { method: "POST", body: JSON.stringify({ action: "type_test" }) });
+        showToast("Đã gửi lệnh Test Type!");
+      } catch (err) {
+        showToast(`Lỗi Type Test: ${err.message}`);
+      }
+    });
+  }
+
+  setInterval(pollLogs, 1000);
+}
+
+/* Guide Cards / Template Application */
+function applyTemplateToSlot(preset, label) {
+  let targetFinger = state.fingers.find((f) => !f.enrolled) || state.fingers[0];
+  if (!targetFinger) {
+    targetFinger = { slot: 1, label: label || "Mẫu mới", action: { preset: preset || "password" } };
+  }
+
+  switchTab("slots");
+
+  openProfile({
+    ...targetFinger,
+    label: label || targetFinger.label,
+    action: {
+      ...targetFinger.action,
+      preset: preset || targetFinger.action?.preset || "password",
+    },
+  });
+
+  showToast(`Áp dụng mẫu "${label}" cho Slot ${targetFinger.slot}`);
+}
+
+function initGuideCards() {
+  document.querySelectorAll(".btn-apply-template").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const preset = btn.dataset.preset;
+      const label = btn.dataset.label;
+      applyTemplateToSlot(preset, label);
+    });
+  });
+}
+
 document.querySelector("#profile-preset").addEventListener("change", syncPresetFields);
 document.querySelectorAll("[data-add-step]").forEach((element) => element.addEventListener("click", () => addCustomStep({ type: element.dataset.addStep })));
 document.querySelector("#refresh").addEventListener("click", refresh);
@@ -246,5 +471,10 @@ function showToast(message) {
   toastTimer = setTimeout(() => toast.classList.remove("visible"), 3000);
 }
 
+// Initial Boot
+initTabNavigation();
+initOnboardingWizard();
+initDebugConsole();
+initGuideCards();
 refresh();
 setInterval(refresh, 5000);
