@@ -1,85 +1,110 @@
 # 🤖 TouchPass 1-Prompt AI Agent Integration Guide
 
-This guide provides standardized, copy-paste **1-Prompt Setup instructions** for AI coding assistants and CLI agents (**Claude Code**, **Cursor**, **Antigravity**, **OpenCode**).
+This guide provides standardized, copy-paste **1-Prompt Setup instructions** for non-technical users leveraging AI coding assistants and CLI agents (**Claude Code**, **Cursor**, **Antigravity**, **OpenCode**).
 
-With a single prompt, your AI agent can clone, configure, launch, and verify the TouchPass local hardware helper and daemon on any operating system.
+With a single prompt, an AI agent can inspect your OS environment, set up the Python local helper service, direct Web Serial firmware flashing, and perform post-installation verification and fingerprint enrollment.
 
 ---
 
-## 📐 1-Prompt Execution Workflow
+## 📐 1-Prompt Overview & 4-Phase Autonomous Execution Workflow
 
-When an AI agent executes the TouchPass 1-prompt sequence, it automatically runs through four deterministic steps:
+When an AI agent receives the Master Prompt, it executes a 4-phase workflow to complete setup without manual command-line editing:
 
 ```text
-┌─────────────────────────────────────────────────────────────────────────┐
-│                        1-PROMPT EXECUTION FLOW                          │
-├─────────────────────────────────────────────────────────────────────────┤
-│ 1. 🔍 Detect OS & Environment                                           │
-│    Identifies Windows / macOS / Linux and checks Python 3.11+            │
-├─────────────────────────────────────────────────────────────────────────┤
-│ 2. 📦 Setup Virtual Environment & Dependencies                          │
-│    Creates software/.venv and installs software/requirements.txt         │
-├─────────────────────────────────────────────────────────────────────────┤
-│ 3. 🚀 Launch TouchPass Portal Daemon                                     │
-│    Starts local portal engine on http://127.0.0.1:8787/                 │
-├─────────────────────────────────────────────────────────────────────────┤
-│ 4. ⚡ Verify USB Connection & HID Keybinding                             │
-│    Verifies ESP32-S3 serial port & confirms 'y' + Enter keybinding       │
-└─────────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                    4-PHASE AUTONOMOUS EXECUTION WORKFLOW                      │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ Phase 1: Environment Preflight                                               │
+│   • Detect OS (Windows / macOS / Linux)                                      │
+│   • Verify Python 3.11+ installation & shell environment                     │
+│   • Check USB permissions (e.g. dialout on Linux, COM ports on Windows)       │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ Phase 2: Local Helper Setup                                                  │
+│   • Create virtual environment (`software/.venv`)                            │
+│   • Install required dependencies from `software/requirements.txt`           │
+│   • Start local portal daemon listening on http://127.0.0.1:8787/             │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ Phase 3: Web Serial Firmware Flashing                                        │
+│   • Direct non-technical users to https://tody-agent.github.io/Touch-Pass/web/flasher/ │
+│   • Connect ESP32-S3 SuperMini via Chrome/Edge Web Serial API                │
+│   • Guide bootloader entry (Hold BOOT, press RESET, release BOOT) if needed   │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ Phase 4: Verification & Finger Enrollment                                    │
+│   • Verify daemon health check at http://127.0.0.1:8787/api/status          │
+│   • Confirm USB serial / HID hardware connection                             │
+│   • Guide user through initial fingerprint enrollment & prompt auto-approval │
+└──────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 📋 Copyable 1-Prompt Templates
+## 📋 Copyable Master Prompt Templates
 
-Select and paste the appropriate prompt into your AI coding assistant.
+### 🌟 Universal Master Setup Prompt (Recommended)
 
-### 🌟 Universal Cross-Platform Prompt (Recommended)
-
-Works with **Claude Code**, **Cursor**, **Antigravity**, and **OpenCode** on any OS:
+Copy and paste this exact prompt into **Claude Code**, **Cursor**, **Antigravity**, or **OpenCode**:
 
 ```text
-Set up TouchPass on this machine for automated AI CLI prompt confirmation:
-1. Detect the operating system (Windows, macOS, or Linux) and verify Python 3.11+ is installed.
-2. Ensure the TouchPass repository is cloned locally or use current workspace files.
-3. Create a Python virtual environment in `software/.venv` (if not present) and install dependencies from `software/requirements.txt`.
-4. Start the TouchPass local portal service (`run_portal_win.py` on Windows or `python3 software/app.py` on macOS/Linux) in the background listening on port 8787.
-5. Verify the Web Portal is responsive at http://127.0.0.1:8787/ and verify the ESP32-S3 USB HID connection for 'y' + Enter prompt auto-approval.
+Set up TouchPass on this machine for non-technical 1-prompt automated operation:
+
+Phase 1: Environment Preflight
+- Detect the operating system (Windows, macOS, or Linux).
+- Verify Python 3.11+ is installed (`python --version` or `python3 --version`).
+- Verify USB serial access permissions (e.g. ensure `dialout` group access on Linux, active COM ports on Windows, or `/dev/cu.usbmodem*` on macOS).
+
+Phase 2: Local Helper Setup
+- Ensure the TouchPass codebase is available locally.
+- Create a Python virtual environment in `software/.venv` if it doesn't exist.
+- Install dependencies from `software/requirements.txt`.
+- Start the TouchPass portal daemon (`run_portal_win.py` on Windows or `python3 software/app.py` on macOS/Linux) running in the background on port 8787.
+
+Phase 3: Firmware Flashing Guidance
+- Instruct the user to open https://tody-agent.github.io/Touch-Pass/web/flasher/ in Chrome/Edge to flash the ESP32-S3 firmware via Web Serial API.
+- Provide step-by-step instructions if bootloader entry is required (Hold BOOT button, press & release RESET, release BOOT).
+
+Phase 4: Verification & Finger Enrollment
+- Check http://127.0.0.1:8787/api/status to verify the local daemon is running and active.
+- Verify USB serial hardware connection to ESP32-S3.
+- Guide the user on opening http://127.0.0.1:8787/ to enroll their first fingerprint and test the hardware 'y' + Enter keybinding for automated AI CLI prompt approvals.
 ```
 
 ---
 
-### 🪟 Windows Prompt (Command Prompt / PowerShell)
+### 🪟 Windows Setup Prompt (PowerShell / CMD)
 
 ```text
 Set up TouchPass on Windows:
-1. Check for Python installation (`python` or `py -3`).
-2. Run `start_touchpass.bat` to automatically create `software/.venv`, install requirements, and launch the portal service on http://127.0.0.1:8787/.
-3. Verify that http://127.0.0.1:8787/ responds with HTTP 200 OK and check for connected ESP32-S3 serial ports.
+1. Verify Python installation using `python --version` or `py -3 --version`.
+2. Run `start_touchpass.bat` to create `software\.venv`, install `software\requirements.txt`, and launch `run_portal_win.py` on http://127.0.0.1:8787/.
+3. Direct user to https://tody-agent.github.io/Touch-Pass/web/flasher/ for Web Serial firmware flashing.
+4. Verify daemon health at http://127.0.0.1:8787/api/status and test USB serial connection.
 ```
 
 ---
 
-### 🍎 macOS Prompt (Terminal / zsh)
+### 🍎 macOS Setup Prompt (Terminal / zsh)
 
 ```text
 Set up TouchPass on macOS:
-1. Verify Python 3.11+ is available via `python3 --version` or Homebrew.
-2. Create virtual environment `python3 -m venv software/.venv` and install `pip install -r software/requirements.txt`.
-3. Launch the TouchPass portal engine in the background: `nohup software/.venv/bin/python software/app.py > touchpass.log 2>&1 &`.
-4. Verify port 8787 is active (`curl -s http://127.0.0.1:8787/api/status`) and check USB serial connection to ESP32-S3.
+1. Check Python version via `python3 --version` (install via Homebrew or Python installer if missing).
+2. Run `python3 -m venv software/.venv && software/.venv/bin/pip install -r software/requirements.txt`.
+3. Launch portal in background: `nohup software/.venv/bin/python software/app.py > touchpass.log 2>&1 &`.
+4. Direct user to https://tody-agent.github.io/Touch-Pass/web/flasher/ for Web Serial firmware flashing.
+5. Verify status at http://127.0.0.1:8787/api/status and check connected `/dev/cu.usbmodem*` ports.
 ```
 
 ---
 
-### 🐧 Linux Prompt (Bash / systemd)
+### 🐧 Linux Setup Prompt (Bash / systemd)
 
 ```text
 Set up TouchPass on Linux:
 1. Check `python3 --version` and ensure `python3-venv` is installed.
-2. Initialize virtual environment and install requirements: `python3 -m venv software/.venv && software/.venv/bin/pip install -r software/requirements.txt`.
-3. Start the daemon in the background on port 8787 and verify `curl http://127.0.0.1:8787/api/status`.
-4. Ensure dialout/tty permissions are configured for ESP32-S3 access (`sudo usermod -a -G dialout $USER`).
+2. Ensure dialout permissions: `sudo usermod -a -G dialout $USER`.
+3. Run `python3 -m venv software/.venv && software/.venv/bin/pip install -r software/requirements.txt`.
+4. Start daemon: `nohup software/.venv/bin/python software/app.py > touchpass.log 2>&1 &`.
+5. Direct user to https://tody-agent.github.io/Touch-Pass/web/flasher/ for Web Serial firmware flashing.
+6. Verify daemon endpoint `curl http://127.0.0.1:8787/api/status`.
 ```
 
 ---
@@ -100,42 +125,102 @@ curl -fsSL https://raw.githubusercontent.com/tody-agent/Touch-Pass/main/packagin
 
 ---
 
-## 🤖 Guide by AI Agent Tool
+## 🛠️ Detailed Step-by-Step Breakdown: What the AI Agent Does
+
+Here is an explicit breakdown of the actions your AI agent executes automatically across each phase:
+
+### Phase 1: Environment Preflight
+1. **OS Detection & Binary Check**:
+   - Executes `uname -s` or checks `%OS%` environment variables.
+   - Checks if Python 3.11+ is installed (`python --version` / `python3 --version`).
+   - If Python is missing, prompts user with specific instructions to install Python 3.11+.
+2. **Port Availability Check**:
+   - Confirms port 8787 is open and not occupied by another process.
+3. **USB Serial Permission Inspection**:
+   - On Linux, checks if current user belongs to `dialout` or `tty` group.
+   - On Windows, lists available COM ports using PowerShell or `serial.tools.list_ports`.
+   - On macOS, checks `/dev/cu.usbmodem*` or `/dev/cu.usbserial*`.
+
+### Phase 2: Local Helper Setup
+1. **Virtual Environment Creation**:
+   - Executes `python -m venv software/.venv` (or `python3 -m venv software/.venv`).
+2. **Dependency Installation**:
+   - Upgrades `pip` and installs required packages: `pip install -r software/requirements.txt` (including `flask`, `pyserial`, `cryptography`, etc.).
+3. **Daemon Service Launch**:
+   - On Windows: Launches `run_portal_win.py` or runs `start_touchpass.bat`.
+   - On macOS/Linux: Executes `software/.venv/bin/python software/app.py` in the background.
+   - Ensures local web server is listening on `http://127.0.0.1:8787/`.
+
+### Phase 3: Web Serial Firmware Flashing
+1. **Flasher Redirection**:
+   - Instructs the user to open [https://tody-agent.github.io/Touch-Pass/web/flasher/](https://tody-agent.github.io/Touch-Pass/web/flasher/) in a Web Serial supported browser (Google Chrome, Microsoft Edge, Opera).
+2. **Web Serial Connection & Flash**:
+   - The user selects the connected ESP32-S3 device port and clicks **Install / Flash Firmware**.
+3. **Bootloader Guidance**:
+   - If device fails to enter flash mode automatically:
+     1. Hold down the **BOOT** button on the ESP32-S3 SuperMini.
+     2. Press and release the **RESET** (EN) button.
+     3. Release the **BOOT** button.
+     4. Click **Connect** on the Web Flasher.
+
+### Phase 4: Verification & Finger Enrollment
+1. **Health Gate Check**:
+   - Agent queries `http://127.0.0.1:8787/api/status` to verify JSON response (`"status": "ok"` or active state).
+2. **Hardware Serial Link Verification**:
+   - Agent verifies that serial communication between the Python daemon and ESP32-S3 hardware is active.
+3. **Web Portal Enrollment**:
+   - Agent opens or provides the link to `http://127.0.0.1:8787/`.
+   - User follows instructions on the Web Portal UI to register fingerprints (e.g. Index finger for `y` + Enter CLI prompt approval).
+4. **Action Binding Test**:
+   - User tests touching the sensor when prompted in terminal sessions (Claude Code, Cursor, terminal prompts) to automatically authorize commands.
+
+---
+
+## 🤖 AI Agent Tool-Specific Usage Guide
 
 ### 1. Claude Code CLI
-- **Usage**: Copy the Universal Prompt and paste it directly into your Claude Code terminal prompt:
+- **Execution**: Paste the Universal Master Setup Prompt directly into your terminal running `claude`:
   ```bash
-  claude "Set up TouchPass on this machine: create venv in software/.venv, install requirements, launch run_portal_win.py or software/app.py on port 8787, and verify USB connection."
+  claude "Set up TouchPass on this machine following the 4-phase setup flow: preflight environment, software/.venv setup, web serial flashing link, and daemon status check."
   ```
-- **Result**: Claude Code will detect your system, execute the setup commands, and confirm daemon status.
+- **Outcome**: Claude Code inspects system tools, sets up Python environments, launches background services, and outputs the flasher and portal URLs.
 
 ### 2. Cursor IDE
-- **Usage**: Open Composer (`Cmd+I` or `Ctrl+I`) or Chat (`Cmd+L` or `Ctrl+L`) in Cursor.
-- **Action**: Paste the Universal Prompt and select **"Agent Mode"**. Cursor will create the virtual environment and start the daemon service.
+- **Execution**: Open **Composer** (`Ctrl+I` / `Cmd+I`) or **Chat** (`Ctrl+L` / `Cmd+L`), switch to **Agent Mode**, and paste the Master Setup Prompt.
+- **Outcome**: Cursor creates the `.venv`, executes package installation terminal tasks, and verifies portal responsiveness.
 
 ### 3. Antigravity AI Agent
-- **Usage**: Invoke the agent in your workspace with the 1-Prompt template.
-- **Action**: Antigravity will automatically analyze `start_touchpass.bat` or `software/app.py`, set up the dependencies, start background tasks, and run verification gates.
+- **Execution**: Provide the Master Prompt in the Antigravity session.
+- **Outcome**: Antigravity runs OS preflight, manages background daemon execution, and confirms system readiness.
 
 ### 4. OpenCode
-- **Usage**: Send the setup prompt in the OpenCode agent window.
-- **Action**: OpenCode will run shell commands to build `.venv`, launch port 8787, and verify connection to your ESP32-S3 fingerprint hardware.
+- **Execution**: Paste prompt into OpenCode agent chat window.
+- **Outcome**: OpenCode executes shell commands to configure Python requirements, start the portal daemon, and verify hardware connectivity.
 
 ---
 
 ## 🔍 Verification & Troubleshooting
 
-After running the 1-prompt setup, verify status via terminal:
+After setup, test daemon status and endpoints directly:
 
 ```bash
-# Check if daemon API is responding
-curl http://127.0.0.1:8787/api/status
+# Check daemon HTTP status endpoint
+curl -s http://127.0.0.1:8787/api/status
 
-# Check connected hardware ports
+# Test local portal engine on Windows without auto-launching browser
 python run_portal_win.py --no-browser
 ```
 
-If the USB hardware is not detected:
-1. Ensure your ESP32-S3 SuperMini is connected via a **USB Data Cable** (not power-only).
-2. If flashing new firmware, use the [🌐 **1-Click Web Flasher**](https://tody-agent.github.io/Touch-Pass/web/flasher/).
-3. For bootloader manual entry, hold **BOOT**, press **RESET**, then release **BOOT**.
+### Common Troubleshooting Steps
+1. **USB Hardware Not Detected**:
+   - Ensure you are using a **USB 2.0/3.0 Data Cable**, not a power-only charging cable.
+   - Verify USB drivers (CP210x or CH340 if using external UART bridge; ESP32-S3 native USB CDC otherwise).
+2. **Web Serial Flashing Fails**:
+   - Use Google Chrome or Microsoft Edge (Web Serial is not supported on Firefox or Safari).
+   - Put ESP32-S3 in bootloader mode: Hold **BOOT** button, press/release **RESET**, release **BOOT**.
+3. **Port 8787 Already in Use**:
+   - Stop any existing TouchPass processes:
+     - **Windows**: `taskkill /F /IM python.exe`
+     - **macOS/Linux**: `pkill -f "software/app.py"`
+4. **Linux Serial Permission Error**:
+   - Run `sudo usermod -a -G dialout $USER` and log out/log in to apply group changes.
