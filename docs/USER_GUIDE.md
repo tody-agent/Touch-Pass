@@ -207,6 +207,8 @@ Before using TouchPass for actions that issue terminal commands or fill credenti
 - [ ] **Keyboard Layout**: Ensure system input language is set to **ABC** or **US English** (Vietnamese Telex/VNI layouts can modify password or macro characters).
 - [ ] **Double-Touch Confirmation**: For non-password control macros, remember to touch the **same enrolled finger twice within 3 seconds**.
 - [ ] **Keychain Storage**: Passwords are securely stored in the native OS Keychain (macOS Keychain / Credential Manager), never in plain text configuration files.
+- [ ] **Session Unlock Limit**: TouchPass supports session unlock for an already logged-in user, but does not support cold boot login or FileVault unlock after logout because the per-user helper and Keychain service are only available after user login.
+- [ ] **Macro Payload Limits**: Custom macros support up to 16 steps and 256 encoded bytes. If a macro profile exceeds 256 bytes, saving fails with a save rejection error.
 
 ---
 
