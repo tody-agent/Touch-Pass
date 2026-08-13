@@ -2192,6 +2192,7 @@ dependencies = [
  "hex",
  "hmac",
  "keyring",
+ "mime_guess",
  "rand",
  "rust-embed",
  "serde",
