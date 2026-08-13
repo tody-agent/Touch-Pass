@@ -2,192 +2,110 @@
 
 🌐 **English** | [🇻🇳 **Tiếng Việt**](README.vi.md)
 
-> Give every finger a superpower.
+> **Give every finger a superpower.**
 
 ![TouchPass Web Portal Hero Showcase](assets/demo/06-touchpass-portal-hero.jpg)
 
-## What is TouchPass?
+---
 
-**TouchPass** is an open-source **USB HID Native + Biometric Authentication Platform** powered by an **ESP32-S3 Super Mini** microcontroller and a **ZW101** optical fingerprint sensor.
+## ⚡ The Story: Why We Built TouchPass
 
-It turns physical fingerprint touches into instant developer shortcuts, terminal command acceptances, password fills, and multi-step custom keyboard macros on your computer (macOS, Windows, or Linux). Direct hardware-level USB HID keyboard emulation means TouchPass works natively as a standard USB keyboard without requiring any custom HID target device drivers.
+Imagine this: You are in the flow state, building a complex feature with AI coding tools like **Claude Code CLI**, **Cursor**, or **Antigravity**.
 
-It combines hardware USB HID keyboard emulation, a local background helper service, and a browser-based management portal into a seamless personal command surface built on the open-source [ZimengXiong/TinyTouch](https://github.com/ZimengXiong/TinyTouch) platform.
+Every 30 seconds, your terminal pauses and asks:
+> *"Allow execution of `git status`? (y/n)"*
+
+You reach for your keyboard, type `y`, hit `Enter`, and return your eyes to the code. Then 20 seconds later: *`Sudo password required`*. You stop, type your complex 20-character password, hoping you didn't mistype a symbol.
+
+**These micro-interruptions kill your deep work flow.**
+
+That’s why we created **TouchPass**. 
+
+What if your desk had a physical biometric touch pad where **each finger is assigned a dedicated superpower**?
+- ☝️ **Index finger**: Instantly accepts AI terminal prompts (`y` + Enter).
+- 🖕 **Middle finger**: Types your developer sudo/SSH password from encrypted OS credential store.
+- 🖐️ **Ring finger**: Triggers your custom multi-key macro sequence.
+
+No app switching. No copy-pasting credentials. No typing errors. Just **one tap**, and your hardware executes the action at lightning speed.
 
 ---
 
-## Key Features
+## 🎯 The Solution: Physical Hardware Meets Biometric Security
 
-- 🚀 **Self-Serve Onboarding Workflow**: Interactive 4-step wizard for immediate USB HID keyboard output testing, physical wiring setup, and initial finger enrollment.
-- 🖐️ **10 Biometric Fingerprint Slots**: Map up to 10 fingers (Slots 01–10) to distinct shortcuts, password fills, or multi-step macros.
-- ⚡ **Live Debug Log Monitor**: Real-time telemetry monitoring with color-coded event log badges (`TOUCH`, `MATCH`, `PW`, `ERR`, `SYS`) for instant hardware diagnostics.
-- ⌨️ **Interactive Keyboard Shortcut Recorder**: Capture physical keystrokes and modifier key bitmasks (`Ctrl`, `Shift`, `Alt/Option`, `Cmd/Meta`) directly in the portal without manual code lookup.
-- 🤖 **AI Developer Tools Shortcut Library**: Built-in 1-click preset library for top AI developer tools including Claude Code CLI, Cursor IDE, Claude Desktop, and Antigravity IDE.
-- 🛡️ **Double-Touch Confirmation Safety**: Password execution runs on a single touch; non-password actions (Accept, Enter, Escape, Custom Macros) require touching the same finger **twice within 3 seconds** to prevent accidental command triggers.
+**TouchPass** is an open-source **USB HID Native + Biometric Authentication Platform** built on an **ESP32-S3 Super Mini** microcontroller and a **ZW101** optical fingerprint sensor.
+
+Unlike software macro apps that require custom background agents on target machines, TouchPass operates at the **hardware level**:
+
+```text
+┌───────────────────────┐             ┌───────────────────────┐             ┌───────────────────────┐
+│  Physical Finger Touch│ ──────────► │  ESP32-S3 Hardware    │ ──────────► │  Computer / Terminal  │
+│  (Biometric ZW101)    │             │  (USB HID Keyboard)   │             │  (Instant Keystrokes) │
+└───────────────────────┘             └───────────────────────┘             └───────────────────────┘
+```
+
+Your computer recognizes TouchPass as a **standard USB physical keyboard**. It types text, sends hotkeys, executes delays, or inputs passwords into whichever window currently has cursor focus — **zero drivers or target software required**.
 
 ---
 
-## See It in Action
+## 🚀 Key Use Cases: How TouchPass Transforms Your Workflow
+
+### 1. 🤖 AI Pair Programming Accelerator
+When working with AI agentic CLI tools (such as Claude Code), approving suggestions requires pressing `y` and `Enter` repeatedly.
 
 ![TouchPass approving a Claude prompt on a Mac mini](assets/demo/02-mac-mini-claude-accept-v2.png)
 
-**Accept** sends only lowercase `y` + Return. Use it only in a focused terminal-style prompt that visibly expects that input; Touch Pass cannot click arbitrary GUI buttons. Accept and other non-password control actions need a deliberate confirmation: touch the same finger twice within three seconds.
+> **How it works:** When your terminal prompt asks for approval, tap your enrolled finger. TouchPass sends a key action that types `y` followed by Enter directly into your terminal-style prompt. Note: TouchPass sends native USB HID keyboard keystrokes to the focused field; it cannot click or press GUI button elements.
 
-### Visual Showcase
+### 2. 🔑 One-Tap Secure Developer Authentication
+Tired of typing complex passwords for `sudo`, SSH keys, database staging environments, or 2FA codes?
+- TouchPass securely retrieves your password from your native OS Credential Store (Windows Credential Manager / macOS Keychain).
+- The payload is encrypted over serial using HMAC-SHA256 and AES-CTR.
+- The hardware inputs the exact password text instantly with zero typing errors.
 
-![TouchPass Hardware Setup](assets/demo/01-hero-showcase-v2.png)
+### 3. ⌨️ Interactive Custom Keystroke & Macro Execution
+Configure up to 10 distinct biometric slots (Slots 01–10) with custom macros:
+- **Key Actions**: Send single key strokes or hotkey combinations like `Enter`, `Escape`, `Ctrl+C`, or `Cmd+K`.
+- **Text Actions**: Type frequently used boilerplate code, git flags, or email templates.
+- **Delay Actions**: Add millisecond delays between keystrokes for multi-step terminal sequences.
 
-![TouchPass Lock Screen Unlock Action](assets/demo/03-login-success.png)
-
-![TouchPass Key Features Breakdown](assets/demo/04-features.png)
-
-*Note: The "secure" language in this overview refers to local encrypted helper and OS Keychain handling. It does **not** mean TouchPass is a hardware secure enclave or that the sensor UART link is unauthenticated.*
-
-![TouchPass Hardware Exploded View](assets/demo/05-exploded-view-v3.png)
-
----
-
-## Quick Start Setup
-
-TouchPass requires a Python 3.9+ runtime to run the local helper service and Web Portal (`http://127.0.0.1:8787/`).
-
-### 1. Environment Setup
-
-Clone the repository and prepare a local Python virtual environment:
-
-#### Windows (PowerShell)
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r software\macos-helper\requirements.txt
-```
-
-#### macOS / Linux (Terminal)
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r software/macos-helper/requirements.txt
-```
-
-### 2. Launching the Web Portal
-
-Start the TouchPass helper service and open the local management portal in your browser:
-
-#### Windows (1-Click Launcher - Recommended)
-> 💡 **1-Click Launch**: On Windows, simply double-click **`start_touchpass.bat`** in the project root directory. It automatically launches the helper service and opens `http://127.0.0.1:8787/` in your default browser!
-
-Or launch manually via PowerShell / Command Prompt:
-```powershell
-python run_portal_win.py
-```
-
-#### macOS / Linux
-```bash
-.venv/bin/python software/macos-helper/tinytouch_helper.py
-```
-
-Navigate to **`http://127.0.0.1:8787/`** in your web browser to open the TouchPass Web Portal.
+### 4. 🛡️ Double-Touch Confirmation Safety Guard
+Worried about accidentally triggering an execution by bumping the sensor? TouchPass includes an intelligent safety engine:
+- **Password actions**: Execute on a single touch.
+- **Non-password actions** (`Enter`, `Escape`, `Accept`, Custom Macros): Require touching the same finger **twice within 3 seconds** to confirm before sending the keystrokes.
 
 ---
 
-## Firmware Compilation & Flashing
+## 💎 Product Values: Why Developers Love TouchPass
 
-The TouchPass firmware runs on an ESP32-S3 board with native USB OTG enabled (`firmware/tiny_touch_keyboard`).
-
-### Option A: Using `arduino-cli` (Command Line)
-
-You can compile and flash the firmware directly using `arduino-cli`:
-
-1. **Install ESP32 Core**:
-   ```bash
-   arduino-cli core update-index
-   arduino-cli core install esp32:esp32
-   ```
-
-2. **Compile Firmware**:
-   ```bash
-   arduino-cli compile --fqbn esp32:esp32:esp32s3:CDCOnBoot=cdc,USBMode=tinyusb firmware/tiny_touch_keyboard
-   ```
-
-3. **Flash Firmware**:
-   - **Windows**:
-     ```powershell
-     arduino-cli upload -p COM3 --fqbn esp32:esp32:esp32s3:CDCOnBoot=cdc,USBMode=tinyusb firmware/tiny_touch_keyboard
-     ```
-   - **macOS / Linux**:
-     ```bash
-     arduino-cli upload -p /dev/cu.usbmodem101 --fqbn esp32:esp32:esp32s3:CDCOnBoot=cdc,USBMode=tinyusb firmware/tiny_touch_keyboard
-     ```
-
-### Option B: Using Arduino IDE GUI
-
-1. Open `firmware/tiny_touch_keyboard/tiny_touch_keyboard.ino` in Arduino IDE 2.x.
-2. Select Board: **ESP32S3 Dev Module**.
-3. Configure settings:
-   - **USB Mode**: `USB-OTG (TinyUSB)`
-   - **USB CDC On Boot**: `Enabled`
-   - **Flash Size**: `4MB`
-   - **PSRAM**: `Disabled`
-4. Click **Verify**, then **Upload**.
-
-For full wiring schematics and initial key pairing configuration, refer to the [TouchPass Build Guide](docs/BUILD_GUIDE.md).
+- 🚀 **Plug & Play Universal Compatibility**: Works on Windows, macOS, and Linux as a standard USB HID keyboard.
+- 🔐 **Zero-Cloud Local Privacy**: All biometrics are matched locally on the ZW101 sensor core. No fingerprints or passwords ever touch the cloud.
+- ⚡ **Real-Time Telemetry & Web Portal**: Includes a sleek Web Portal (`http://127.0.0.1:8787/`) with an interactive **Shortcut Recorder** and **Live Debug Log Monitor**.
+- 🛠️ **Open Source & Hackable**: Built on the open-source platform [ZimengXiong/TinyTouch](https://github.com/ZimengXiong/TinyTouch).
 
 ---
 
-## Directory Structure Overview
+## 🎬 Feature Highlights
 
-```text
-TouchPass/
-├── assets/                  # Documentation images, hero showcases, and diagrams
-├── docs/                    # Project documentation & guides
-│   ├── BUILD_GUIDE.md       # Hardware wiring, parts list, enclosure & firmware build guide (EN)
-│   ├── BUILD_GUIDE.vi.md    # Hardware wiring, parts list, enclosure & firmware build guide (VI)
-│   ├── USER_GUIDE.md        # Comprehensive user manual, AI presets, & portal guide (EN)
-│   └── USER_GUIDE.vi.md     # Comprehensive user manual, AI presets, & portal guide (VI)
-├── firmware/                # Microcontroller firmware source code
-│   ├── tiny_touch_keyboard/ # Primary Arduino firmware sketch for ESP32-S3 + ZW101 HID
-│   └── tiny_touch_smartcard/# ESP-IDF alternative unified factory firmware
-├── hardware/                # Physical enclosure files
-│   └── case/                # 3D printable STL enclosure models (case_top.stl, case_bottom.stl)
-├── packaging/               # Standalone application build scripts
-├── software/                # Local helper & portal backend software
-│   └── macos-helper/        # Python service, Keychain manager, and web portal API
-├── tests/                   # Python automated unit and documentation test suite
-├── run_portal_win.py        # Windows runner script for TouchPass Web Portal
-├── start_touchpass.bat      # 1-click launcher batch script for Windows
-└── README.md                # Project documentation overview
-```
+![TouchPass Feature Overview](assets/demo/04-features.png)
+
+- **Self-Serve 4-Step Onboarding**: Get up and running in 5 minutes with interactive hardware checks.
+- **AI Shortcut Library**: Built-in 1-click presets for Claude Code CLI, Cursor IDE, Claude Desktop, and Antigravity IDE.
+- **Live Event Log Badges**: Monitor real-time hardware telemetry (`TOUCH`, `MATCH`, `PW`, `ERR`, `SYS`).
 
 ---
 
-## Supported Action Types
+## 📖 Deep-Dive Guides & Documentation
 
-TouchPass natively supports standard USB HID keyboard actions:
+Ready to build your own TouchPass or explore advanced configurations? Jump into our step-by-step guides:
 
-| Action Type | Description & Example |
-| :--- | :--- |
-| **Text** | Types a standard ASCII text string into the focused field. |
-| **Key** | Sends specific single keystrokes or hotkeys (e.g. Enter, Escape, `Ctrl+C`). |
-| **Delay** | Pauses execution for a specified millisecond duration within custom macros. |
-| **Password** | Securely fetches credentials from OS Keychain and types them into focused fields. |
+- 🛠️ **[Build TouchPass (English)](docs/BUILD_GUIDE.md)** | **[🇻🇳 Bản Tiếng Việt](docs/BUILD_GUIDE.vi.md)**
+  *Hardware wiring diagram, ZW101 pinout, enclosure assembly, `arduino-cli` firmware compilation, and 1-click Windows launcher.*
 
----
-
-## Security & Safety
-
-- **Focused Input Safety**: TouchPass acts as a standard USB HID keyboard. Keystrokes are typed directly into whichever application window currently has cursor focus. Always check focused cursor position before placing a finger on the sensor ring.
-- **Unauthenticated UART Hardware Link**: The physical UART communication link between the ZW101 fingerprint sensor and the ESP32-S3 microcontroller is unauthenticated. Ensure physical access to the device hardware is controlled.
-- **Keychain Storage**: Passwords are securely stored in the native operating system Keychain (macOS Keychain / Windows Credential Manager) and encrypted over serial.
+- 📖 **[User Guide & AI Presets (English)](docs/USER_GUIDE.md)** | **[🇻🇳 Bản Tiếng Việt](docs/USER_GUIDE.vi.md)**
+  *Fingerprint enrollment, interactive shortcut recorder, double-touch safety rules, OS credential storage, and troubleshooting.*
 
 ---
 
-## Documentation & Guides
+## ⚖️ License & Acknowledgments
 
-- 🛠️ [Build TouchPass (EN)](docs/BUILD_GUIDE.md) | [🇻🇳 Tiếng Việt](docs/BUILD_GUIDE.vi.md) — Hardware parts, wiring diagram, soldering, and firmware setup.
-- 📖 [Use TouchPass (EN)](docs/USER_GUIDE.md) | [🇻🇳 Tiếng Việt](docs/USER_GUIDE.vi.md) — Complete user guide, fingerprint enrollment, shortcut recorder, and AI tool presets.
-
----
-
-## Built on TinyTouch
-
-TouchPass is built on [ZimengXiong/TinyTouch](https://github.com/ZimengXiong/TinyTouch), the open-source foundation for fingerprint biometric processing and USB HID emulation. If TinyTouch helps your workflow, consider supporting the upstream project!
+TouchPass is open-source software licensed under the MIT License. Built with ❤️ upon the foundational architecture of [ZimengXiong/TinyTouch](https://github.com/ZimengXiong/TinyTouch).
