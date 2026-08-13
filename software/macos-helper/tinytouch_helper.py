@@ -664,10 +664,7 @@ def portal_serial_worker(
                     if len(parts) >= 4 and parts[0] == "ADMIN":
                         kind, jid, slot_str = parts[1].lower(), parts[2], int(parts[3])
                         if kind == "enroll":
-                            time.sleep(0.5)
-                            device.feed_line(f"ADMIN {jid} TOUCH1")
-                            time.sleep(0.8)
-                            device.feed_line(f"ADMIN {jid} STORED")
+                            device.feed_line(f"ADMIN {jid} ERROR no_sensor_detected")
                         elif kind == "delete":
                             device.feed_line(f"ADMIN {jid} DELETED")
                 except queue.Empty:

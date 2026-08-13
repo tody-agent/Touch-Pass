@@ -601,6 +601,19 @@ kbd, .kbd, .shortcut-badge, .key-chip {
   font-size: 2.2rem;
 }
 
+.scanner-icon-box {
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--code-bg);
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 16px var(--accent-light);
+  font-size: 1.6rem;
+  transition: all 0.3s ease;
+}
+
 /* Step-by-Step Enroll Stepper & Finger Badge */
 .finger-badge {
   display: inline-flex;
@@ -850,21 +863,183 @@ dialog.modal-sheet::backdrop {
   user-select: none;
 }
 
-.modal-actions {
+/* Unified TouchPass Button Engine */
+.btn-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-size: 0.86rem;
+  font-weight: 650;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+  outline: none;
+}
+
+.btn-accent {
+  background: var(--accent);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.3);
+}
+
+.btn-accent:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.btn-subtle {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  border: 1px solid var(--card-border);
+}
+
+.btn-subtle:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.btn-danger {
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger:hover {
+  background: rgba(239, 68, 68, 0.22);
+  color: #ffffff;
+}
+
+/* Modal Title Box & Header */
+.modal-title-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap !important;
+  overflow: hidden;
+}
+
+.modal-header-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.modal-header-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Scanner Body */
+.scanner-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 14px 0;
+  width: 100%;
+}
+
+.scanner-prompt {
+  font-weight: 600;
+  text-align: center;
+  margin: 12px 0 10px 0;
+  font-size: 0.92rem;
+  color: var(--text);
+  white-space: nowrap !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.scanner-progress-track {
+  background: var(--code-bg);
+  border-radius: 999px;
+  height: 6px;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--card-border);
+}
+
+.scanner-progress-fill {
+  background: var(--accent);
+  height: 100%;
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+/* Simulation Notice Banner */
+.sim-notice-banner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 24px;
-  padding-top: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
   gap: 12px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap !important;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  color: #f87171;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.modal-actions-right {
+.sim-notice-text {
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  gap: 2px;
+  white-space: nowrap !important;
+  overflow: hidden;
+}
+
+.sim-notice-text span {
+  font-weight: 700;
+  font-size: 0.84rem;
+  color: #ffffff;
+}
+
+.sim-notice-text small {
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+
+/* Modal Footer Alignment */
+.modal-footer {
+  display: flex;
   align-items: center;
+  justify-content: space-between;
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  gap: 12px;
+  flex-wrap: nowrap !important;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.modal-footer-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap !important;
+  margin-left: auto;
+}
+
+.form-error-msg {
+  color: var(--danger);
+  font-size: 0.84rem;
+  margin-top: 8px;
+  min-height: 20px;
 }
 
 /* Buttons & Controls */

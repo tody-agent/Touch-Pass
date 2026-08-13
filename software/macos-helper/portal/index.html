@@ -270,64 +270,60 @@
 
   <!-- Modals -->
 
-  <!-- Enrollment Modal Sheet -->
-  <dialog id="enroll-modal" class="modal-sheet">
+  <!-- Modals -->
+
+  <!-- Enrollment Modal Sheet (Native Apple Touch ID Style) -->
+  <dialog id="enroll-modal" class="modal-sheet" style="max-width: 440px;">
+    <!-- Header -->
     <div class="modal-header">
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <span style="font-size: 1.3rem;">🖐️</span>
-        <div style="display: flex; flex-direction: column; gap: 2px;">
-          <h3 id="enroll-finger-name" style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #ffffff; white-space: nowrap;">Ngón cái trái (Slot 1)</h3>
-          <span style="font-size: 0.78rem; color: var(--muted); white-space: nowrap;" data-i18n="enrollModalTitle">Đăng ký vân tay ZW101</span>
-        </div>
+      <div class="modal-title-box">
+        <span class="modal-header-icon">🖐️</span>
+        <h3 id="enroll-finger-name" class="modal-header-title">Ngón cái trái (Slot 1)</h3>
       </div>
       <button id="btn-close-enroll" class="btn-close" type="button" aria-label="Close">×</button>
     </div>
 
-    <!-- 3-Step Visual Progress Stepper -->
+    <!-- Stepper Progress Bar -->
     <div class="enroll-stepper">
       <div id="step-node-1" class="stepper-step active">① <span data-i18n="enrollStep1">Đặt ngón</span></div>
       <div id="step-node-2" class="stepper-step">② <span data-i18n="enrollStep2">Chạm lần 2</span></div>
       <div id="step-node-3" class="stepper-step">③ <span data-i18n="enrollStep3">Hoàn tất</span></div>
     </div>
 
-    <!-- Concentric Scan Ring Animation -->
-    <div class="pulse-ring-container">
-      <div id="pulse-ring" class="pulse-ring-wrapper">
-        <div class="pulse-ring"></div>
-        <div class="pulse-ring"></div>
-        <div class="pulse-ring"></div>
-      </div>
-      <span class="pulse-ring-icon">👆</span>
-    </div>
-
-    <!-- Status Prompt & Progress Bar -->
-    <p id="enroll-status-text" style="font-weight: 600; text-align: center; margin-bottom: 14px; min-height: 38px; font-size: 0.95rem; line-height: 1.4;" data-i18n="enrollPrompt">Đặt ngón tay vuông góc lên cảm biến ZW101...</p>
-    <div style="background: var(--code-bg); border-radius: 999px; height: 8px; width: 100%; overflow: hidden; margin-bottom: 20px; border: 1px solid var(--card-border);">
-      <div id="enroll-progress-bar" style="background: var(--accent); height: 100%; width: 0%; transition: width 0.3s ease;"></div>
-    </div>
-
-    <!-- Compact Sensor Hardware Alert / Simulation Banner -->
-    <div id="sim-banner" style="display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 14px; padding: 12px 16px; margin-bottom: 20px; font-size: 0.84rem; color: #f87171;">
-      <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
-        <div>
-          <strong style="color: #ffffff; font-size: 0.88rem;">⚠️ Chưa cắm cảm biến ZW101</strong>
-          <div style="font-size: 0.78rem; color: var(--muted); margin-top: 2px;">Nối 4 dây: VCC(3.3V) · GND · TX(GPIO18) · RX(GPIO17)</div>
-        </div>
-        <button id="btn-sim-touch" class="button button-primary" type="button" style="padding: 6px 14px; font-size: 0.82rem; white-space: nowrap;" data-i18n="simBtn">🧪 Mô phỏng Chạm Cảm Biến</button>
+    <!-- Scanner & Status Display -->
+    <div class="scanner-body">
+      <div id="pulse-ring" class="scanner-icon-box">👆</div>
+      <p id="enroll-status-text" class="scanner-prompt" data-i18n="enrollPrompt">Đặt ngón tay vuông góc lên cảm biến ZW101...</p>
+      <div class="scanner-progress-track">
+        <div id="enroll-progress-bar" class="scanner-progress-fill"></div>
       </div>
     </div>
 
-    <div style="display: flex; justify-content: flex-end;">
-      <button id="btn-cancel-enroll" class="button button-secondary" type="button" data-i18n="cancelEnrollBtn">Hủy đăng ký</button>
-      <button id="cancel-job" style="display: none !important;" type="button">Hủy</button>
+    <!-- Hardware Sensor Warning Banner -->
+    <div id="sim-banner" class="sim-notice-banner" style="display: none;">
+      <div class="sim-notice-text">
+        <span>🔴 Chưa đấu nối Cảm biến ZW101</span>
+        <small>Hãy kết nối 4 dây: VCC (3.3V) · GND · TX (GPIO 18) · RX (GPIO 17)</small>
+      </div>
+    </div>
+
+    <!-- Modal Footer Actions (Single Cancel Button) -->
+    <div class="modal-footer">
+      <div class="modal-footer-right">
+        <button id="btn-cancel-enroll" class="btn-pill btn-subtle" type="button" data-i18n="cancelEnrollBtn">Hủy</button>
+      </div>
     </div>
   </dialog>
 
-  <!-- Slot Edit Modal Sheet -->
-  <dialog id="edit-modal" class="modal-sheet">
+  <!-- Slot Edit Modal Sheet (Native Apple Touch ID Style) -->
+  <dialog id="edit-modal" class="modal-sheet" style="max-width: 460px;">
     <form id="edit-form" method="dialog">
+      <!-- Header -->
       <div class="modal-header">
-        <h3 id="dialog-title" class="modal-title" data-i18n="editModalTitle">⚙️ Cấu hình Slot Vân Tay</h3>
+        <div class="modal-title-box">
+          <span class="modal-header-icon">⚙️</span>
+          <h3 id="dialog-title" class="modal-header-title">Cấu hình Slot Vân Tay</h3>
+        </div>
         <button id="btn-close-edit" class="btn-close" type="button" aria-label="Close">×</button>
       </div>
 
@@ -336,7 +332,7 @@
 
       <div class="form-group">
         <label class="form-label" data-i18n="editLabelField">Tên ngón / Chức năng</label>
-        <input id="edit-label" class="form-input" maxlength="64" required autocomplete="off">
+        <input id="edit-label" class="form-input" maxlength="64" required autocomplete="off" placeholder="VD: Ngón cái trái (Sudo)">
         <input id="profile-label" type="hidden">
       </div>
 
@@ -359,22 +355,23 @@
         <span id="secret-hint" class="form-hint" data-i18n="editSecretHint">Lưu an toàn trong macOS Keychain. Để trống để giữ nguyên.</span>
       </div>
 
-      <div class="form-group" style="margin-top: 8px;">
+      <div class="form-group" style="margin-top: 4px;">
         <label class="form-checkbox-label">
           <input type="checkbox" id="edit-confirm">
           <span data-i18n="editConfirmLabel">Chạm kép bảo vệ (Confirm Touch)</span>
         </label>
       </div>
 
-      <p id="form-error" class="error" role="alert" style="color: var(--danger); font-size: 0.85rem; margin-top: 10px;"></p>
+      <p id="form-error" class="form-error-msg" role="alert"></p>
 
-      <div class="modal-actions">
-        <button id="btn-delete-slot-modal" class="button button-danger" type="button" style="font-size: 0.82rem;" data-i18n="resetSlotBtn">🗑️ Reset Slot</button>
-        <div class="modal-actions-right">
-          <button id="btn-cancel-edit" class="button button-secondary" value="cancel" type="button" data-i18n="cancelEditBtn">Hủy</button>
-          <button id="btn-save-slot" class="button button-primary" type="button" data-i18n="saveSlotBtn">Lưu cấu hình</button>
+      <!-- Modal Footer Actions -->
+      <div class="modal-footer">
+        <button id="btn-delete-slot-modal" class="btn-pill btn-danger" type="button" data-i18n="resetSlotBtn">🗑️ Reset Slot</button>
+        <div class="modal-footer-right">
+          <button id="btn-cancel-edit" class="btn-pill btn-subtle" value="cancel" type="button" data-i18n="cancelEditBtn">Hủy</button>
+          <button id="btn-save-slot" class="btn-pill btn-accent" type="button" data-i18n="saveSlotBtn">Lưu cấu hình</button>
         </div>
-        <button id="save-profile" style="display: none;" type="button">Lưu</button>
+        <button id="save-profile" style="display: none !important;" type="button">Lưu</button>
       </div>
     </form>
   </dialog>

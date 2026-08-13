@@ -45,7 +45,7 @@ const TRANSLATIONS = {
     exportLogsBtn: "Export Logs",
     enrollModalTitle: "ZW101 Fingerprint Enrollment",
     enrollPrompt: "Place finger on ZW101 sensor...",
-    cancelEnrollBtn: "Cancel Enrollment",
+    cancelEnrollBtn: "Cancel",
     editModalTitle: "Fingerprint Slot Settings",
     editLabelField: "Finger Name / Label",
     editPresetField: "Action Preset",
@@ -161,7 +161,7 @@ const TRANSLATIONS = {
     exportLogsBtn: "Экспорт логов",
     enrollModalTitle: "Регистрация отпечатка ZW101",
     enrollPrompt: "Поместите палец на датчик ZW101...",
-    cancelEnrollBtn: "Отмена регистрации",
+    cancelEnrollBtn: "Отмена",
     editModalTitle: "Настройка слота отпечатка",
     editLabelField: "Имя пальца / Метка",
     editPresetField: "Пресет действия",
@@ -269,7 +269,7 @@ const TRANSLATIONS = {
     exportLogsBtn: "Xuất log",
     enrollModalTitle: "Đăng ký vân tay ZW101",
     enrollPrompt: "Đặt ngón tay lên cảm biến ZW101...",
-    cancelEnrollBtn: "Hủy đăng ký",
+    cancelEnrollBtn: "Hủy",
     editModalTitle: "Cấu hình Slot Vân Tay",
     editLabelField: "Tên ngón / Chức năng",
     editPresetField: "Hành động (Preset)",
@@ -902,10 +902,12 @@ function renderSlotGrid() {
       <article class="finger-card ${f.enrolled ? 'enrolled' : ''}" data-slot="${f.slot}">
         <div class="slot-number">${f.slot}</div>
         <div class="finger-info">
-          <h4 class="finger-name">${f.label || `Slot ${f.slot}`}</h4>
-          <p class="finger-meta">
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: nowrap;">
+            <h4 class="finger-name">${f.label || `Slot ${f.slot}`}</h4>
             ${f.enrolled ? `<span class="status-pill enrolled">${t('statusEnrolled')}</span>` : `<span class="status-pill unenrolled">${t('statusUnenrolled')}</span>`}
-            ${isSecret ? ` · ${t('keychainLabel')}` : ''} · Action: ${actionLabel}
+          </div>
+          <p class="finger-meta">
+            ${isSecret ? `${t('keychainLabel')} · ` : ''}Action: ${actionLabel}
           </p>
         </div>
         <div class="card-actions">
@@ -958,10 +960,7 @@ function updateEnrollStepUI(phase) {
   if (node3) node3.className = 'stepper-step' + (phase === 3 ? ' active completed' : '');
 }
 
-let simTouchStep = 0;
-
 async function startEnrollment(slot) {
-  simTouchStep = 0;
   state.activeSlot = slot;
 
   // Auto-cancel previous job if active
@@ -977,7 +976,7 @@ async function startEnrollment(slot) {
       showEnrollModal(slot, res.job.id);
       pollEnrollJob(res.job.id, slot);
     } else {
-      showEnrollModal(slot, 'sim-job');
+      showEnrollModal(slot, 'active-enroll');
     }
   } catch (err) {
     const msg = typeof err === 'string' ? err : (err.message || '');
@@ -992,7 +991,7 @@ async function startEnrollment(slot) {
         }
       } catch (e) {}
     }
-    showEnrollModal(slot, 'sim-job');
+    showEnrollModal(slot, 'active-enroll');
   }
 }
 
@@ -1021,35 +1020,6 @@ function showEnrollModal(slot, jobId) {
 
   if (simBanner) {
     simBanner.style.display = (state.device.connected && state.device.sensor === 'ok') ? 'none' : 'block';
-  }
-}
-
-function simulateTouch() {
-  const text = document.querySelector('#enroll-status-text');
-  const bar = document.querySelector('#enroll-progress-bar');
-  const slot = state.activeSlot || 1;
-
-  if (simTouchStep === 0) {
-    simTouchStep = 1;
-    updateEnrollStepUI(2);
-    if (text) text.textContent = `② ${t('enrollStep2Prompt', '✅ Đã nhận diện lần 1! Nhấc ngón tay và chạm lại lần 2...')}`;
-    if (bar) bar.style.width = '65%';
-    showToast('🧪 Touch 1/2 detected in simulation mode', 'info');
-  } else if (simTouchStep === 1) {
-    simTouchStep = 2;
-    updateEnrollStepUI(3);
-    if (text) text.textContent = `③ ${t('enrollStep3Prompt', '🎉 Tuyệt vời! Vân tay đã được lưu trữ an toàn.')}`;
-    if (bar) bar.style.width = '100%';
-    showToast(t('enrollSuccess'), 'success');
-
-    const finger = state.fingers.find(f => f.slot === slot);
-    if (finger) finger.enrolled = true;
-    renderSlotGrid();
-    renderHandMap();
-
-    setTimeout(() => {
-      hideEnrollModal();
-    }, 1400);
   }
 }
 
@@ -1114,8 +1084,18 @@ function pollEnrollJob(jobId, slot) {
         }, 1400);
       } else if (job.state === 'error' || job.state === 'cancelled') {
         clearInterval(state.jobPollTimer);
-        showToast(t('enrollFailed') + (job.error ? `: ${job.error}` : ''), 'error');
-        hideEnrollModal();
+        const text = document.querySelector('#enroll-status-text');
+        const bar = document.querySelector('#enroll-progress-bar');
+        const errDetail = job.error === 'no_sensor_detected'
+          ? '🔴 Chưa đấu nối Cảm biến ZW101! Hãy cắm 4 dây (VCC, GND, TX, RX) trước khi đăng ký.'
+          : (t('enrollFailed') + (job.error ? `: ${job.error}` : ''));
+        
+        if (text) text.innerHTML = `<span style="color: #f87171; font-weight: 600;">${errDetail}</span>`;
+        if (bar) {
+          bar.style.background = '#ef4444';
+          bar.style.width = '100%';
+        }
+        showToast(errDetail, 'error');
       }
     } catch (err) {
       clearInterval(state.jobPollTimer);
@@ -1157,7 +1137,7 @@ function openEditModal(slot) {
 
   const fingerAnatomy = getFingerAnatomicalName(slot);
   if (titleEl) {
-    titleEl.innerHTML = `⚙️ Cấu hình Slot ${slot} <span style="font-weight: 400; color: var(--muted); font-size: 0.9rem;">· ${fingerAnatomy}</span>`;
+    titleEl.textContent = `Cấu hình Slot ${slot} · ${fingerAnatomy}`;
   }
 
   if (inputLabel) {
@@ -1378,9 +1358,6 @@ function initEventListeners() {
 
   const btnCloseEdit = document.querySelector('#btn-close-edit');
   if (btnCloseEdit) btnCloseEdit.addEventListener('click', hideEditModal);
-
-  const btnSimTouch = document.querySelector('#btn-sim-touch');
-  if (btnSimTouch) btnSimTouch.addEventListener('click', simulateTouch);
 
   const formEdit = document.querySelector('#edit-form');
   if (formEdit) formEdit.addEventListener('submit', saveSlotEdit);
