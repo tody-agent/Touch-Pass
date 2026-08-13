@@ -76,6 +76,8 @@ Dành cho người dùng Windows, TouchPass cung cấp script khởi động 1-c
 
 ## 2. TouchPass Platform Overview / Tổng Quan Nền Tảng
 
+![TouchPass Web Portal Giao diện điều khiển UI](../assets/demo/06-touchpass-portal-hero.jpg)
+
 ### English
 TouchPass combines hardware-level USB HID keyboard emulation with biometric fingerprint recognition and a local Web Management Portal. It enables instant triggering of developer shortcuts, password fills, and multi-step custom macros with a touch of a finger.
 
@@ -97,6 +99,8 @@ Tính năng nổi bật:
 ---
 
 ## 3. Step-by-Step Self-Serve Onboarding / Hướng Dẫn Tự Cài Đặt
+
+![TouchPass Hardware Setup](../assets/demo/01-hero-showcase-v2.png)
 
 Follow these 4 steps to set up and test your TouchPass device.
 
@@ -137,6 +141,8 @@ You can test the hardware USB HID keyboard output before wiring or enrolling fin
 ---
 
 ### Step 3: ESP32-S3 & ZW101 Wiring Diagram / Sơ Đồ Đấu Nối Phần Cứng
+
+![TouchPass Hardware Exploded View](../assets/demo/05-exploded-view-v3.png)
 
 Wire the ZW101 fingerprint sensor to the ESP32-S3 board according to the table below.
 
