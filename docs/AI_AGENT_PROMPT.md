@@ -1,14 +1,16 @@
 # 🤖 TouchPass 1-Prompt AI Agent Integration Guide
 
-This guide provides standardized, copy-paste **1-Prompt Setup instructions** for non-technical users leveraging AI coding assistants and CLI agents (**Claude Code**, **Cursor**, **Antigravity**, **OpenCode**).
+🌐 **English** | [🇻🇳 **Tiếng Việt**](AI_AGENT_PROMPT.vi.md)
 
-With a single prompt, an AI agent can inspect your OS environment, set up the Python local helper service, direct Web Serial firmware flashing, and perform post-installation verification and fingerprint enrollment.
+This guide provides a standardized, copy-paste **1-Prompt Setup instructions** for non-technical users leveraging AI coding assistants and CLI agents (**Claude Code**, **Cursor**, **Antigravity**, **OpenCode**, and **ChatGPT CLI**).
+
+With a single prompt, your AI agent autonomously inspects your operating system environment, provisions the Python local helper service (`http://127.0.0.1:8787/`), directs Web Serial firmware flashing, and validates hardware communication and fingerprint enrollment.
 
 ---
 
 ## 📐 1-Prompt Overview & 4-Phase Autonomous Execution Workflow
 
-When an AI agent receives the Master Prompt, it executes a 4-phase workflow to complete setup without manual command-line editing:
+When an AI agent receives the Master Prompt, it executes a 4-phase workflow to complete setup without requiring manual command-line editing from the user:
 
 ```text
 ┌──────────────────────────────────────────────────────────────────────────────┐
@@ -42,7 +44,7 @@ When an AI agent receives the Master Prompt, it executes a 4-phase workflow to c
 
 ### 🌟 Universal Master Setup Prompt (Recommended)
 
-Copy and paste this exact prompt into **Claude Code**, **Cursor**, **Antigravity**, or **OpenCode**:
+Copy and paste this exact prompt into **Claude Code**, **Cursor**, **Antigravity**, **OpenCode**, or **ChatGPT CLI**:
 
 ```text
 Set up TouchPass on this machine for non-technical 1-prompt automated operation:
@@ -66,6 +68,66 @@ Phase 4: Verification & Finger Enrollment
 - Check http://127.0.0.1:8787/api/status to verify the local daemon is running and active.
 - Verify USB serial hardware connection to ESP32-S3.
 - Guide the user on opening http://127.0.0.1:8787/ to enroll their first fingerprint and test the hardware 'y' + Enter keybinding for automated AI CLI prompt approvals.
+```
+
+---
+
+### 🟧 Claude Code CLI Prompt
+
+```text
+Set up TouchPass on this machine using Claude Code CLI:
+1. Perform Environment Preflight: Check OS type, verify Python 3.11+, and list available USB serial ports.
+2. Local Helper Setup: Create software/.venv if missing, run pip install -r software/requirements.txt, and launch the portal daemon in background on http://127.0.0.1:8787/.
+3. Direct user to https://tody-agent.github.io/Touch-Pass/web/flasher/ for 1-click Web Serial flashing on Chrome/Edge.
+4. Verify daemon health at http://127.0.0.1:8787/api/status and report connection status.
+```
+
+---
+
+### 🟦 Cursor IDE Prompt (Agent Mode)
+
+```text
+Set up TouchPass environment in Cursor:
+1. Verify Python 3.11+ is active in terminal.
+2. Initialize software/.venv, install requirements from software/requirements.txt, and start background server at http://127.0.0.1:8787/.
+3. Prompt user to open https://tody-agent.github.io/Touch-Pass/web/flasher/ to flash ESP32-S3 firmware over Web Serial.
+4. Confirm http://127.0.0.1:8787/api/status returns JSON status "ok".
+```
+
+---
+
+### 🟪 Antigravity AI Agent Prompt
+
+```text
+Initialize TouchPass hardware paired helper:
+1. Detect host environment (Windows/macOS/Linux) and Python 3.11+ path.
+2. Set up virtual environment in software/.venv, install dependencies, and launch daemon on port 8787.
+3. Output Web Flasher link https://tody-agent.github.io/Touch-Pass/web/flasher/ with bootloader instructions.
+4. Run health check on http://127.0.0.1:8787/api/status and confirm serial telemetry.
+```
+
+---
+
+### 🟩 OpenCode Agent Prompt
+
+```text
+Set up TouchPass automated pair programming helper:
+1. Perform preflight checks for Python 3.11+ and USB serial permissions.
+2. Build software/.venv environment, install requirements, and execute background daemon software/app.py on http://127.0.0.1:8787/.
+3. Guide user to https://tody-agent.github.io/Touch-Pass/web/flasher/ for browser firmware installation.
+4. Test http://127.0.0.1:8787/api/status endpoint to confirm daemon readiness.
+```
+
+---
+
+### 🟨 ChatGPT CLI Prompt
+
+```text
+Configure TouchPass daemon and firmware flasher flow via ChatGPT CLI:
+1. Verify Python 3.11+ binary environment and serial communication permissions.
+2. Create software/.venv, install dependencies from software/requirements.txt, and run portal daemon at http://127.0.0.1:8787/.
+3. Direct user to open https://tody-agent.github.io/Touch-Pass/web/flasher/ for ESP32-S3 Web Serial flashing.
+4. Perform API health check on http://127.0.0.1:8787/api/status and prompt user for fingerprint enrollment.
 ```
 
 ---
@@ -196,6 +258,10 @@ Here is an explicit breakdown of the actions your AI agent executes automaticall
 ### 4. OpenCode
 - **Execution**: Paste prompt into OpenCode agent chat window.
 - **Outcome**: OpenCode executes shell commands to configure Python requirements, start the portal daemon, and verify hardware connectivity.
+
+### 5. ChatGPT CLI
+- **Execution**: Pass the Master Prompt to ChatGPT CLI interface.
+- **Outcome**: ChatGPT CLI inspects environment, guides local venv provisioning, directs browser Web Serial flashing, and verifies API endpoints.
 
 ---
 

@@ -12,7 +12,7 @@
 [![AI Setup](https://img.shields.io/badge/🤖_1--Prompt-AI_Agent_Setup-purple.svg)](docs/AI_AGENT_PROMPT.md)
 [![Release](https://img.shields.io/badge/Release-v2.0.0-brightgreen.svg)](https://github.com/tody-agent/Touch-Pass/releases/tag/v2.0.0)
 
-🌐 **English** | [🇻🇳 **Tiếng Việt**](README.vi.md) | [📥 **Download TouchPass.exe**](https://github.com/tody-agent/Touch-Pass/releases/download/v2.0.0/TouchPass.exe) | [🌐 **1-Click Web Flasher**](https://tody-agent.github.io/Touch-Pass/web/flasher/) | [🤖 **1-Prompt AI Agent Setup**](docs/AI_AGENT_PROMPT.md)
+🌐 **English** | [🇻🇳 **Tiếng Việt**](README.vi.md) | [📥 **Download TouchPass.exe**](https://github.com/tody-agent/Touch-Pass/releases/download/v2.0.0/TouchPass.exe) | [🌐 **1-Click Web Flasher**](https://tody-agent.github.io/Touch-Pass/web/flasher/) | [🤖 **1-Prompt AI Agent Setup (EN)**](docs/AI_AGENT_PROMPT.md) | [🇻🇳 **(VI)**](docs/AI_AGENT_PROMPT.vi.md)
 
 <br />
 
@@ -85,7 +85,7 @@ Swapping context, repositioning your hands, typing `y` + `Enter`, or mistyping a
 Flash ESP32-S3 firmware in 1 click at [🌐 **tody-agent.github.io/Touch-Pass/web/flasher/**](https://tody-agent.github.io/Touch-Pass/web/flasher/).
 
 ### 🤖 1-Prompt AI Agent Setup
-Pass the standardized setup prompt to your AI coding assistant. See [🤖 **1-Prompt AI Agent Integration Guide**](docs/AI_AGENT_PROMPT.md).
+Pass the standardized setup prompt to your AI coding assistant. See [🤖 **1-Prompt AI Agent Integration Guide**](docs/AI_AGENT_PROMPT.md) | [🇻🇳 **Bản Tiếng Việt**](docs/AI_AGENT_PROMPT.vi.md).
 
 ### Windows
 1. Download **[TouchPass.exe](https://github.com/tody-agent/Touch-Pass/releases/download/v2.0.0/TouchPass.exe)** or clone the repository:
@@ -120,8 +120,8 @@ Pass the standardized setup prompt to your AI coding assistant. See [🤖 **1-Pr
 
 ## 📖 Deep-Dive Guides & Documentation
 
-- 🤖 **[1-Prompt AI Agent Integration Guide](docs/AI_AGENT_PROMPT.md)**
-  *Automated 1-prompt setup instructions for Claude Code, Cursor, Antigravity, and OpenCode across Windows, macOS, and Linux.*
+- 🤖 **[1-Prompt AI Agent Integration Guide](docs/AI_AGENT_PROMPT.md)** | **[🇻🇳 Bản Tiếng Việt](docs/AI_AGENT_PROMPT.vi.md)**
+  *Automated 1-prompt setup instructions for Claude Code, Cursor, Antigravity, OpenCode, and ChatGPT CLI across Windows, macOS, and Linux.*
 
 - 🛠️ **[Hardware Build & Wiring Guide](docs/BUILD_GUIDE.md)** | **[🇻🇳 Bản Tiếng Việt](docs/BUILD_GUIDE.vi.md)**
   *ESP32-S3 Super Mini, ZW101 pinout, enclosure assembly, `arduino-cli` firmware compilation, unauthenticated UART security model, and 1-click Windows launcher setup.*
