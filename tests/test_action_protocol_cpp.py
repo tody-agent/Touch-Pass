@@ -9,8 +9,14 @@ ROOT = Path(__file__).resolve().parents[1]
 FIRMWARE = ROOT / "firmware" / "tiny_touch_keyboard"
 
 
+import shutil
+
+
 class ActionProtocolCppTests(unittest.TestCase):
     def test_action_decoder_executes_valid_steps_and_rejects_truncation(self):
+        compiler = shutil.which("c++") or shutil.which("g++") or shutil.which("clang++")
+        if not compiler:
+            self.skipTest("No C++ compiler found in PATH")
         source = textwrap.dedent(
             r"""
             #include <cassert>
@@ -52,7 +58,7 @@ class ActionProtocolCppTests(unittest.TestCase):
             binary = directory / "harness"
             harness.write_text(source, encoding="utf-8")
             compile_result = subprocess.run(
-                ["c++", "-std=c++17", "-Wall", "-Wextra", "-Werror", "-I", str(FIRMWARE), str(harness), "-o", str(binary)],
+                [compiler, "-std=c++17", "-Wall", "-Wextra", "-Werror", "-I", str(FIRMWARE), str(harness), "-o", str(binary)],
                 text=True,
                 capture_output=True,
             )
