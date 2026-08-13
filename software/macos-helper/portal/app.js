@@ -386,9 +386,15 @@ function initEventListeners() {
       switchTab(btn.dataset.tab);
     });
   });
+
+  // Bind HID test sandbox button (#btn-test-hid)
+  const btnTestHid = document.querySelector('#btn-test-hid');
+  if (btnTestHid) {
+    btnTestHid.addEventListener('click', triggerTestHID);
+  }
 }
 
-// 7. HELPER UTILITIES
+// 7. HELPER UTILITIES & STEP 1 LOGIC
 let toastTimer = null;
 function showToast(message, type = 'info') {
   const toast = document.querySelector('#toast');
@@ -403,56 +409,99 @@ function showToast(message, type = 'info') {
   }, 3000);
 }
 
-// Device Status Badge Updates
-function updateStatusBadge(device) {
+// Step 1: USB HID Test Sandbox Dispatcher
+async function triggerTestHID() {
+  // Visual flash animation on key chips (.key-chip)
+  const chips = document.querySelectorAll('.key-chip, .key-combo kbd');
+  chips.forEach(chip => chip.classList.add('flash'));
+  setTimeout(() => {
+    chips.forEach(chip => chip.classList.remove('flash'));
+  }, 400);
+
+  // Focus #hid-test-input automatically
+  const input = document.querySelector('#hid-test-input');
+  if (input) {
+    input.focus();
+  }
+
+  try {
+    const res = await apiCall('/api/test', 'POST', { action: 'type_test' });
+    showToast(t('testSuccess') || 'USB HID keystroke test sent!', 'success');
+    return res;
+  } catch (err) {
+    const msg = err.message || err.toString();
+    showToast((t('testFailed') || 'HID test failed: ') + msg, 'error');
+    throw err;
+  }
+}
+
+// Connection Status & Telemetry Updates
+function updateDeviceTelemetry(device) {
+  if (!device) return;
   state.device = device;
+
   const badge = document.querySelector('#device-status');
   const text = document.querySelector('#device-status-text');
+  const telemetryDevice = document.querySelector('#telemetry-device');
   const telemetryStatus = document.querySelector('#telemetry-status');
   const telemetryPort = document.querySelector('#telemetry-port');
   const telemetrySensor = document.querySelector('#telemetry-sensor');
 
-  if (!badge || !text) return;
-
+  const isConnected = !!device.connected;
   const isHid = device.port?.includes('USB HID');
 
-  if (device.connected && device.sensor === 'ok') {
-    badge.className = 'status-pill status-online';
-    text.textContent = isHid
-      ? `${t('statusConnected')} (USB HID · ${device.port})`
-      : `${t('statusConnected')} (${device.port || 'ESP32-S3'})`;
-  } else if (device.connected) {
-    badge.className = 'status-pill status-warning';
-    text.textContent = `🟡 ESP32 Connected (ZW101 ${device.sensor})`;
-  } else {
-    badge.className = 'status-pill status-offline';
-    text.textContent = t('statusDisconnected');
+  if (badge) {
+    badge.className = `status-pill ${isConnected ? 'status-online' : 'status-offline'}`;
   }
 
-  if (telemetryStatus) {
-    telemetryStatus.textContent = device.connected ? (isHid ? 'Connected (USB HID)' : 'Connected') : 'Offline';
+  if (text) {
+    if (isConnected) {
+      text.textContent = isHid
+        ? `${t('statusConnected')} (USB HID · ${device.port})`
+        : `${t('statusConnected')} (${device.port || 'ESP32-S3'})`;
+    } else {
+      text.textContent = t('statusDisconnected');
+    }
   }
-  if (telemetryPort) {
-    telemetryPort.textContent = device.port || 'N/A';
-  }
-  if (telemetrySensor) {
-    telemetrySensor.textContent = device.sensor === 'ok' ? 'OK (ZW101)' : (device.sensor || 'Offline');
-  }
+
+  const deviceVal = isConnected ? (isHid ? 'Connected (USB HID)' : 'Connected (ESP32-S3)') : 'Offline';
+  const sensorVal = device.sensor === 'ok' ? 'OK (ZW101)' : (device.sensor || 'Offline');
+  const portVal = device.port || 'N/A';
+
+  if (telemetryDevice) telemetryDevice.textContent = deviceVal;
+  if (telemetryStatus && telemetryStatus !== telemetryDevice) telemetryStatus.textContent = deviceVal;
+  if (telemetryPort) telemetryPort.textContent = portVal;
+  if (telemetrySensor) telemetrySensor.textContent = sensorVal;
 }
 
-async function fetchStatus() {
+// Backward compatibility alias wrapper
+function updateStatusBadge(device) {
+  return updateDeviceTelemetry(device);
+}
+
+// Status Polling Loop (GET /api/status every 2 seconds)
+async function pollStatus() {
   try {
     const data = await apiCall('/api/status');
-    if (data.csrf_token) {
-      state.csrfToken = data.csrf_token;
-    }
-    if (data.device) {
-      updateStatusBadge(data.device);
+    if (data) {
+      if (data.csrf_token) {
+        state.csrfToken = data.csrf_token;
+      }
+      if (data.device) {
+        state.device = data.device;
+        updateDeviceTelemetry(state.device);
+      }
     }
     return data;
   } catch (err) {
-    updateStatusBadge({ connected: false, sensor: 'offline', port: null });
+    state.device = { connected: false, sensor: 'offline', port: null };
+    updateDeviceTelemetry(state.device);
   }
+}
+
+// Backward compatibility alias wrapper
+async function fetchStatus() {
+  return pollStatus();
 }
 
 // Initial Boot Scaffolding
@@ -461,8 +510,8 @@ document.addEventListener('DOMContentLoaded', () => {
   setLanguage(state.lang);
   const savedTab = localStorage.getItem('touchpass_active_tab') || 'step1';
   switchTab(savedTab);
-  fetchStatus();
-  setInterval(fetchStatus, 3000);
+  pollStatus();
+  setInterval(pollStatus, 2000);
 });
 
 // Export globally for browser console debugging / window scope
@@ -474,5 +523,9 @@ window.TouchPass = {
   apiCall,
   switchTab,
   showToast,
+  triggerTestHID,
+  updateDeviceTelemetry,
+  updateStatusBadge,
+  pollStatus,
   fetchStatus
 };

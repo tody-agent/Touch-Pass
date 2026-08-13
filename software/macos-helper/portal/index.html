@@ -37,10 +37,22 @@
   <main class="container">
     <!-- 4-Step Segmented Nav Tabs -->
     <nav class="step-tabs" aria-label="TouchPass Flow Steps">
-      <button class="step-tab-btn active" data-tab="step1" type="button" data-i18n="step1Title">🚀 1. Setup & Flash</button>
-      <button class="step-tab-btn" data-tab="step2" type="button" data-i18n="step2Title">📋 2. Presets</button>
-      <button class="step-tab-btn" data-tab="step3" type="button" data-i18n="step3Title">🖐️ 3. Biometric Studio</button>
-      <button class="step-tab-btn" data-tab="step4" type="button" data-i18n="step4Title">⚡ 4. Live Activity</button>
+      <button class="step-tab-btn active" data-tab="step1" type="button">
+        <span class="tab-label-full" data-i18n="step1Title">🚀 1. Setup & Flash</span>
+        <span class="tab-label-short">🚀 1. Setup</span>
+      </button>
+      <button class="step-tab-btn" data-tab="step2" type="button">
+        <span class="tab-label-full" data-i18n="step2Title">📋 2. Presets</span>
+        <span class="tab-label-short">📋 2. Presets</span>
+      </button>
+      <button class="step-tab-btn" data-tab="step3" type="button">
+        <span class="tab-label-full" data-i18n="step3Title">🖐️ 3. Biometric Studio</span>
+        <span class="tab-label-short">🖐️ 3. Studio</span>
+      </button>
+      <button class="step-tab-btn" data-tab="step4" type="button">
+        <span class="tab-label-full" data-i18n="step4Title">⚡ 4. Live Activity</span>
+        <span class="tab-label-short">⚡ 4. Activity</span>
+      </button>
     </nav>
 
     <!-- Step 1 Panel: Setup, Flasher & USB HID Sandbox -->
@@ -58,7 +70,7 @@
           <div class="telemetry-panel" style="margin-top: 14px;">
             <div class="telemetry-card">
               <span class="telemetry-label">Thiết bị</span>
-              <span id="telemetry-status" class="telemetry-value">--</span>
+              <span id="telemetry-device" class="telemetry-value">--</span>
             </div>
             <div class="telemetry-card">
               <span class="telemetry-label">Cổng Serial</span>
@@ -87,7 +99,7 @@
         <p class="section-desc" data-i18n="hidSandboxDesc">Nhấp vào ô văn bản bên dưới và nhấn nút Thử Gõ để kiểm tra tính năng giả lập phím gõ phần cứng.</p>
         <div class="sandbox-box">
           <div class="key-combo" style="margin-bottom: 14px;">
-            <kbd>Cmd ⌘</kbd><span class="plus">+</span><kbd>Shift ⇧</kbd><span class="plus">+</span><kbd>Enter ↵</kbd>
+            <kbd class="key-chip">Cmd ⌘</kbd><span class="plus">+</span><kbd class="key-chip">Shift ⇧</kbd><span class="plus">+</span><kbd class="key-chip">Enter ↵</kbd>
           </div>
           <div style="display: flex; gap: 12px; max-width: 500px; margin: 0 auto;">
             <input type="text" id="hid-test-input" placeholder="Thử nghiệm nhập ký tự tại đây..." autocomplete="off" data-i18n-placeholder="hidTestPlaceholder">
@@ -99,7 +111,8 @@
       <!-- Wiring Guide Table -->
       <article class="card" style="margin-top: 24px;">
         <h3 data-i18n="wiringTitle">Sơ đồ đấu nối phần cứng ZW101</h3>
-        <table class="wiring-table" style="width: 100%; border-collapse: collapse; margin-top: 14px;">
+        <div class="table-responsive">
+          <table class="wiring-table" style="width: 100%; border-collapse: collapse; margin-top: 14px;">
           <thead>
             <tr style="border-bottom: 1px solid var(--card-border); text-align: left;">
               <th style="padding: 10px;">Cảm biến ZW101</th>
@@ -128,13 +141,14 @@
               <td style="padding: 10px;"><kbd>TX (GPIO 17)</kbd></td>
               <td style="padding: 10px;">Nhận dữ liệu Serial</td>
             </tr>
-            <tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
               <td style="padding: 10px;">Touch / IRQ</td>
               <td style="padding: 10px;"><kbd>GPIO 15</kbd></td>
-              <td style="padding: 10px;">Tín hiệu ngắt cảm ứng ngón tay</td>
+              <td style="padding: 10px;">Tín hiệu ngắt cảm ứng vân tay</td>
             </tr>
           </tbody>
         </table>
+        </div>
       </article>
     </section>
 

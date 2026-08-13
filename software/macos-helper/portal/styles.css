@@ -335,7 +335,7 @@ h1, h2, h3, p {
   background: rgba(34, 197, 94, 0.04);
 }
 
-kbd, .kbd, .shortcut-badge {
+kbd, .kbd, .shortcut-badge, .key-chip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -351,6 +351,14 @@ kbd, .kbd, .shortcut-badge {
   font-weight: 600;
   color: var(--text);
   line-height: 1;
+  transition: all 0.2s ease;
+}
+
+.key-chip.flash, kbd.flash {
+  background: var(--accent) !important;
+  color: #0d1310 !important;
+  box-shadow: 0 0 14px var(--accent) !important;
+  transform: scale(1.1);
 }
 
 .key-combo {
