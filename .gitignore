@@ -21,5 +21,8 @@ firmware/tiny_touch_smartcard/sdkconfig.old
 build/
 build/distribution/
 dist/
+target/
+software/rust-helper/target/
+
 
 
