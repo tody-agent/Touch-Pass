@@ -77,6 +77,42 @@ body {
   color: #ffffff;
 }
 
+.nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lang-selector-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+}
+
+.lang-icon {
+  font-size: 14px;
+}
+
+#lang-select {
+  background: transparent;
+  color: var(--text);
+  border: none;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+}
+
+#lang-select option {
+  background: var(--card);
+  color: var(--text);
+}
+
 .nav-badges {
   display: flex;
   gap: 8px;

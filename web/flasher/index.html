@@ -21,17 +21,28 @@
         <span class="logo-icon">⚡</span>
         <span class="brand-title">TouchPass</span>
       </div>
-      <div class="nav-badges">
-        <span class="badge badge-accent">Web Serial Flasher</span>
-        <span class="badge">ESP32-S3 HID</span>
+      <div class="nav-controls">
+        <div class="lang-selector-box">
+          <span class="lang-icon">🌐</span>
+          <select id="lang-select" aria-label="Select Language">
+            <option value="en">English (EN)</option>
+            <option value="vi">Tiếng Việt (VI)</option>
+            <option value="zh">中文 (ZH)</option>
+            <option value="ru">Русский (RU)</option>
+          </select>
+        </div>
+        <div class="nav-badges">
+          <span class="badge badge-accent" data-i18n="navWebSerial">Web Serial Flasher</span>
+          <span class="badge">ESP32-S3 HID</span>
+        </div>
       </div>
     </header>
 
     <!-- Hero Section -->
     <section class="hero">
-      <div class="hero-badge">AI HARDWARE CONFIRMATION PORTAL</div>
-      <h1 class="hero-title">TouchPass — Give every finger a superpower.</h1>
-      <p class="hero-subtitle">
+      <div class="hero-badge" data-i18n="heroBadge">AI HARDWARE CONFIRMATION PORTAL</div>
+      <h1 class="hero-title" data-i18n="heroTitle">TouchPass — Give every finger a superpower.</h1>
+      <p class="hero-subtitle" data-i18n="heroSubtitle">
         1-Click Hardware Web Flasher &amp; Setup Portal for AI Developers &amp; Non-Tech Users.
       </p>
     </section>
@@ -39,9 +50,9 @@
     <!-- Interactive Feature Explanation Section -->
     <section class="card feature-card">
       <h2 class="section-title">
-        <span class="icon">👆</span> How TouchPass Works
+        <span class="icon">👆</span> <span data-i18n="howItWorks">How TouchPass Works</span>
       </h2>
-      <p class="feature-desc">
+      <p class="feature-desc" data-i18n="featureDesc">
         A single touch on your fingerprint hardware sends native USB HID keystrokes (<kbd>y</kbd> + <kbd>Enter</kbd>) instantly to confirm AI agent actions across your favorite development environments.
       </p>
       
@@ -68,24 +79,24 @@
         <div class="diagram-step">
           <div class="step-num">1</div>
           <div class="step-content">
-            <strong>Touch Sensor</strong>
-            <span>Biometric scan via ZW111 / ZW101 sensor on ESP32-S3</span>
+            <strong data-i18n="diagramStep1Title">Touch Sensor</strong>
+            <span data-i18n="diagramStep1Desc">Biometric scan via ZW111 / ZW101 sensor on ESP32-S3</span>
           </div>
         </div>
         <div class="diagram-arrow">➔</div>
         <div class="diagram-step">
           <div class="step-num">2</div>
           <div class="step-content">
-            <strong>Hardware USB HID</strong>
-            <span>Emulates physical keyboard without driver installation</span>
+            <strong data-i18n="diagramStep2Title">Hardware USB HID</strong>
+            <span data-i18n="diagramStep2Desc">Emulates physical keyboard without driver installation</span>
           </div>
         </div>
         <div class="diagram-arrow">➔</div>
         <div class="diagram-step">
           <div class="step-num">3</div>
           <div class="step-content">
-            <strong>Auto Confirmation</strong>
-            <span>Sends <code class="key-combo">y + Enter</code> to grant AI execution</span>
+            <strong data-i18n="diagramStep3Title">Auto Confirmation</strong>
+            <span data-i18n="diagramStep3Desc">Sends <code class="key-combo">y + Enter</code> to grant AI execution</span>
           </div>
         </div>
       </div>
@@ -95,37 +106,37 @@
     <section class="card flasher-card">
       <div class="card-header">
         <h2 class="section-title">
-          <span class="icon">🔌</span> 1-Click Hardware Web Flasher
+          <span class="icon">🔌</span> <span data-i18n="flasherTitle">1-Click Hardware Web Flasher</span>
         </h2>
-        <span class="tag">Browser Native</span>
+        <span class="tag" data-i18n="tagBrowserNative">Browser Native</span>
       </div>
       
       <ol class="flasher-steps">
         <li>
           <div class="step-icon">1</div>
           <div class="step-text">
-            <strong>Connect USB Cable</strong>
-            <small>Plug your ESP32-S3 board into your computer with a USB data cable.</small>
+            <strong data-i18n="step1Title">Connect USB Cable</strong>
+            <small data-i18n="step1Desc">Plug your ESP32-S3 board into your computer with a USB data cable.</small>
           </div>
         </li>
         <li>
           <div class="step-icon">2</div>
           <div class="step-text">
-            <strong>Choose Serial Port</strong>
-            <small>Click below and select your board from the browser serial prompt.</small>
+            <strong data-i18n="step2Title">Choose Serial Port</strong>
+            <small data-i18n="step2Desc">Click below and select your board from the browser serial prompt.</small>
           </div>
         </li>
         <li>
           <div class="step-icon">3</div>
           <div class="step-text">
-            <strong>Automatic Flashing</strong>
-            <small>Firmware is flashed securely in seconds over WebSerial.</small>
+            <strong data-i18n="step3Title">Automatic Flashing</strong>
+            <small data-i18n="step3Desc">Firmware is flashed securely in seconds over WebSerial.</small>
           </div>
         </li>
       </ol>
 
       <div class="flasher-action-box">
-        <div id="message" class="message" role="status">Ready. Nothing is written until you approve a serial port.</div>
+        <div id="message" class="message" role="status" data-i18n="messageReady">Ready. Nothing is written until you approve a serial port.</div>
         
         <div id="progress-wrap" class="progress-wrap" hidden>
           <div class="progress-header">
@@ -135,19 +146,19 @@
           <progress id="progress" max="100" value="0">0%</progress>
         </div>
 
-        <button id="flash" type="button">Connect &amp; Flash Firmware</button>
+        <button id="flash" type="button" data-i18n="flashButton">Connect &amp; Flash Firmware</button>
         <p id="browser-note" class="note"></p>
       </div>
 
       <!-- Compatibility & Recovery instructions -->
       <div class="hardware-hints">
         <div class="hint-item">
-          <strong>Compatible Boards</strong>
+          <strong data-i18n="compatBoards">Compatible Boards</strong>
           <span>ESP32-S3 SuperMini · Seeed XIAO ESP32-S3</span>
         </div>
         <div class="hint-item">
-          <strong>Board Not Found / Connection Issues?</strong>
-          <span>Hold <kbd>BOOT</kbd> button, tap <kbd>RESET</kbd>, then release <kbd>BOOT</kbd> button and try again.</span>
+          <strong data-i18n="connIssues">Board Not Found / Connection Issues?</strong>
+          <span data-i18n="connIssuesDesc">Hold <kbd>BOOT</kbd> button, tap <kbd>RESET</kbd>, then release <kbd>BOOT</kbd> button and try again.</span>
         </div>
       </div>
     </section>
@@ -155,9 +166,9 @@
     <!-- Desktop Software Downloads Section -->
     <section class="card download-card">
       <h2 class="section-title">
-        <span class="icon">💻</span> Desktop Companion Downloads
+        <span class="icon">💻</span> <span data-i18n="downloadsTitle">Desktop Companion Downloads</span>
       </h2>
-      <p class="section-desc">
+      <p class="section-desc" data-i18n="downloadsDesc">
         Download optional desktop tools and background daemons for advanced keybinding management and continuous monitoring.
       </p>
 
@@ -172,10 +183,10 @@
           </div>
           <div class="btn-group">
             <a href="https://github.com/tody-agent/Touch-Pass/releases/latest/download/start_touchpass.bat" class="download-btn" download>
-              <span>Download <code>start_touchpass.bat</code></span>
+              <span data-i18n="downloadWinBtn1">Download <code>start_touchpass.bat</code></span>
             </a>
             <a href="https://github.com/tody-agent/Touch-Pass/releases/latest/download/TouchPass.exe" class="download-btn btn-secondary" download>
-              <span>Download <code>TouchPass.exe</code></span>
+              <span data-i18n="downloadWinBtn2">Download <code>TouchPass.exe</code></span>
             </a>
           </div>
         </div>
@@ -190,7 +201,7 @@
           </div>
           <div class="btn-group">
             <a href="https://github.com/tody-agent/Touch-Pass/releases/latest/download/install.sh" class="download-btn" download>
-              <span>Download <code>install.sh</code></span>
+              <span data-i18n="downloadMacBtn">Download <code>install.sh</code></span>
             </a>
           </div>
         </div>
@@ -201,19 +212,19 @@
     <section class="card prompt-card">
       <div class="card-header">
         <h2 class="section-title">
-          <span class="icon">🤖</span> AI Agent 1-Prompt Setup
+          <span class="icon">🤖</span> <span data-i18n="promptTitle">AI Agent 1-Prompt Setup</span>
         </h2>
-        <span class="tag">Automated Setup</span>
+        <span class="tag" data-i18n="promptTag">Automated Setup</span>
       </div>
-      <p class="section-desc">
+      <p class="section-desc" data-i18n="promptDesc">
         Copy this prompt into your AI coding assistant (Claude Code, Cursor, Antigravity, OpenCode) to automatically set up TouchPass on your machine.
       </p>
 
       <div class="prompt-box">
-        <pre><code id="ai-prompt-text">Set up TouchPass on this system: install the daemon/CLI, register auto-start, verify USB HID keybinding for 'y'+'Enter' confirmation, and test hardware connection.</code></pre>
+        <pre><code id="ai-prompt-text" data-i18n="promptText">Set up TouchPass on this system: install the daemon/CLI, register auto-start, verify USB HID keybinding for 'y'+'Enter' confirmation, and test hardware connection.</code></pre>
         <button id="ai-prompt-copy" type="button" class="btn-copy">
           <span class="copy-icon">📋</span>
-          <span class="copy-text">Copy Prompt</span>
+          <span class="copy-text" data-i18n="copyPrompt">Copy Prompt</span>
         </button>
       </div>
     </section>
@@ -221,40 +232,17 @@
     <!-- Technical Log Drawer -->
     <details class="log-panel card">
       <summary>
-        <span class="icon">🔍</span> Technical Flashing Log
+        <span class="icon">🔍</span> <span data-i18n="techLog">Technical Flashing Log</span>
       </summary>
-      <pre id="log">No device activity yet.</pre>
+      <pre id="log" data-i18n="noActivity">No device activity yet.</pre>
     </details>
 
     <!-- Footer -->
     <footer>
-      <p>TouchPass · Local USB HID Security &amp; AI Workflow Acceleration · No cloud data uploaded</p>
+      <p data-i18n="footerText">TouchPass · Local USB HID Security &amp; AI Workflow Acceleration · No cloud data uploaded</p>
     </footer>
   </div>
 
   <script type="module" src="app.js"></script>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const copyBtn = document.querySelector('#ai-prompt-copy');
-      const promptText = document.querySelector('#ai-prompt-text');
-      
-      if (copyBtn && promptText) {
-        copyBtn.addEventListener('click', async () => {
-          try {
-            await navigator.clipboard.writeText(promptText.textContent.trim());
-            const origHTML = copyBtn.innerHTML;
-            copyBtn.classList.add('copied');
-            copyBtn.innerHTML = '<span class="copy-icon">✅</span><span class="copy-text">Copied!</span>';
-            setTimeout(() => {
-              copyBtn.classList.remove('copied');
-              copyBtn.innerHTML = origHTML;
-            }, 2000);
-          } catch (err) {
-            console.error('Failed to copy text: ', err);
-          }
-        });
-      }
-    });
-  </script>
 </body>
 </html>
