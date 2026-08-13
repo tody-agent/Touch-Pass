@@ -77,56 +77,45 @@ body {
   color: #ffffff;
 }
 
-.nav-controls {
+.lang-picker {
   display: flex;
   align-items: center;
-  gap: 12px;
-}
-
-.lang-selector-box {
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  gap: 4px;
   background: var(--card);
   border: 1px solid var(--card-border);
-  padding: 4px 8px;
+  padding: 4px;
   border-radius: var(--radius-sm);
 }
 
-.lang-icon {
-  font-size: 14px;
-}
-
-#lang-select {
+.lang-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   background: transparent;
-  color: var(--text);
   border: none;
+  color: var(--muted);
   font-family: var(--font-sans);
   font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  outline: none;
-}
-
-#lang-select option {
-  background: var(--card);
-  color: var(--text);
-}
-
-.nav-badges {
-  display: flex;
-  gap: 8px;
-}
-
-.badge {
-  font-family: var(--font-mono);
-  font-size: 12px;
   font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 20px;
-  background: rgba(148, 163, 184, 0.1);
-  color: var(--muted);
-  border: 1px solid rgba(148, 163, 184, 0.2);
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lang-btn:hover {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.lang-btn.active {
+  color: #ffffff;
+  background: var(--card-border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.lang-btn .flag {
+  font-size: 14px;
 }
 
 .badge-accent {

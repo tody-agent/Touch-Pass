@@ -242,10 +242,13 @@ function setLanguage(lang) {
     }
   });
 
-  const langSelect = document.querySelector("#lang-select");
-  if (langSelect && langSelect.value !== lang) {
-    langSelect.value = lang;
-  }
+  document.querySelectorAll(".lang-btn").forEach((btn) => {
+    if (btn.getAttribute("data-lang") === lang) {
+      btn.classList.add("active");
+    } else {
+      btn.classList.remove("active");
+    }
+  });
 }
 
 const images = [
@@ -370,12 +373,11 @@ button.addEventListener("click", async () => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
-  const langSelect = document.querySelector("#lang-select");
-  if (langSelect) {
-    langSelect.addEventListener("change", (e) => {
-      setLanguage(e.target.value);
+  document.querySelectorAll(".lang-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      setLanguage(btn.getAttribute("data-lang"));
     });
-  }
+  });
 
   // Detect initial language
   const savedLang = localStorage.getItem("touchpass_lang");

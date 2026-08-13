@@ -21,20 +21,19 @@
         <span class="logo-icon">⚡</span>
         <span class="brand-title">TouchPass</span>
       </div>
-      <div class="nav-controls">
-        <div class="lang-selector-box">
-          <span class="lang-icon">🌐</span>
-          <select id="lang-select" aria-label="Select Language">
-            <option value="en">English (EN)</option>
-            <option value="vi">Tiếng Việt (VI)</option>
-            <option value="zh">中文 (ZH)</option>
-            <option value="ru">Русский (RU)</option>
-          </select>
-        </div>
-        <div class="nav-badges">
-          <span class="badge badge-accent" data-i18n="navWebSerial">Web Serial Flasher</span>
-          <span class="badge">ESP32-S3 HID</span>
-        </div>
+      <div class="lang-picker" id="lang-picker">
+        <button type="button" class="lang-btn active" data-lang="en" title="English">
+          <span class="flag">🇬🇧</span> <span class="lang-code">EN</span>
+        </button>
+        <button type="button" class="lang-btn" data-lang="vi" title="Tiếng Việt">
+          <span class="flag">🇻🇳</span> <span class="lang-code">VI</span>
+        </button>
+        <button type="button" class="lang-btn" data-lang="zh" title="中文">
+          <span class="flag">🇨🇳</span> <span class="lang-code">ZH</span>
+        </button>
+        <button type="button" class="lang-btn" data-lang="ru" title="Русский">
+          <span class="flag">🇷🇺</span> <span class="lang-code">RU</span>
+        </button>
       </div>
     </header>
 
