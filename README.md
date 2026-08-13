@@ -6,12 +6,13 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Hardware](https://img.shields.io/badge/Hardware-ESP32--S3-orange.svg)](docs/BUILD_GUIDE.md)
+[![Download Executable](https://img.shields.io/badge/📥_Download-TouchPass.exe_(Windows)-blueviolet.svg)](https://github.com/tody-agent/Touch-Pass/releases/download/v2.0.0/TouchPass.exe)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB.svg)](https://python.org)
 [![Web Flasher](https://img.shields.io/badge/🌐_1--Click-Web_Flasher-success.svg)](https://tody-agent.github.io/Touch-Pass/web/flasher/)
 [![AI Setup](https://img.shields.io/badge/🤖_1--Prompt-AI_Agent_Setup-purple.svg)](docs/AI_AGENT_PROMPT.md)
-[![Release](https://img.shields.io/badge/Release-v2.0.0-brightgreen.svg)](https://github.com/ZimengXiong/TinyTouch)
+[![Release](https://img.shields.io/badge/Release-v2.0.0-brightgreen.svg)](https://github.com/tody-agent/Touch-Pass/releases/tag/v2.0.0)
 
-🌐 **English** | [🇻🇳 **Tiếng Việt**](README.vi.md) | [🌐 **1-Click Web Flasher**](https://tody-agent.github.io/Touch-Pass/web/flasher/) | [🤖 **1-Prompt AI Agent Setup**](docs/AI_AGENT_PROMPT.md)
+🌐 **English** | [🇻🇳 **Tiếng Việt**](README.vi.md) | [📥 **Download TouchPass.exe**](https://github.com/tody-agent/Touch-Pass/releases/download/v2.0.0/TouchPass.exe) | [🌐 **1-Click Web Flasher**](https://tody-agent.github.io/Touch-Pass/web/flasher/) | [🤖 **1-Prompt AI Agent Setup**](docs/AI_AGENT_PROMPT.md)
 
 <br />
 
