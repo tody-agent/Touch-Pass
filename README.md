@@ -140,9 +140,10 @@ For full wiring schematics and initial key pairing configuration, refer to the [
 TouchPass/
 ├── assets/                  # Documentation images, hero showcases, and diagrams
 ├── docs/                    # Project documentation & guides
-│   ├── BUILD_GUIDE.md       # Hardware wiring, parts list, enclosure & firmware build guide
-│   ├── USER_GUIDE.md        # Comprehensive user manual, AI presets, & portal guide
-│   └── esp32-s3-zw101-portal-vi.md  # Vietnamese hardware & portal setup guide
+│   ├── BUILD_GUIDE.md       # Hardware wiring, parts list, enclosure & firmware build guide (EN)
+│   ├── BUILD_GUIDE.vi.md    # Hardware wiring, parts list, enclosure & firmware build guide (VI)
+│   ├── USER_GUIDE.md        # Comprehensive user manual, AI presets, & portal guide (EN)
+│   └── USER_GUIDE.vi.md     # Comprehensive user manual, AI presets, & portal guide (VI)
 ├── firmware/                # Microcontroller firmware source code
 │   ├── tiny_touch_keyboard/ # Primary Arduino firmware sketch for ESP32-S3 + ZW101 HID
 │   └── tiny_touch_smartcard/# ESP-IDF alternative unified factory firmware
@@ -182,9 +183,8 @@ TouchPass natively supports standard USB HID keyboard actions:
 
 ## Documentation & Guides
 
-- 🛠️ [Build TouchPass](docs/BUILD_GUIDE.md) — Hardware parts, wiring diagram, soldering, and firmware setup.
-- 📖 [Use TouchPass](docs/USER_GUIDE.md) — Complete user guide, fingerprint enrollment, shortcut recorder, and AI tool presets.
-- 🇻🇳 [Hướng dẫn phần cứng bằng tiếng Việt](docs/esp32-s3-zw101-portal-vi.md) — Detailed hardware & portal guide in Vietnamese.
+- 🛠️ [Build TouchPass (EN)](docs/BUILD_GUIDE.md) | [🇻🇳 Tiếng Việt](docs/BUILD_GUIDE.vi.md) — Hardware parts, wiring diagram, soldering, and firmware setup.
+- 📖 [Use TouchPass (EN)](docs/USER_GUIDE.md) | [🇻🇳 Tiếng Việt](docs/USER_GUIDE.vi.md) — Complete user guide, fingerprint enrollment, shortcut recorder, and AI tool presets.
 
 ---
 

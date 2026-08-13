@@ -11,7 +11,7 @@ Pin mapping:
 - ZW101 GND -> GND
 
 The portal supports fingerprint slots 1 through 10 and encrypted action
-payloads. See `docs/esp32-s3-zw101-portal-vi.md` for the complete Vietnamese
+payloads. See `docs/BUILD_GUIDE.vi.md` for the complete Vietnamese
 build and setup guide.
 
 This remains a HID authentication device: keystrokes go to the focused window,

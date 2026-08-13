@@ -370,8 +370,8 @@ the focused-window behavior with a harmless action in a text editor.
 | Password characters are incorrect | Switch the macOS input source to `ABC` or `US`; password actions type ASCII keyboard input. |
 | An Accept, Enter, Escape, or custom action does nothing after one touch | These actions deliberately require the same finger to touch again within three seconds. |
 
-For the existing Vietnamese hardware and portal guide, see
-[`esp32-s3-zw101-portal-vi.md`](esp32-s3-zw101-portal-vi.md).
+For the Vietnamese hardware and portal guide, see
+[`BUILD_GUIDE.vi.md`](BUILD_GUIDE.vi.md).
 
 ## What automated tests prove
 
