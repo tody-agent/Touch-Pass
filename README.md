@@ -139,13 +139,11 @@ Special thanks and full credit to **[Zimeng Xiong](https://github.com/ZimengXion
 
 ---
 
-## 🛡️ Security Policy & Legal Disclaimer / Tuyên Bố Miễn Trừ Trách Nhiệm
+## 🛡️ Security Policy & Legal Disclaimer
 
 TouchPass is provided **"AS IS"**, without warranty of any kind, express or implied. Users assume full responsibility for physical hardware assembly, wiring diagram verification, voltage levels (3.3V vs 5V safety), optical biometric sensor calibration, and maintaining physical device security. TouchPass integrates directly with OS secure credential stores (Windows Credential Manager / macOS Keychain / Linux Secret Service) and communicates over Serial UART using HMAC-SHA256 challenge-response authentication.
 
-TouchPass được cung cấp **"NGUYÊN TRẠNG" (AS IS)** và không có bất kỳ bảo hành nào. Người dùng tự chịu toàn bộ trách nhiệm đối với việc lắp ráp phần cứng vật lý, kiểm tra sơ đồ đấu nối dây, an toàn điện áp, hiệu chuẩn cảm biến vân tay quang học và bảo đảm an toàn truy cập vật lý cho thiết bị.
-
 For full security architecture details, supported versions, vulnerability reporting procedures, and complete legal disclaimers, please review our **[Security Policy & Legal Disclaimer (SECURITY.md)](SECURITY.md)**.
 
-Chi tiết về kiến trúc bảo mật, các phiên bản được hỗ trợ, quy trình báo cáo lỗ hổng bảo mật và toàn văn tuyên bố miễn trừ trách nhiệm pháp lý có tại **[Chính Sách Bảo Mật (docs/translations/SECURITY.vi.md)](docs/translations/SECURITY.vi.md)**.
+For localized versions, see **[Vietnamese Security Policy (docs/translations/SECURITY.vi.md)](docs/translations/SECURITY.vi.md)**, **[Chinese Security Policy (docs/translations/SECURITY.zh.md)](docs/translations/SECURITY.zh.md)**, or **[Russian Security Policy (docs/translations/SECURITY.ru.md)](docs/translations/SECURITY.ru.md)**.
 
