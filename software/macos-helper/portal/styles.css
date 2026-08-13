@@ -385,7 +385,7 @@ h2 { margin-bottom: 0; letter-spacing: -.025em; color: #f1f5f9; }
   font-size: .8rem;
   color: #34d399;
   display: block;
-  overflow-x auto;
+  overflow-x: auto;
 }
 
 /* Modal Dialogs */
