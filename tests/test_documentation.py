@@ -8,6 +8,7 @@ README_VI = ROOT / "README.vi.md"
 BUILD_GUIDE = ROOT / "docs" / "BUILD_GUIDE.md"
 USER_GUIDE = ROOT / "docs" / "USER_GUIDE.md"
 SECURITY = ROOT / "SECURITY.md"
+SECURITY_VI = ROOT / "SECURITY.vi.md"
 APPROVED_IMAGES = {
     "01-hero-showcase-v2.png",
     "02-mac-mini-claude-accept-v2.png",
@@ -94,7 +95,7 @@ class DocumentationTests(unittest.TestCase):
         self.assertRegex(text, r"save[\s\S]{0,180}(?:fails|error|reject)")
 
     def test_local_markdown_links_resolve(self):
-        for document in (README, README_VI, BUILD_GUIDE, USER_GUIDE, SECURITY):
+        for document in (README, README_VI, BUILD_GUIDE, USER_GUIDE, SECURITY, SECURITY_VI):
             text = document.read_text(encoding="utf-8")
             for target in re.findall(r"!?\[[^]]*\]\(([^)]+)\)", text):
                 if target.startswith(("http://", "https://", "#")):
@@ -111,27 +112,38 @@ class DocumentationTests(unittest.TestCase):
         self.assertIn("unauthenticated uart", combined)
 
     def test_security_md_contents(self):
-        security_file = ROOT / "SECURITY.md"
-        self.assertTrue(security_file.is_file())
-        text = security_file.read_text(encoding="utf-8")
-        self.assertIn("Hardware Biometrics", text)
-        self.assertIn("HMAC-SHA256", text)
-        self.assertIn("OS Credential Store", text)
-        self.assertIn("Supported Versions", text)
-        self.assertIn("Reporting a Vulnerability", text)
-        self.assertIn("AS IS", text)
-        self.assertIn("NGUYÊN TRẠNG", text)
+        self.assertTrue(SECURITY.is_file())
+        self.assertTrue(SECURITY_VI.is_file())
+        
+        en_text = SECURITY.read_text(encoding="utf-8")
+        self.assertIn("Hardware Biometrics", en_text)
+        self.assertIn("HMAC-SHA256", en_text)
+        self.assertIn("OS Credential Store", en_text)
+        self.assertIn("Supported Versions", en_text)
+        self.assertIn("Reporting a Vulnerability", en_text)
+        self.assertIn("AS IS", en_text)
+        self.assertIn("SECURITY.vi.md", en_text)
+
+        vi_text = SECURITY_VI.read_text(encoding="utf-8")
+        self.assertIn("Sinh Trắc Học", vi_text)
+        self.assertIn("HMAC-SHA256", vi_text)
+        self.assertIn("Chứng Thư", vi_text)
+        self.assertIn("Phiên Bản", vi_text)
+        self.assertIn("Báo Cáo Lỗ Hổng Bảo Mật", vi_text)
+        self.assertIn("NGUYÊN TRẠNG", vi_text)
+        self.assertIn("SECURITY.md", vi_text)
 
     def test_disclaimer_embedded_in_docs(self):
-        for doc_path, expected_link in [
-            (README, "SECURITY.md"),
-            (README_VI, "SECURITY.md"),
-            (USER_GUIDE, "../SECURITY.md"),
+        for doc_path, expected_links in [
+            (README, ["SECURITY.md", "SECURITY.vi.md"]),
+            (README_VI, ["SECURITY.md", "SECURITY.vi.md"]),
+            (USER_GUIDE, ["../SECURITY.md", "../SECURITY.vi.md"]),
         ]:
             with self.subTest(doc=doc_path.name):
                 text = doc_path.read_text(encoding="utf-8")
                 self.assertIn("AS IS", text)
                 self.assertIn("NGUYÊN TRẠNG", text)
-                self.assertIn(expected_link, text)
+                for expected_link in expected_links:
+                    self.assertIn(expected_link, text)
 
 

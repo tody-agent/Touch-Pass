@@ -147,5 +147,5 @@ TouchPass được cung cấp **"NGUYÊN TRẠNG" (AS IS)** và không có bất
 
 For full security architecture details, supported versions, vulnerability reporting procedures, and complete legal disclaimers, please review our **[Security Policy & Legal Disclaimer (SECURITY.md)](SECURITY.md)**.
 
-Chi tiết về kiến trúc bảo mật, các phiên bản được hỗ trợ, quy trình báo cáo lỗ hổng bảo mật và toàn văn tuyên bố miễn trừ trách nhiệm pháp lý có tại **[Chính Sách Bảo Mật (SECURITY.md)](SECURITY.md)**.
+Chi tiết về kiến trúc bảo mật, các phiên bản được hỗ trợ, quy trình báo cáo lỗ hổng bảo mật và toàn văn tuyên bố miễn trừ trách nhiệm pháp lý có tại **[Chính Sách Bảo Mật (SECURITY.vi.md)](SECURITY.vi.md)**.
 
