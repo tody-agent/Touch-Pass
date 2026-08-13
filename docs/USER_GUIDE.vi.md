@@ -124,3 +124,16 @@ Giao diện Web Portal hiển thị nhật ký sự kiện real-time với các 
 | Web Portal báo `Disconnected` | Cổng serial chưa được mở | Kiểm tra lại dây USB Data và đảm bảo `USB CDC On Boot` đã được bật trong firmware. |
 | Đèn LED cảm biến không sáng | Lỗi cấp nguồn | Kiểm tra lại chân `V_TOUCH` và `VCC` đã nối đúng vào `3V3` chưa. |
 | Không lưu được phím tắt | Vượt quá giới hạn | Đảm bảo chuỗi macro không quá 16 bước và dưới 256 bytes. |
+
+---
+
+## 9. 🛡️ Chính Sách Bảo Mật & Tuyên Bố Miễn Trừ Trách Nhiệm / Security Policy & Legal Disclaimer
+
+TouchPass được cung cấp **"NGUYÊN TRẠNG" (AS IS)** và không có bất kỳ bảo hành nào dưới bất kỳ hình thức nào. Người dùng tự chịu toàn bộ trách nhiệm đối với việc lắp ráp phần cứng vật lý, kiểm tra sơ đồ đấu nối dây, an toàn điện áp, hiệu chuẩn cảm biến vân tay quang học và bảo đảm an toàn truy cập vật lý cho thiết bị.
+
+TouchPass is provided **"AS IS"**, without warranty of any kind, express or implied. Users assume full responsibility for physical hardware assembly, wiring diagram verification, voltage levels (3.3V vs 5V safety), optical biometric sensor calibration, and maintaining physical device security.
+
+- 🇻🇳 **Tiếng Việt**: Chi tiết về quy trình báo cáo lỗ hổng, các phiên bản hỗ trợ và miễn trừ trách nhiệm pháp lý, vui lòng tham khảo **[Chính Sách Bảo Mật (SECURITY.vi.md)](../SECURITY.vi.md)**.
+- 🇺🇸 **English**: For full security architecture details, supported versions, vulnerability reporting, and limitation of liability, see **[Security Policy & Legal Disclaimer (SECURITY.md)](../SECURITY.md)**.
+- 🇨🇳 **简体中文**: **[安全策略与法律声明 (SECURITY.zh.md)](../SECURITY.zh.md)**.
+- 🇷🇺 **Русский**: **[Политика безопасности (SECURITY.ru.md)](../SECURITY.ru.md)**.
