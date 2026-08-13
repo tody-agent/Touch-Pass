@@ -9,17 +9,72 @@ Chào mừng bạn đến với hướng dẫn sử dụng chính thức của *
 
 ## Table of Contents / Mục Lục
 
-1. [TouchPass Platform Overview / Tổng Quan Nền Tảng](#1-touchpass-platform-overview--tong-quan-nen-tang)
-2. [Step-by-Step Self-Serve Onboarding / Hướng Dẫn Tự Cài Đặt](#2-step-by-step-self-serve-onboarding--huong-dan-tu-cai-dat)
-3. [Interactive Keyboard Shortcut Recorder / Trình Ghi Phím Tắt Tương Tác](#3-interactive-keyboard-shortcut-recorder--trinh-ghi-phim-tat-tuong-tac)
-4. [AI Developer Tools Shortcut Preset Library / Thư Viện Phím Tắt AI Tools](#4-ai-developer-tools-shortcut-preset-library--thu-vien-phim-tat-ai-tools)
-5. [Debug Console & Live Event Logs / Nhật Ký Hệ Thống & Debug Console](#5-debug-console--live-event-logs--nhat-ky-he-thong--debug-console)
-6. [Security & Safety Checklist / Danh Mục Kiểm Tra An Toàn](#6-security--safety-checklist--danh-muc-kiem-tra-an-toan)
-7. [Troubleshooting Guide / Xử Lý Lỗi Phổ Biến](#7-troubleshooting-guide--xu-ly-loi-pho-bien)
+1. [Phân biệt Firmware (ESP32-S3) và Local Helper (Máy tính)](#1-phan-biet-firmware-esp32-s3-va-local-helper-may-tinh)
+2. [TouchPass Platform Overview / Tổng Quan Nền Tảng](#2-touchpass-platform-overview--tong-quan-nen-tang)
+3. [Step-by-Step Self-Serve Onboarding / Hướng Dẫn Tự Cài Đặt](#3-step-by-step-self-serve-onboarding--huong-dan-tu-cai-dat)
+4. [Interactive Keyboard Shortcut Recorder / Trình Ghi Phím Tắt Tương Tác](#4-interactive-keyboard-shortcut-recorder--trinh-ghi-phim-tat-tuong-tac)
+5. [AI Developer Tools Shortcut Preset Library / Thư Viện Phím Tắt AI Tools](#5-ai-developer-tools-shortcut-preset-library--thu-vien-phim-tat-ai-tools)
+6. [Debug Console & Live Event Logs / Nhật Ký Hệ Thống & Debug Console](#6-debug-console--live-event-logs--nhat-ky-he-thong--debug-console)
+7. [Security & Safety Checklist / Danh Mục Kiểm Tra An Toàn](#7-security--safety-checklist--danh-muc-kiem-tra-an-toan)
+8. [Troubleshooting Guide / Xử Lý Lỗi Phổ Biến](#8-troubleshooting-guide--xu-ly-loi-pho-bien)
 
 ---
 
-## 1. TouchPass Platform Overview / Tổng Quan Nền Tảng
+## 1. Phân biệt Firmware (ESP32-S3) và Local Helper (Máy tính) / Architecture Separation
+
+TouchPass được thiết kế theo kiến trúc phân tách rõ ràng giữa **Firmware phần cứng (ESP32-S3)** và **Local Helper (Phần mềm trên máy tính)** nhằm mang lại khả năng phản hồi tức thì qua USB HID phần cứng và độ an toàn bảo mật cao cho dữ liệu sinh trắc học & mật khẩu.
+
+### Architecture Data Flow Diagram / Sơ Đồ Luồng Dữ Liệu
+
+```text
+┌─────────────────────────┐
+│ Fingerprint sensor      │ (Quét & nhận diện vân tay ZW101)
+│ (ZW101 Sensor)          │
+└────────────┬────────────┘
+             │ UART Serial (Matching Slot / IRQ Trigger)
+             ▼
+┌─────────────────────────┐
+│ ESP32-S3 Firmware       │
+│ (tiny_touch_keyboard)   │
+└──────┬───────────▲──────┘
+       │           │
+  USB  │           │ USB Keyboard Output
+Serial │           │ (HID Keystrokes gõ phím trực tiếp)
+       ▼           │
+┌──────────────────┴──────┐
+│ Python Local Helper     │ (run_portal_win.py / tinytouch_helper.py)
+│ (http://127.0.0.1:8787) │
+└────────────┬────────────┘
+             │ Truy xuất mật khẩu an toàn (API RPC)
+             ▼
+┌─────────────────────────┐
+│ OS Keychain             │ (Windows Credential Manager /
+│ Storage                 │  macOS Keychain Access)
+└─────────────────────────┘
+```
+
+### Vai Trò & Phân Tách Kiến Trúc
+
+- **ESP32-S3 Firmware (`firmware/tiny_touch_keyboard`)**:
+  - Vi điều khiển nhúng chạy mã nguồn Arduino/C++ trực tiếp trên chip ESP32-S3.
+  - Xử lý giao tiếp UART nối tiếp với cảm biến vân tay ZW101.
+  - Giả lập **USB Keyboard Output** (Native USB HID Keyboard emulation), cho phép gõ ký tự, phím tắt và macro trực tiếp vào bất kỳ hệ điều hành nào (Windows, macOS, Linux) mà không cần cài driver thiết bị.
+  - Truyền nhận dữ liệu cấu hình slot và log telemetry realtime với phần mềm máy tính qua cổng **USB Serial**.
+
+- **Python Local Helper (`software/macos-helper` & `run_portal_win.py`)**:
+  - Dịch vụ ứng dụng Python chạy nội bộ trên máy tính cá nhân (`http://127.0.0.1:8787/`).
+  - Quản lý giao diện Web Portal đa tính năng: đăng ký vân tay 10 slot, thu âm phím tắt tương tác (Shortcut Recorder), áp dụng mẫu phím tắt AI và Debug Console.
+  - Giao tiếp với **OS Keychain** để mã hóa và lưu trữ mật khẩu an toàn trong Credential Manager (Windows) hoặc Keychain Access (macOS).
+
+### 🚀 Khởi Chạy 1-Click trên Windows (`start_touchpass.bat`)
+
+Dành cho người dùng Windows, TouchPass cung cấp script khởi động 1-click **`start_touchpass.bat`**:
+- Chỉ cần nhấp đúp file **`start_touchpass.bat`** tại thư mục gốc của dự án.
+- Script sẽ tự động bật trình duyệt web kết nối tới `http://127.0.0.1:8787/` và kích hoạt Python Local Helper mà không cần nhập lệnh terminal thủ công.
+
+---
+
+## 2. TouchPass Platform Overview / Tổng Quan Nền Tảng
 
 ### English
 TouchPass combines hardware-level USB HID keyboard emulation with biometric fingerprint recognition and a local Web Management Portal. It enables instant triggering of developer shortcuts, password fills, and multi-step custom macros with a touch of a finger.
@@ -41,7 +96,7 @@ Tính năng nổi bật:
 
 ---
 
-## 2. Step-by-Step Self-Serve Onboarding / Hướng Dẫn Tự Cài Đặt
+## 3. Step-by-Step Self-Serve Onboarding / Hướng Dẫn Tự Cài Đặt
 
 Follow these 4 steps to set up and test your TouchPass device.
 
@@ -50,19 +105,21 @@ Follow these 4 steps to set up and test your TouchPass device.
 ### Step 1: Launch the Local Web Portal / Khởi Chạy Web Portal
 
 1. Connect your ESP32-S3 device to your computer via a USB Data Cable.
-2. Start the TouchPass helper service in your terminal:
-   - **macOS / Linux**:
-     ```bash
-     .venv/bin/python software/macos-helper/tinytouch_helper.py
-     ```
-   - **Windows**:
+2. Start the TouchPass helper service:
+   - **Windows (1-Click Launcher - Khuyên dùng)**: Double-click `start_touchpass.bat` in the project root directory.
+   - **Windows (PowerShell / Command Line)**:
      ```powershell
      python run_portal_win.py
+     ```
+   - **macOS / Linux (Terminal)**:
+     ```bash
+     .venv/bin/python software/macos-helper/tinytouch_helper.py
      ```
 3. Open your browser and navigate to:
    ```text
    http://127.0.0.1:8787/
    ```
+   *(Note: `start_touchpass.bat` on Windows automatically opens this URL in your default browser).*
 4. Verify the top status badge reads: `ZW101 sẵn sàng` (ZW101 Ready) with your active COM/USB port.
 
 ---
@@ -114,7 +171,7 @@ Wire the ZW101 fingerprint sensor to the ESP32-S3 board according to the table b
 
 ---
 
-## 3. Interactive Keyboard Shortcut Recorder / Trình Ghi Phím Tắt Tương Tác
+## 4. Interactive Keyboard Shortcut Recorder / Trình Ghi Phím Tắt Tương Tác
 
 TouchPass includes an interactive **Keyboard Shortcut Recorder** within the Custom Macro profile editor. It eliminates manual key code entry by automatically capturing physical keyboard keystrokes and modifier key bitmasks.
 
@@ -138,7 +195,7 @@ TouchPass includes an interactive **Keyboard Shortcut Recorder** within the Cust
 
 ---
 
-## 4. AI Developer Tools Shortcut Preset Library / Thư Viện Phím Tắt AI Tools
+## 5. AI Developer Tools Shortcut Preset Library / Thư Viện Phím Tắt AI Tools
 
 TouchPass features a built-in **AI Tools Shortcut Library** (accessible in **Tab 4: 📚 Hướng dẫn & Mẫu**). You can apply shortcuts with a single click directly to any target slot.
 
@@ -171,7 +228,7 @@ TouchPass features a built-in **AI Tools Shortcut Library** (accessible in **Tab
 
 ---
 
-## 5. Debug Console & Live Event Logs / Nhật Ký Hệ Thống & Debug Console
+## 6. Debug Console & Live Event Logs / Nhật Ký Hệ Thống & Debug Console
 
 The **Debug & Logs** tab (**Tab 3: ⚡ Debug & Logs**) provides real-time telemetry and color-coded event log monitoring for hardware diagnostics.
 
@@ -199,7 +256,7 @@ The **Debug & Logs** tab (**Tab 3: ⚡ Debug & Logs**) provides real-time teleme
 
 ---
 
-## 6. Security & Safety Checklist / Danh Mục Kiểm Tra An Toàn
+## 7. Security & Safety Checklist / Danh Mục Kiểm Tra An Toàn
 
 Before using TouchPass for actions that issue terminal commands or fill credentials:
 
@@ -212,7 +269,7 @@ Before using TouchPass for actions that issue terminal commands or fill credenti
 
 ---
 
-## 7. Troubleshooting Guide / Xử Lý Lỗi Phổ Biến
+## 8. Troubleshooting Guide / Xử Lý Lỗi Phổ Biến
 
 | Issue / Symptom | Possible Cause | Recommended Solution |
 | :--- | :--- | :--- |

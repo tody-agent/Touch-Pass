@@ -63,7 +63,10 @@ pip install -r software/macos-helper/requirements.txt
 
 Start the TouchPass helper service and open the local management portal in your browser:
 
-#### Windows
+#### Windows (1-Click Launcher - Recommended)
+> 💡 **1-Click Launch**: On Windows, simply double-click **`start_touchpass.bat`** in the project root directory. It automatically launches the helper service and opens `http://127.0.0.1:8787/` in your default browser!
+
+Or launch manually via PowerShell / Command Prompt:
 ```powershell
 python run_portal_win.py
 ```
@@ -140,6 +143,7 @@ TouchPass/
 │   └── macos-helper/        # Python service, Keychain manager, and web portal API
 ├── tests/                   # Python automated unit and documentation test suite
 ├── run_portal_win.py        # Windows runner script for TouchPass Web Portal
+├── start_touchpass.bat      # 1-click launcher batch script for Windows
 └── README.md                # Project documentation overview
 ```
 
