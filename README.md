@@ -1,5 +1,7 @@
 # TouchPass
 
+🌐 **English** | [🇻🇳 **Tiếng Việt**](README.vi.md)
+
 > Give every finger a superpower.
 
 ![TouchPass Web Portal Hero Showcase](assets/demo/06-touchpass-portal-hero.jpg)

@@ -1,5 +1,7 @@
 # Build Touch Pass
 
+🌐 **English** | [🇻🇳 **Tiếng Việt**](BUILD_GUIDE.vi.md)
+
 This guide takes you from loose parts to the local Touch Pass portal on Windows or macOS.
 Work through it from the root of this repository (the folder that contains
 `README.md`). Touch Pass is a convenient HID keyboard interface, not a
