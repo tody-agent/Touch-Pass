@@ -6,6 +6,7 @@ ROOT = Path(__file__).resolve().parents[1]
 README = ROOT / "README.md"
 BUILD_GUIDE = ROOT / "docs" / "BUILD_GUIDE.md"
 USER_GUIDE = ROOT / "docs" / "USER_GUIDE.md"
+SECURITY = ROOT / "SECURITY.md"
 APPROVED_IMAGES = {
     "01-hero-showcase-v2.png",
     "02-mac-mini-claude-accept-v2.png",
@@ -91,7 +92,7 @@ class DocumentationTests(unittest.TestCase):
         self.assertRegex(text, r"save[\s\S]{0,180}(?:fails|error|reject)")
 
     def test_local_markdown_links_resolve(self):
-        for document in (README, BUILD_GUIDE, USER_GUIDE):
+        for document in (README, BUILD_GUIDE, USER_GUIDE, SECURITY):
             text = document.read_text(encoding="utf-8")
             for target in re.findall(r"!?\[[^]]*\]\(([^)]+)\)", text):
                 if target.startswith(("http://", "https://", "#")):
@@ -106,3 +107,16 @@ class DocumentationTests(unittest.TestCase):
         ).lower()
         self.assertIn("focused", combined)
         self.assertIn("unauthenticated uart", combined)
+
+    def test_security_md_contents(self):
+        security_file = ROOT / "SECURITY.md"
+        self.assertTrue(security_file.is_file())
+        text = security_file.read_text(encoding="utf-8")
+        self.assertIn("Hardware Biometrics", text)
+        self.assertIn("HMAC-SHA256", text)
+        self.assertIn("OS Credential Store", text)
+        self.assertIn("Supported Versions", text)
+        self.assertIn("Reporting a Vulnerability", text)
+        self.assertIn("AS IS", text)
+        self.assertIn("NGUYÊN TRẠNG", text)
+
