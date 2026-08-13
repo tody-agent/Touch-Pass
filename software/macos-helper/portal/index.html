@@ -1,129 +1,63 @@
 <!doctype html>
 <html lang="vi">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>TouchPass Portal</title>
-    <link rel="stylesheet" href="/styles.css">
-    <script src="/app.js" defer></script>
-  </head>
-  <body>
-    <header class="topbar">
-      <div class="brand-container">
-        <div>
-          <p class="eyebrow">ESP32-S3 · ZW101</p>
-          <h1>TouchPass Portal</h1>
-          <p class="subtitle">Mười ngón tay, mười hành động — Bảo mật sinh trắc học TouchPass.</p>
-        </div>
-        <div id="device-status" class="status status-offline" aria-live="polite">Đang tìm thiết bị…</div>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="brandTitle">TouchPass Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=4">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <!-- Header Navbar with Brand, Status Badge & Language Switcher -->
+  <header class="navbar">
+    <div class="brand-container">
+      <div class="brand-logo">⚡</div>
+      <div class="brand-info">
+        <span class="eyebrow" data-i18n="eyebrow">ESP32-S3 · ZW101</span>
+        <h1 class="brand-title" data-i18n="brandTitle">TouchPass Portal</h1>
       </div>
-      
-      <nav class="nav-tabs" aria-label="Menu điều hướng chính">
-        <button class="tab-button active" data-tab="onboarding" type="button">🚀 Hướng dẫn ban đầu</button>
-        <button class="tab-button" data-tab="slots" type="button">🔑 Quản lý Vân tay (Slots)</button>
-        <button class="tab-button" data-tab="debug" type="button">⚡ Debug & Logs</button>
-        <button class="tab-button" data-tab="guide" type="button">📚 Hướng dẫn & Mẫu</button>
-      </nav>
-    </header>
+    </div>
+    <div class="navbar-right">
+      <div id="device-status" class="status-pill status-offline" aria-live="polite">
+        <span class="status-dot"></span>
+        <span id="device-status-text" data-i18n="statusDisconnected">🔴 Disconnected</span>
+      </div>
+      <div class="lang-switcher" aria-label="Language selection">
+        <button class="lang-btn" data-lang="en" type="button">EN</button>
+        <button class="lang-btn" data-lang="ru" type="button">RU</button>
+        <button class="lang-btn active" data-lang="vi" type="button">VI</button>
+      </div>
+    </div>
+  </header>
 
-    <main>
-      <!-- Tab 1: Onboarding Wizard -->
-      <section id="tab-onboarding" class="tab-content active" aria-label="Hướng dẫn ban đầu">
-        <div class="wizard-header">
-          <h2>Chào mừng đến với TouchPass</h2>
-          <p>Hoàn thành 3 bước bên dưới để cài đặt và trải nghiệm thiết bị xác thực vân tay USB HID TouchPass.</p>
-        </div>
+  <!-- Main Container -->
+  <main class="container">
+    <!-- 4-Step Segmented Nav Tabs -->
+    <nav class="step-tabs" aria-label="TouchPass Flow Steps">
+      <button class="step-tab-btn active" data-tab="step1" type="button" data-i18n="step1Title">🚀 1. Setup & Flash</button>
+      <button class="step-tab-btn" data-tab="step2" type="button" data-i18n="step2Title">📋 2. Presets</button>
+      <button class="step-tab-btn" data-tab="step3" type="button" data-i18n="step3Title">🖐️ 3. Biometric Studio</button>
+      <button class="step-tab-btn" data-tab="step4" type="button" data-i18n="step4Title">⚡ 4. Live Activity</button>
+    </nav>
 
-        <div class="wizard-steps">
-          <!-- Step 1 Card: Test USB HID -->
-          <article id="step-1" class="wizard-card">
-            <div class="wizard-step-badge">Bước 1</div>
-            <h3>Test USB HID Keyboard Output</h3>
-            <p>TouchPass giả lập bàn phím USB HID phần cứng. Nhấp vào ô văn bản bên dưới và nhấn nút thử nghiệm để kiểm tra tính năng mô phỏng phím gõ.</p>
-            <div class="wizard-action-box">
-              <input type="text" id="hid-test-input" placeholder="Thử nghiệm nhập ký tự tại đây..." autocomplete="off">
-              <button id="btn-test-hid" class="button button-primary" type="button">Thử gõ USB HID (Test)</button>
-            </div>
-          </article>
+    <!-- Step 1 Panel: Setup, Flasher & USB HID Sandbox -->
+    <section id="tab-step1" class="tab-content active" aria-label="Setup & Flash">
+      <div class="section-header">
+        <span class="hero-badge">Step 1</span>
+        <h2 class="section-title" data-i18n="step1Header">1. Phần Cứng & Khởi Tạo Device</h2>
+        <p class="section-desc" data-i18n="step1Desc">Đấu nối vi điều khiển ESP32-S3 với cảm biến ZW101, nạp firmware qua Web Flasher và thử nghiệm phím USB HID.</p>
+      </div>
 
-          <!-- Step 2 Card: Wiring Guide -->
-          <article id="step-2" class="wizard-card">
-            <div class="wizard-step-badge">Bước 2</div>
-            <h3>Hướng dẫn đấu nối phần cứng ZW101</h3>
-            <p>Sơ đồ kết nối giữa vi điều khiển ESP32-S3 và cảm biến vân tay ZW101:</p>
-            <table class="wiring-table">
-              <thead>
-                <tr>
-                  <th>Cảm biến ZW101</th>
-                  <th>Chân ESP32-S3</th>
-                  <th>Ghi chú</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>VCC</td>
-                  <td>3.3V</td>
-                  <td>Nguồn cấp cảm biến</td>
-                </tr>
-                <tr>
-                  <td>GND</td>
-                  <td>GND</td>
-                  <td>Mass chung</td>
-                </tr>
-                <tr>
-                  <td>TX</td>
-                  <td>RX (GPIO 18)</td>
-                  <td>Truyền dữ liệu Serial</td>
-                </tr>
-                <tr>
-                  <td>RX</td>
-                  <td>TX (GPIO 17)</td>
-                  <td>Nhận dữ liệu Serial</td>
-                </tr>
-                <tr>
-                  <td>Touch / IRQ</td>
-                  <td>GPIO 15</td>
-                  <td>Tín hiệu ngắt cảm ứng</td>
-                </tr>
-              </tbody>
-            </table>
-          </article>
-
-          <!-- Step 3 Card: Finger Enrollment -->
-          <article id="step-3" class="wizard-card">
-            <div class="wizard-step-badge">Bước 3</div>
-            <h3>Đăng ký vân tay & Cấu hình Slot</h3>
-            <p>TouchPass hỗ trợ lưu trữ tới 10 mẫu vân tay. Mỗi ngón tay tương ứng với một hành động (nhập mật khẩu, phím Enter, phím Escape, hoặc macro văn bản tùy chỉnh).</p>
-            <div class="wizard-action-box">
-              <button class="button button-primary" data-nav-target="slots" type="button">Chuyển tới Quản lý Vân tay (Slots)</button>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <!-- Tab 2: Fingerprint Slots -->
-      <section id="tab-slots" class="tab-content" aria-label="Quản lý Vân tay">
-        <section class="notice" aria-label="Lưu ý an toàn">
-          <strong>Chạm kép bảo vệ thao tác xác nhận.</strong>
-          Password chạy sau một lần chạm; Accept, Enter, Escape và macro tùy chỉnh cần chạm lại cùng ngón trong 3 giây.
-        </section>
-
-        <section class="section-heading">
-          <div>
-            <p class="eyebrow">Cấu hình vân tay</p>
-            <h2>Slot 1–10</h2>
-          </div>
-          <button id="refresh" class="button button-secondary" type="button">Làm mới</button>
-        </section>
-        <section id="finger-grid" class="finger-grid" aria-live="polite"></section>
-      </section>
-
-      <!-- Tab 3: Debug & Logs -->
-      <section id="tab-debug" class="tab-content" aria-label="Debug & Logs">
-        <div class="debug-container">
-          <div class="telemetry-panel">
+      <div class="preset-grid">
+        <!-- Connection Status Card -->
+        <article id="connection-card" class="card">
+          <h3 data-i18n="connStatusCardTitle">Trạng thái kết nối Hardware</h3>
+          <div class="telemetry-panel" style="margin-top: 14px;">
             <div class="telemetry-card">
-              <span class="telemetry-label">Trạng thái thiết bị</span>
+              <span class="telemetry-label">Thiết bị</span>
               <span id="telemetry-status" class="telemetry-value">--</span>
             </div>
             <div class="telemetry-card">
@@ -134,220 +68,280 @@
               <span class="telemetry-label">Cảm biến ZW101</span>
               <span id="telemetry-sensor" class="telemetry-value">--</span>
             </div>
-            <div class="telemetry-card">
-              <span class="telemetry-label">Tốc độ Baud</span>
-              <span class="telemetry-value">115200 bps</span>
+          </div>
+        </article>
+
+        <!-- Web Flasher Redirect Card -->
+        <article class="card">
+          <h3 data-i18n="webFlasherCardTitle">Web Flasher Firmware</h3>
+          <p class="preset-card-desc" data-i18n="webFlasherCardDesc">Nạp hoặc nâng cấp firmware cho ESP32-S3 ngay trên trình duyệt Chrome/Edge qua Web Serial API.</p>
+          <div style="margin-top: 16px;">
+            <a href="https://tody-agent.github.io/Touch-Pass/web/flasher/" target="_blank" rel="noopener" class="button button-primary" style="text-decoration: none;" data-i18n="webFlasherBtn">⚡ Mở Web Flasher Web</a>
+          </div>
+        </article>
+      </div>
+
+      <!-- USB HID Keystroke Sandbox -->
+      <article class="card" style="margin-top: 24px;">
+        <h3 data-i18n="hidSandboxTitle">USB HID Keystroke Sandbox</h3>
+        <p class="section-desc" data-i18n="hidSandboxDesc">Nhấp vào ô văn bản bên dưới và nhấn nút Thử Gõ để kiểm tra tính năng giả lập phím gõ phần cứng.</p>
+        <div class="sandbox-box">
+          <div class="key-combo" style="margin-bottom: 14px;">
+            <kbd>Cmd ⌘</kbd><span class="plus">+</span><kbd>Shift ⇧</kbd><span class="plus">+</span><kbd>Enter ↵</kbd>
+          </div>
+          <div style="display: flex; gap: 12px; max-width: 500px; margin: 0 auto;">
+            <input type="text" id="hid-test-input" placeholder="Thử nghiệm nhập ký tự tại đây..." autocomplete="off" data-i18n-placeholder="hidTestPlaceholder">
+            <button id="btn-test-hid" class="button button-primary" type="button" data-i18n="hidTestBtn">Thử gõ USB HID (Test)</button>
+          </div>
+        </div>
+      </article>
+
+      <!-- Wiring Guide Table -->
+      <article class="card" style="margin-top: 24px;">
+        <h3 data-i18n="wiringTitle">Sơ đồ đấu nối phần cứng ZW101</h3>
+        <table class="wiring-table" style="width: 100%; border-collapse: collapse; margin-top: 14px;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--card-border); text-align: left;">
+              <th style="padding: 10px;">Cảm biến ZW101</th>
+              <th style="padding: 10px;">Chân ESP32-S3</th>
+              <th style="padding: 10px;">Ghi chú</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+              <td style="padding: 10px;">VCC</td>
+              <td style="padding: 10px;"><kbd>3.3V</kbd></td>
+              <td style="padding: 10px;">Nguồn cấp cảm biến ZW101</td>
+            </tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+              <td style="padding: 10px;">GND</td>
+              <td style="padding: 10px;"><kbd>GND</kbd></td>
+              <td style="padding: 10px;">Mass chung hệ thống</td>
+            </tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+              <td style="padding: 10px;">TX</td>
+              <td style="padding: 10px;"><kbd>RX (GPIO 18)</kbd></td>
+              <td style="padding: 10px;">Truyền dữ liệu Serial</td>
+            </tr>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+              <td style="padding: 10px;">RX</td>
+              <td style="padding: 10px;"><kbd>TX (GPIO 17)</kbd></td>
+              <td style="padding: 10px;">Nhận dữ liệu Serial</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px;">Touch / IRQ</td>
+              <td style="padding: 10px;"><kbd>GPIO 15</kbd></td>
+              <td style="padding: 10px;">Tín hiệu ngắt cảm ứng ngón tay</td>
+            </tr>
+          </tbody>
+        </table>
+      </article>
+    </section>
+
+    <!-- Step 2 Panel: macOS AI Dev Presets & Live Slot Preview Sheet -->
+    <section id="tab-step2" class="tab-content" aria-label="Presets">
+      <div class="section-header">
+        <span class="hero-badge">Step 2</span>
+        <h2 class="section-title" data-i18n="step2Header">2. macOS AI Dev Presets</h2>
+        <p class="section-desc" data-i18n="step2Desc">Chọn bộ cấu hình phím tắt tối ưu cho workflow lập trình AI (Claude Code, Cursor, Antigravity, Sudo Vault).</p>
+      </div>
+
+      <!-- Preset Gallery Container -->
+      <div id="preset-gallery" class="preset-grid">
+        <!-- AI Developer Preset Card -->
+        <article class="preset-card active" data-preset-id="ai_dev">
+          <h3 class="preset-card-title">🤖 AI Developer</h3>
+          <p class="preset-card-desc">Phân bổ phím tắt cho Claude Code & AI Agent. Confirm AI, Accept Diff, Abort, Inline AI & Command Palette.</p>
+        </article>
+
+        <!-- CLI Specialist Preset Card -->
+        <article class="preset-card" data-preset-id="cli_specialist">
+          <h3 class="preset-card-title">💻 CLI Specialist</h3>
+          <p class="preset-card-desc">Tối ưu thao tác Terminal: Sudo Vault, Git Commit Accept, Ctrl+C Abort, Clear Terminal & Exit.</p>
+        </article>
+
+        <!-- Cursor/Antigravity Master Preset Card -->
+        <article class="preset-card" data-preset-id="cursor_master">
+          <h3 class="preset-card-title">🚀 Cursor & Antigravity Master</h3>
+          <p class="preset-card-desc">Điều khiển IDE thông minh: Cmd+K Inline Edit, Cmd+I Composer, Toggle Panel & Quick Search.</p>
+        </article>
+
+        <!-- Password Vault Preset Card -->
+        <article class="preset-card" data-preset-id="password_vault">
+          <h3 class="preset-card-title">🔐 Password Vault</h3>
+          <p class="preset-card-desc">Tạo kho điền mật khẩu an toàn lưu trong macOS Keychain với 10 slot phím vân tay.</p>
+        </article>
+      </div>
+
+      <!-- Live Slot Preview Sheet -->
+      <article id="preset-preview-sheet" class="card" style="margin-top: 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+          <h3 data-i18n="presetPreviewTitle">Xem trước Slot phân bổ</h3>
+          <button id="btn-apply-preset" class="button button-primary" type="button" data-i18n="applyPresetBtn">✦ Áp dụng Preset này</button>
+        </div>
+        <div id="preview-slot-list" class="preset-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+          <!-- Slot preview cards dynamically rendered by app.js -->
+        </div>
+      </article>
+    </section>
+
+    <!-- Step 3 Panel: Biometric Studio & 10-Finger Hand Map -->
+    <section id="tab-step3" class="tab-content" aria-label="Biometric Studio">
+      <div class="section-header" style="display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+          <span class="hero-badge">Step 3</span>
+          <h2 class="section-title" data-i18n="step3Header">3. Biometric Studio</h2>
+          <p class="section-desc" data-i18n="step3Desc">Bản đồ 10 ngón tay tương ứng 10 Slot sinh trắc học. Đăng ký vân tay mới hoặc tùy chỉnh hành động.</p>
+        </div>
+        <button id="refresh" class="button button-secondary" type="button" data-i18n="refreshBtn">Làm mới</button>
+      </div>
+
+      <!-- 10-Finger Hand Map -->
+      <div id="hand-map" class="hand-map-container">
+        <div class="hand-grid">
+          <!-- Left Hand Slots 1-5 -->
+          <div class="hand-section">
+            <div class="hand-title" data-i18n="leftHandTitle">Bàn tay trái (Slot 1–5)</div>
+            <div id="left-hand-slots" class="finger-grid"></div>
+          </div>
+          <!-- Right Hand Slots 6-10 -->
+          <div class="hand-section">
+            <div class="hand-title" data-i18n="rightHandTitle">Bàn tay phải (Slot 6–10)</div>
+            <div id="right-hand-slots" class="finger-grid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Full Slot Grid Container (Fallback / Grid Alias) -->
+      <div id="slot-grid" class="finger-grid" aria-live="polite"></div>
+      <div id="finger-grid" class="finger-grid" aria-live="polite" style="display: none;"></div>
+    </section>
+
+    <!-- Step 4 Panel: Live Activity Console -->
+    <section id="tab-step4" class="tab-content" aria-label="Live Activity">
+      <div class="section-header">
+        <span class="hero-badge">Step 4</span>
+        <h2 class="section-title" data-i18n="step4Header">4. Live Activity Console</h2>
+        <p class="section-desc" data-i18n="step4Desc">Theo dõi nhật ký hoạt động thời gian thực từ phần cứng ESP32-S3 và macOS Helper Service.</p>
+      </div>
+
+      <div class="debug-container">
+        <!-- Log Filter Segmented Control & Actions Bar -->
+        <div class="log-header" style="flex-wrap: wrap; gap: 12px;">
+          <div class="lang-switcher" aria-label="Log Category Filters">
+            <button id="filter-all" class="lang-btn active" data-filter="all" type="button" data-i18n="filterAll">Tất cả</button>
+            <button id="filter-biometric" class="lang-btn" data-filter="biometric" type="button" data-i18n="filterBiometric">Sinh trắc</button>
+            <button id="filter-system" class="lang-btn" data-filter="system" type="button" data-i18n="filterSystem">Hệ thống</button>
+            <button id="filter-error" class="lang-btn" data-filter="error" type="button" data-i18n="filterError">Lỗi</button>
+          </div>
+          <div class="log-actions">
+            <button id="btn-ping-test" class="button button-quiet" type="button" data-i18n="pingTestBtn">Test Ping</button>
+            <button id="btn-clear-logs" class="button button-quiet" type="button" data-i18n="clearLogsBtn">Xóa log</button>
+            <button id="btn-export-logs" class="button button-secondary" type="button" data-i18n="exportLogsBtn">Xuất log</button>
+          </div>
+        </div>
+
+        <!-- Terminal Console Window -->
+        <div id="activity-console" class="activity-console" role="log" aria-live="polite">
+          <div id="log-console" class="log-console-inner">
+            <div id="log-stream">
+              <div class="log-line">
+                <span class="log-time">[00:00:00]</span>
+                <span class="log-tag system">SYSTEM</span>
+                <span>TouchPass Live Activity Stream Started.</span>
+              </div>
             </div>
           </div>
-          
-          <div class="log-header">
-            <h3>Nhật ký hệ thống (Live Logs)</h3>
-            <div class="log-actions">
-              <button id="btn-test-ping" class="button button-quiet" type="button">Test Ping</button>
-              <button id="btn-test-type" class="button button-quiet" type="button">Test Type</button>
-              <button id="btn-clear-logs" class="button button-quiet" type="button">Xóa log</button>
-              <button id="btn-pause-logs" class="button button-quiet" type="button">Tạm dừng</button>
-            </div>
-          </div>
-          <div id="log-console" class="log-console" role="log" aria-live="polite">
-            <div class="log-entry log-info"><span class="log-time">[00:00:00]</span> <span class="log-tag log-tag-system">SYSTEM</span> Sẵn sàng kết nối TouchPass Debug Portal...</div>
-          </div>
         </div>
-      </section>
+      </div>
+    </section>
+  </main>
 
-      <!-- Tab 4: User Guide & Examples -->
-      <section id="tab-guide" class="tab-content" aria-label="Hướng dẫn & Mẫu">
-        <div class="guide-header">
-          <h2>Hướng dẫn sử dụng & Kịch bản mẫu</h2>
-          <p>Khám phá các kịch bản tự động hóa phổ biến được tối ưu cho TouchPass.</p>
+  <!-- Modals -->
+
+  <!-- Enrollment Modal Sheet -->
+  <dialog id="enroll-modal" class="modal-sheet">
+    <div style="text-align: center; padding: 24px 16px;">
+      <h3 style="margin-bottom: 20px;" data-i18n="enrollModalTitle">Đăng ký vân tay ZW101</h3>
+      <!-- Concentric Scan Ring Animation -->
+      <div class="pulse-ring-container">
+        <div id="pulse-ring" class="pulse-ring-wrapper">
+          <div class="pulse-ring"></div>
+          <div class="pulse-ring"></div>
+          <div class="pulse-ring"></div>
         </div>
+        <span class="pulse-ring-icon">👆</span>
+      </div>
 
-        <div class="guide-grid">
-          <!-- Case 1: Terminal Sudo -->
-          <article class="guide-card" data-preset="password" data-label="Terminal Sudo">
-            <div class="guide-icon">🖥️</div>
-            <h3>Terminal Sudo</h3>
-            <p>Nhập mật khẩu administrator tự động khi chạy lệnh <code>sudo</code> trong macOS Terminal hoặc iTerm2.</p>
-            <div class="guide-snippet">
-              <code>Preset: Mật khẩu + Enter</code>
-              <code>Chạm 1 lần -> Tự động điền mật khẩu & gửi phím Enter</code>
-            </div>
-            <button class="button button-secondary btn-apply-template" data-preset="password" data-label="Terminal Sudo" type="button">Áp dụng mẫu này</button>
-          </article>
+      <!-- Status Prompt & Progress Bar -->
+      <p id="enroll-status-text" style="font-weight: 600; margin-bottom: 16px;" data-i18n="enrollPrompt">Đặt ngón tay lên cảm biến ZW101...</p>
+      <div style="background: var(--code-bg); border-radius: 999px; height: 8px; width: 100%; overflow: hidden; margin-bottom: 24px; border: 1px solid var(--card-border);">
+        <div id="enroll-progress-bar" style="background: var(--accent); height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+      </div>
 
-          <!-- Case 2: Git Commit 'y/N' -->
-          <article class="guide-card" data-preset="accept" data-label="Git Commit Confirmation">
-            <div class="guide-icon">🔀</div>
-            <h3>Git Commit 'y/N'</h3>
-            <p>Xác nhận câu hỏi 'y/N' trên Terminal khi commit code hoặc push git với chế độ chạm kép an toàn.</p>
-            <div class="guide-snippet">
-              <code>Preset: Accept (Y + Enter)</code>
-              <code>Chạm lần 1 -> Chờ chạm xác nhận trong 3s</code>
-              <code>Chạm lần 2 -> Gửi 'y' + Enter</code>
-            </div>
-            <button class="button button-secondary btn-apply-template" data-preset="accept" data-label="Git Commit Confirmation" type="button">Áp dụng mẫu này</button>
-          </article>
+      <button id="btn-cancel-enroll" class="button button-secondary" type="button" data-i18n="cancelEnrollBtn">Hủy đăng ký</button>
+      <button id="cancel-job" style="display: none;" type="button">Hủy</button>
+    </div>
+  </dialog>
 
-          <!-- Case 3: Custom Macro -->
-          <article class="guide-card" data-preset="custom" data-label="Custom Macro">
-            <div class="guide-icon">⚙️</div>
-            <h3>Custom Macro</h3>
-            <p>Chuỗi hành động kết hợp giữa gõ chữ ASCII, phím Tab/Enter và khoảng hoãn delay thời gian tùy chỉnh.</p>
-            <div class="guide-snippet">
-              <code>Preset: Macro tùy chỉnh</code>
-              <code>Bước 1: Text 'admin' -> Bước 2: Key 'Tab' -> Bước 3: Delay 250ms -> Bước 4: Key 'Enter'</code>
-            </div>
-            <button class="button button-secondary btn-apply-template" data-preset="custom" data-label="Custom Macro" type="button">Áp dụng mẫu này</button>
-          </article>
+  <!-- Slot Edit Modal Sheet -->
+  <dialog id="edit-modal" class="modal-sheet">
+    <form id="edit-form" method="dialog" style="padding: 24px 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 id="dialog-title" data-i18n="editModalTitle">Cấu hình Slot Vân Tay</h3>
+        <button class="button button-secondary" value="cancel" type="submit" style="padding: 4px 10px; min-width: auto;">×</button>
+      </div>
 
-          <!-- Case 4: Password Autofill -->
-          <article class="guide-card" data-preset="password" data-label="Password Autofill">
-            <div class="guide-icon">🔐</div>
-            <h3>Password Autofill</h3>
-            <p>Điền mật khẩu bảo mật dài, phức tạp lưu trong Keychain một cách chính xác mà không lo bị lộ phím.</p>
-            <div class="guide-snippet">
-              <code>Preset: Mật khẩu + Enter</code>
-              <code>Lưu trữ an toàn trong macOS Keychain / Chạm ngón tay trỏ để đăng nhập ngay lập tức</code>
-            </div>
-            <button class="button button-secondary btn-apply-template" data-preset="password" data-label="Password Autofill" type="button">Áp dụng mẫu này</button>
-          </article>
-        </div>
+      <input id="edit-slot" type="hidden">
+      <input id="profile-slot" type="hidden">
 
-        <!-- AI Tools Shortcut Library -->
-        <div class="guide-header" style="margin-top: 36px;">
-          <h2>🤖 AI Tools Shortcut Library</h2>
-          <p>Bộ phím tắt tối ưu cho các công cụ AI Assistant và IDE lập trình. Áp dụng 1-click vào Slot ngón tay.</p>
-        </div>
-
-        <div class="guide-grid">
-          <!-- Card 1: Claude Code CLI -->
-          <article class="guide-card ai-tool-card" data-tool="claude-code">
-            <div class="guide-icon">💻</div>
-            <div class="preset-category">CLI Assistant</div>
-            <h3>Claude Code CLI</h3>
-            <p>Phím tắt điều khiển phiên làm việc dòng lệnh Claude Code CLI.</p>
-            <div class="guide-snippet">
-              <code><span class="shortcut-badge">Ctrl+C</span> Ngắt lệnh · <span class="shortcut-badge">Ctrl+L</span> Clear</code>
-              <code><span class="shortcut-badge">/compact</span> Nén context</code>
-            </div>
-            <button class="button button-secondary btn-apply-preset" data-preset-action='[{"type":"text","value":"/compact"},{"type":"key","key":"enter"}]' data-label="Claude Code: /compact" type="button">Áp dụng phím tắt này</button>
-          </article>
-
-          <!-- Card 2: Cursor IDE -->
-          <article class="guide-card ai-tool-card" data-tool="cursor">
-            <div class="guide-icon">⚡</div>
-            <div class="preset-category">IDE Editor</div>
-            <h3>Cursor IDE</h3>
-            <p>Các tổ hợp phím mở AI Prompt, AI Chat và chuyển focus trong Cursor IDE.</p>
-            <div class="guide-snippet">
-              <code><span class="shortcut-badge">Cmd/Ctrl+K</span> Edit · <span class="shortcut-badge">Cmd/Ctrl+I</span> Composer</code>
-              <code><span class="shortcut-badge">Cmd/Ctrl+L</span> Chat · <span class="shortcut-badge">Shift+Tab</span> Unindent</code>
-            </div>
-            <button class="button button-secondary btn-apply-preset" data-preset-action='[{"type":"key","key":"k","modifiers":2}]' data-label="Cursor: Cmd/Ctrl+K" type="button">Áp dụng phím tắt này</button>
-          </article>
-
-          <!-- Card 3: Claude Desktop -->
-          <article class="guide-card ai-tool-card" data-tool="claude-desktop">
-            <div class="guide-icon">🧡</div>
-            <div class="preset-category">Desktop App</div>
-            <h3>Claude Desktop</h3>
-            <p>Thao tác nhanh trên ứng dụng Claude Desktop cho macOS/Windows.</p>
-            <div class="guide-snippet">
-              <code><span class="shortcut-badge">Cmd/Ctrl+K</span> Quick Search</code>
-              <code><span class="shortcut-badge">Cmd/Ctrl+Shift+O</span> New Chat · <span class="shortcut-badge">Cmd/Ctrl+Shift+C</span> Copy Code</code>
-            </div>
-            <button class="button button-secondary btn-apply-preset" data-preset-action='[{"type":"key","key":"o","modifiers":3}]' data-label="Claude Desktop: New Chat" type="button">Áp dụng phím tắt này</button>
-          </article>
-
-          <!-- Card 4: Antigravity IDE -->
-          <article class="guide-card ai-tool-card" data-tool="antigravity">
-            <div class="guide-icon">🚀</div>
-            <div class="preset-category">AI Workstation</div>
-            <h3>Antigravity IDE</h3>
-            <p>Tổ hợp phím khởi chạy AI Agent, mở panel điều khiển và Command Palette.</p>
-            <div class="guide-snippet">
-              <code><span class="shortcut-badge">Cmd/Ctrl+Shift+A</span> Agent · <span class="shortcut-badge">Cmd/Ctrl+Shift+L</span> Logs</code>
-              <code><span class="shortcut-badge">Cmd/Ctrl+Shift+P</span> Command Palette</code>
-            </div>
-            <button class="button button-secondary btn-apply-preset" data-preset-action='[{"type":"key","key":"a","modifiers":3}]' data-label="Antigravity: AI Agent" type="button">Áp dụng phím tắt này</button>
-          </article>
-
-          <!-- Card 5: OpenCode & Codex CLI -->
-          <article class="guide-card ai-tool-card" data-tool="opencode-codex">
-            <div class="guide-icon">🛠️</div>
-            <div class="preset-category">CLI Agent</div>
-            <h3>OpenCode & Codex CLI</h3>
-            <p>Gửi lệnh trực tiếp hoặc tạo nhiều dòng prompt trong các CLI Agent.</p>
-            <div class="guide-snippet">
-              <code><span class="shortcut-badge">Ctrl+Enter</span> Gửi Prompt lập tức</code>
-              <code><span class="shortcut-badge">Alt+Enter</span> Xuống dòng không gửi</code>
-            </div>
-            <button class="button button-secondary btn-apply-preset" data-preset-action='[{"type":"key","key":"enter","modifiers":2}]' data-label="OpenCode: Ctrl+Enter" type="button">Áp dụng phím tắt này</button>
-          </article>
-        </div>
-      </section>
-    </main>
-
-    <dialog id="profile-dialog">
-      <form id="profile-form" method="dialog">
-        <div class="dialog-heading">
-          <div>
-            <p class="eyebrow">Hồ sơ hành động</p>
-            <h2 id="dialog-title">Cấu hình ngón tay</h2>
-          </div>
-          <button class="icon-button" value="cancel" aria-label="Đóng" type="submit">×</button>
-        </div>
-        <input id="profile-slot" type="hidden">
-        <label>
-          Tên ngón / chức năng
-          <input id="profile-label" maxlength="64" required autocomplete="off">
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <label style="display: flex; flex-direction: column; gap: 6px; font-weight: 600; font-size: 0.9rem;">
+          <span data-i18n="editLabelField">Tên ngón / Chức năng</span>
+          <input id="edit-label" maxlength="64" required autocomplete="off">
+          <input id="profile-label" type="hidden">
         </label>
-        <label>
-          Hành động
-          <select id="profile-preset">
+
+        <label style="display: flex; flex-direction: column; gap: 6px; font-weight: 600; font-size: 0.9rem;">
+          <span data-i18n="editPresetField">Hành động (Preset)</span>
+          <select id="edit-preset">
             <option value="password">Mật khẩu + Enter</option>
             <option value="accept">Accept: Y + Enter</option>
             <option value="enter">Enter</option>
             <option value="escape">Escape</option>
             <option value="custom">Chuỗi tùy chỉnh</option>
           </select>
+          <select id="profile-preset" style="display: none;"></select>
         </label>
-        <label id="secret-field">
-          Mật khẩu mới
-          <input id="profile-secret" type="password" maxlength="128" autocomplete="new-password">
-          <span id="secret-hint" class="field-hint">Để trống để giữ mật khẩu đang lưu.</span>
-        </label>
-        <section id="custom-builder" class="custom-builder" hidden>
-          <div class="builder-heading">
-            <strong>Các bước macro</strong>
-            <span>Tối đa 16 bước</span>
-          </div>
-          <div id="shortcut-recorder" class="shortcut-recorder-box"><span class="recorder-prompt">🔴 Bấm vào đây và nhấn tổ hợp phím để bắt phím tự động</span></div>
-          <div id="custom-steps"></div>
-          <div class="step-actions">
-            <button class="button button-quiet" data-add-step="text" type="button">+ Text</button>
-            <button class="button button-quiet" data-add-step="key" type="button">+ Phím</button>
-            <button class="button button-quiet" data-add-step="delay" type="button">+ Delay</button>
-          </div>
-        </section>
-        <p id="form-error" class="error" role="alert"></p>
-        <div class="dialog-actions">
-          <button class="button button-secondary" value="cancel" type="submit">Hủy</button>
-          <button id="save-profile" class="button button-primary" value="default" type="submit">Lưu cấu hình</button>
-        </div>
-      </form>
-    </dialog>
 
-    <dialog id="job-dialog">
-      <div class="job-content">
-        <div class="sensor-orbit"><span></span></div>
-        <p class="eyebrow">ZW101</p>
-        <h2 id="job-title">Đang đăng ký</h2>
-        <p id="job-message" aria-live="assertive">Đặt ngón tay lên cảm biến.</p>
-        <button id="cancel-job" class="button button-secondary" type="button">Hủy</button>
+        <label id="secret-field" style="display: flex; flex-direction: column; gap: 6px; font-weight: 600; font-size: 0.9rem;">
+          <span data-i18n="editSecretField">Mật khẩu bảo mật</span>
+          <input id="edit-secret" type="password" maxlength="128" autocomplete="new-password">
+          <input id="profile-secret" type="hidden">
+          <span id="secret-hint" style="color: var(--muted); font-size: 0.78rem; font-weight: 400;" data-i18n="editSecretHint">Lưu an toàn trong macOS Keychain. Để trống để giữ nguyên.</span>
+        </label>
+
+        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.9rem; margin-top: 4px;">
+          <input type="checkbox" id="edit-confirm" style="width: auto;">
+          <span data-i18n="editConfirmLabel">Chạm kép bảo vệ (Confirm Touch)</span>
+        </label>
       </div>
-    </dialog>
 
-    <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  </body>
+      <p id="form-error" class="error" role="alert" style="color: var(--danger); font-size: 0.85rem; margin-top: 12px;"></p>
+
+      <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+        <button id="btn-cancel-edit" class="button button-secondary" value="cancel" type="button" data-i18n="cancelEditBtn">Hủy</button>
+        <button id="btn-save-slot" class="button button-primary" type="button" data-i18n="saveSlotBtn">Lưu cấu hình</button>
+        <button id="save-profile" style="display: none;" type="button">Lưu</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Legacy dialog alias if needed -->
+  <dialog id="profile-dialog" style="display: none;"></dialog>
+  <dialog id="job-dialog" style="display: none;"></dialog>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
 </html>
