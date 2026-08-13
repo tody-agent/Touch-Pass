@@ -4,19 +4,19 @@
 
 ### *Дайте каждому пальцу суперспособность.*
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Hardware](https://img.shields.io/badge/Hardware-ESP32--S3-orange.svg)](docs/BUILD_GUIDE.ru.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](../../LICENSE)
+[![Hardware](https://img.shields.io/badge/Hardware-ESP32--S3-orange.svg)](../BUILD_GUIDE.ru.md)
 [![Download Executable](https://img.shields.io/badge/📥_Скачать-TouchPass.exe_(Windows)-blueviolet.svg)](https://github.com/tody-agent/Touch-Pass/releases/download/v2.0.0/TouchPass.exe)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB.svg)](https://python.org)
 [![Web Flasher](https://img.shields.io/badge/🌐_1--Click-Web_Flasher-success.svg)](https://tody-agent.github.io/Touch-Pass/web/flasher/)
-[![AI Setup](https://img.shields.io/badge/🤖_1--Prompt-AI_Agent_Setup-purple.svg)](docs/AI_AGENT_PROMPT.ru.md)
+[![AI Setup](https://img.shields.io/badge/🤖_1--Prompt-AI_Agent_Setup-purple.svg)](../AI_AGENT_PROMPT.ru.md)
 [![Release](https://img.shields.io/badge/Release-v2.0.0-brightgreen.svg)](https://github.com/tody-agent/Touch-Pass/releases/tag/v2.0.0)
 
-[🌐 **English**](README.md) | [🇻🇳 **Tiếng Việt**](README.vi.md) | [🇨🇳 **简体中文**](README.zh.md) | 🇷🇺 **Русский** | [📥 **Скачать TouchPass.exe**](https://github.com/tody-agent/Touch-Pass/releases/download/v2.0.0/TouchPass.exe) | [🌐 **1-Click Web-прошивка**](https://tody-agent.github.io/Touch-Pass/web/flasher/) | [🤖 **1-Prompt AI Agent Настройка (RU)**](docs/AI_AGENT_PROMPT.ru.md)
+[🌐 **English**](../../README.md) | [🇻🇳 **Tiếng Việt**](README.vi.md) | [🇨🇳 **简体中文**](README.zh.md) | 🇷🇺 **Русский** | [📥 **Скачать TouchPass.exe**](https://github.com/tody-agent/Touch-Pass/releases/download/v2.0.0/TouchPass.exe) | [🌐 **1-Click Web-прошивка**](https://tody-agent.github.io/Touch-Pass/web/flasher/) | [🤖 **1-Prompt AI Agent Настройка (RU)**](../AI_AGENT_PROMPT.ru.md)
 
 <br />
 
-![TouchPass Hero](assets/demo/02-mac-mini-claude-accept-v2.png)
+![TouchPass Hero](../../assets/demo/02-mac-mini-claude-accept-v2.png)
 
 > **Принцип работы:** Когда в вашем терминале появляется запрос на подтверждение действия, коснитесь зарегистрированным пальцем. TouchPass отправляет событие клавиши `y` и нажатие Enter непосредственно в активное поле ввода. Примечание: TouchPass передаёт стандартные нажатия клавиш USB HID клавиатуры в сфокусированное окно; он не может кликать по кнопкам графического интерфейса (GUI).
 
@@ -86,7 +86,7 @@
 Прошейте прошивку ESP32-S3 в 1 клик на [🌐 **tody-agent.github.io/Touch-Pass/web/flasher/**](https://tody-agent.github.io/Touch-Pass/web/flasher/).
 
 ### 🤖 1-Prompt AI Agent Настройка
-Передайте стандартный промпт вашему AI-ассистенту. См. [🤖 **1-Prompt AI Agent Интеграция**](docs/AI_AGENT_PROMPT.ru.md) | [🌐 **English**](docs/AI_AGENT_PROMPT.md) | [🇻🇳 **Tiếng Việt**](docs/AI_AGENT_PROMPT.vi.md).
+Передайте стандартный промпт вашему AI-ассистенту. См. [🤖 **1-Prompt AI Agent Интеграция**](../AI_AGENT_PROMPT.ru.md) | [🌐 **English**](../AI_AGENT_PROMPT.md) | [🇻🇳 **Tiếng Việt**](../AI_AGENT_PROMPT.vi.md).
 
 ### Windows
 1. Скачайте **[TouchPass.exe](https://github.com/tody-agent/Touch-Pass/releases/download/v2.0.0/TouchPass.exe)** или клонируйте репозиторий:
@@ -111,7 +111,7 @@
 
 ## 🎬 Главные возможности и визуальная демонстрация
 
-![Обзор функций TouchPass](assets/demo/04-features.png)
+![Обзор функций TouchPass](../../assets/demo/04-features.png)
 
 - **Интерактивный мастер из 4 шагов**: Настройка и запуск за 5 минут благодаря автоматическому определению порта и проверке оборудования.
 - **Защита двойным касанием (Double-Touch Guard)**: Действия без паролей требуют повторного касания того же пальца в течение 3 секунд для защиты от случайных нажатий.
@@ -121,20 +121,20 @@
 
 ## 📖 Подробные руководства и документация
 
-- 🤖 **[1-Prompt AI Agent Руководство по интеграции](docs/AI_AGENT_PROMPT.ru.md)** | **[🌐 English Version](docs/AI_AGENT_PROMPT.md)** | **[🇻🇳 Bản Tiếng Việt](docs/AI_AGENT_PROMPT.vi.md)** | **[🇨🇳 简体中文](docs/AI_AGENT_PROMPT.zh.md)**
+- 🤖 **[1-Prompt AI Agent Руководство по интеграции](../AI_AGENT_PROMPT.ru.md)** | **[🌐 English Version](../AI_AGENT_PROMPT.md)** | **[🇻🇳 Bản Tiếng Việt](../AI_AGENT_PROMPT.vi.md)** | **[🇨🇳 简体中文](../AI_AGENT_PROMPT.zh.md)**
   *Автоматическая настройка за 1 промпт для Claude Code, Cursor, Antigravity, OpenCode и ChatGPT CLI на Windows, macOS и Linux.*
 
-- 🛠️ **[Руководство по сборке и подключению](docs/BUILD_GUIDE.ru.md)** | **[🌐 English Version](docs/BUILD_GUIDE.md)** | **[🇻🇳 Bản Tiếng Việt](docs/BUILD_GUIDE.vi.md)** | **[🇨🇳 简体中文](docs/BUILD_GUIDE.zh.md)**
+- 🛠️ **[Руководство по сборке и подключению](../BUILD_GUIDE.ru.md)** | **[🌐 English Version](../BUILD_GUIDE.md)** | **[🇻🇳 Bản Tiếng Việt](../BUILD_GUIDE.vi.md)** | **[🇨🇳 简体中文](../BUILD_GUIDE.zh.md)**
   *Схема распиновки ESP32-S3 Super Mini и ZW101, сборка корпуса, компиляция через `arduino-cli`, модель безопасности UART и запуск в 1 клик на Windows.*
 
-- 📖 **[Руководство пользователя и пресеты AI](docs/USER_GUIDE.ru.md)** | **[🌐 English Version](docs/USER_GUIDE.md)** | **[🇻🇳 Bản Tiếng Việt](docs/USER_GUIDE.vi.md)** | **[🇨🇳 简体中文](docs/USER_GUIDE.zh.md)**
+- 📖 **[Руководство пользователя и пресеты AI](../USER_GUIDE.ru.md)** | **[🌐 English Version](../USER_GUIDE.md)** | **[🇻🇳 Bản Tiếng Việt](../USER_GUIDE.vi.md)** | **[🇨🇳 简体中文](../USER_GUIDE.zh.md)**
   *Регистрация отпечатков пальцев, интерактивный рекордер горячих клавиш, правила защиты двойным касанием, хранение паролей в ОС и устранение неполадок.*
 
 ---
 
 ## 🙏 Благодарности и лицензия
 
-TouchPass — это программное обеспечение с открытым исходным кодом, распространяемое по **[Лицензии MIT](LICENSE)**.
+TouchPass — это программное обеспечение с открытым исходным кодом, распространяемое по **[Лицензии MIT](../../LICENSE)**.
 
 Особая благодарность **[Zimeng Xiong](https://github.com/ZimengXiong)** (создателю оригинального проекта **[TinyTouch](https://github.com/ZimengXiong/TinyTouch)**), чья архитектура открытого биометрического USB-устройства сделала TouchPass возможным. Проект создан с ❤️ на базе исходного кода ZimengXiong/TinyTouch.
 
@@ -148,4 +148,4 @@ TouchPass is provided **"AS IS"**, without warranty of any kind, express or impl
 
 TouchPass được cung cấp **"NGUYÊN TRẠNG" (AS IS)** và không có bất kỳ bảo hành nào. Người dùng tự chịu toàn bộ trách nhiệm đối với việc lắp ráp phần cứng vật lý, kiểm tra sơ đồ đấu nối dây, an toàn điện áp, hiệu chuẩn cảm biến vân tay quang học и bảo đảm an toàn truy cập vật lý cho thiết bị.
 
-Подробные сведения об архитектуре безопасности, поддерживаемых версиях, процедуре сообщения об уязвимостях и полный текст юридического дисклеймера см. в нашей **[Политике безопасности (SECURITY.ru.md)](SECURITY.ru.md)** | **[SECURITY.md](SECURITY.md)** | **[SECURITY.vi.md](SECURITY.vi.md)** | **[SECURITY.zh.md](SECURITY.zh.md)**.
+Подробные сведения об архитектуре безопасности, поддерживаемых версиях, процедуре сообщения об уязвимостях и полный текст юридического дисклеймера см. в нашей **[Политике безопасности (SECURITY.ru.md)](SECURITY.ru.md)** | **[SECURITY.md](../../SECURITY.md)** | **[SECURITY.vi.md](SECURITY.vi.md)** | **[SECURITY.zh.md](SECURITY.zh.md)**.

@@ -12,7 +12,7 @@
 [![AI Setup](https://img.shields.io/badge/🤖_1--Prompt-AI_Agent_Setup-purple.svg)](docs/AI_AGENT_PROMPT.md)
 [![Release](https://img.shields.io/badge/Release-v2.0.0-brightgreen.svg)](https://github.com/tody-agent/Touch-Pass/releases/tag/v2.0.0)
 
-🌐 **English** | [🇻🇳 **Tiếng Việt**](README.vi.md) | [🇨🇳 **简体中文**](README.zh.md) | [🇷🇺 **Русский**](README.ru.md) | [📥 **Download TouchPass.exe**](https://github.com/tody-agent/Touch-Pass/releases/download/v2.0.0/TouchPass.exe) | [🌐 **1-Click Web Flasher**](https://tody-agent.github.io/Touch-Pass/web/flasher/) | [🤖 **1-Prompt AI Agent Setup (EN)**](docs/AI_AGENT_PROMPT.md) | [🇻🇳 **(VI)**](docs/AI_AGENT_PROMPT.vi.md) | [🇨🇳 **(ZH)**](docs/AI_AGENT_PROMPT.zh.md) | [🇷🇺 **(RU)**](docs/AI_AGENT_PROMPT.ru.md)
+🌐 **English** | [🇻🇳 **Tiếng Việt**](docs/translations/README.vi.md) | [🇨🇳 **简体中文**](docs/translations/README.zh.md) | [🇷🇺 **Русский**](docs/translations/README.ru.md) | [📥 **Download TouchPass.exe**](https://github.com/tody-agent/Touch-Pass/releases/download/v2.0.0/TouchPass.exe) | [🌐 **1-Click Web Flasher**](https://tody-agent.github.io/Touch-Pass/web/flasher/) | [🤖 **1-Prompt AI Agent Setup (EN)**](docs/AI_AGENT_PROMPT.md) | [🇻🇳 **(VI)**](docs/AI_AGENT_PROMPT.vi.md) | [🇨🇳 **(ZH)**](docs/AI_AGENT_PROMPT.zh.md) | [🇷🇺 **(RU)**](docs/AI_AGENT_PROMPT.ru.md)
 
 <br />
 
@@ -147,5 +147,5 @@ TouchPass được cung cấp **"NGUYÊN TRẠNG" (AS IS)** và không có bất
 
 For full security architecture details, supported versions, vulnerability reporting procedures, and complete legal disclaimers, please review our **[Security Policy & Legal Disclaimer (SECURITY.md)](SECURITY.md)**.
 
-Chi tiết về kiến trúc bảo mật, các phiên bản được hỗ trợ, quy trình báo cáo lỗ hổng bảo mật và toàn văn tuyên bố miễn trừ trách nhiệm pháp lý có tại **[Chính Sách Bảo Mật (SECURITY.vi.md)](SECURITY.vi.md)**.
+Chi tiết về kiến trúc bảo mật, các phiên bản được hỗ trợ, quy trình báo cáo lỗ hổng bảo mật và toàn văn tuyên bố miễn trừ trách nhiệm pháp lý có tại **[Chính Sách Bảo Mật (docs/translations/SECURITY.vi.md)](docs/translations/SECURITY.vi.md)**.
 

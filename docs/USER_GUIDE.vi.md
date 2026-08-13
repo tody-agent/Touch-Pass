@@ -133,7 +133,7 @@ TouchPass được cung cấp **"NGUYÊN TRẠNG" (AS IS)** và không có bất
 
 TouchPass is provided **"AS IS"**, without warranty of any kind, express or implied. Users assume full responsibility for physical hardware assembly, wiring diagram verification, voltage levels (3.3V vs 5V safety), optical biometric sensor calibration, and maintaining physical device security.
 
-- 🇻🇳 **Tiếng Việt**: Chi tiết về quy trình báo cáo lỗ hổng, các phiên bản hỗ trợ và miễn trừ trách nhiệm pháp lý, vui lòng tham khảo **[Chính Sách Bảo Mật (SECURITY.vi.md)](../SECURITY.vi.md)**.
+- 🇻🇳 **Tiếng Việt**: Chi tiết về quy trình báo cáo lỗ hổng, các phiên bản hỗ trợ và miễn trừ trách nhiệm pháp lý, vui lòng tham khảo **[Chính Sách Bảo Mật (SECURITY.vi.md)](translations/SECURITY.vi.md)**.
 - 🇺🇸 **English**: For full security architecture details, supported versions, vulnerability reporting, and limitation of liability, see **[Security Policy & Legal Disclaimer (SECURITY.md)](../SECURITY.md)**.
-- 🇨🇳 **简体中文**: **[安全策略与法律声明 (SECURITY.zh.md)](../SECURITY.zh.md)**.
-- 🇷🇺 **Русский**: **[Политика безопасности (SECURITY.ru.md)](../SECURITY.ru.md)**.
+- 🇨🇳 **简体中文**: **[安全策略与法律声明 (SECURITY.zh.md)](translations/SECURITY.zh.md)**.
+- 🇷🇺 **Русский**: **[Политика безопасности (SECURITY.ru.md)](translations/SECURITY.ru.md)**.

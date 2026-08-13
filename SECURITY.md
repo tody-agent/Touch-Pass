@@ -1,6 +1,6 @@
 # 🛡️ TouchPass Security Policy & Legal Disclaimer
 
-🌐 **English** | [🇻🇳 **Tiếng Việt**](SECURITY.vi.md) | [🇨🇳 **简体中文**](SECURITY.zh.md) | [🇷🇺 **Русский**](SECURITY.ru.md)
+🌐 **English** | [🇻🇳 **Tiếng Việt**](docs/translations/SECURITY.vi.md) | [🇨🇳 **简体中文**](docs/translations/SECURITY.zh.md) | [🇷🇺 **Русский**](docs/translations/SECURITY.ru.md)
 
 ---
 

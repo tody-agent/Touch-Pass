@@ -1,6 +1,6 @@
 # 🛡️ Политика безопасности и юридический дисклеймер TouchPass
 
-[🌐 **English**](SECURITY.md) | [🇻🇳 **Tiếng Việt**](SECURITY.vi.md) | [🇨🇳 **简体中文**](SECURITY.zh.md) | 🇷🇺 **Русский**
+[🌐 **English**](../../SECURITY.md) | [🇻🇳 **Tiếng Việt**](SECURITY.vi.md) | [🇨🇳 **简体中文**](SECURITY.zh.md) | 🇷🇺 **Русский**
 
 ---
 

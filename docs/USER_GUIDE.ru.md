@@ -135,5 +135,5 @@ TouchPass is provided **"AS IS"** without warranties of any kind, express or imp
 TouchPass được cung cấp **"NGUYÊN TRẠNG" (AS IS)** và không có bất kỳ bảo hành nào. Người dùng tự chịu toàn bộ trách nhiệm đối với việc đấu nối phần cứng vật lý, an toàn nguồn 3.3V, hiệu chuẩn cảm biến vân tay quang học и bảo vệ thiết bị.
 
 - 🇺🇸 **English**: Полные сведения об архитектуре безопасности и дисклеймер см. в **[Security Policy & Legal Disclaimer (SECURITY.md)](../SECURITY.md)**.
-- 🇷🇺 **Русский**: Полные сведения о безопасности см. в файле **[Политика безопасности (SECURITY.ru.md)](../SECURITY.ru.md)**.
-- 🇻🇳 **Tiếng Việt**: Chi tiết về quy trình bảo mật xem tại **[Chính Sách Bảo Mật (SECURITY.vi.md)](../SECURITY.vi.md)**.
+- 🇷🇺 **Русский**: Полные сведения о безопасности см. в файле **[Политика безопасности (SECURITY.ru.md)](translations/SECURITY.ru.md)**.
+- 🇻🇳 **Tiếng Việt**: Chi tiết về quy trình bảo mật xem tại **[Chính Sách Bảo Mật (SECURITY.vi.md)](translations/SECURITY.vi.md)**.

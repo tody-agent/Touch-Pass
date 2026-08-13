@@ -1,14 +1,14 @@
-[🌐 **English**](README.md) | 🇻🇳 **Tiếng Việt** | [🌐 **1-Click Web Flasher**](https://tody-agent.github.io/Touch-Pass/web/flasher/) | [🤖 **Cài đặt AI Agent (VI)**](docs/AI_AGENT_PROMPT.vi.md) | [🌐 **(EN)**](docs/AI_AGENT_PROMPT.md)
+[🌐 **English**](../../README.md) | 🇻🇳 **Tiếng Việt** | [🌐 **1-Click Web Flasher**](https://tody-agent.github.io/Touch-Pass/web/flasher/) | [🤖 **Cài đặt AI Agent (VI)**](../AI_AGENT_PROMPT.vi.md) | [🌐 **(EN)**](../AI_AGENT_PROMPT.md)
 
 > **Cho mỗi ngón tay một siêu năng lực.**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Hardware](https://img.shields.io/badge/Hardware-ESP32--S3-orange.svg)](docs/BUILD_GUIDE.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](../../LICENSE)
+[![Hardware](https://img.shields.io/badge/Hardware-ESP32--S3-orange.svg)](../BUILD_GUIDE.md)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB.svg)](https://python.org)
 [![Web Flasher](https://img.shields.io/badge/🌐_1--Click-Web_Flasher-success.svg)](https://tody-agent.github.io/Touch-Pass/web/flasher/)
-[![AI Setup](https://img.shields.io/badge/🤖_1--Prompt-AI_Agent_Setup-purple.svg)](docs/AI_AGENT_PROMPT.vi.md)
+[![AI Setup](https://img.shields.io/badge/🤖_1--Prompt-AI_Agent_Setup-purple.svg)](../AI_AGENT_PROMPT.vi.md)
 
-![TouchPass Web Portal Hero Showcase](assets/demo/01-hero-showcase-v2.png)
+![TouchPass Web Portal Hero Showcase](../../assets/demo/01-hero-showcase-v2.png)
 
 ---
 
@@ -56,7 +56,7 @@ Máy tính của bạn nhận diện TouchPass như một **bàn phím USB phầ
 ### 1. 🤖 Tăng tốc Lập trình cùng Trợ lý AI (AI Pair Programming)
 Khi làm việc với các công cụ CLI AI như Claude Code, việc chấp nhận gợi ý lệnh đòi hỏi phải bấm `y` và `Enter` liên tục.
 
-![TouchPass xác nhận prompt trên Mac mini](assets/demo/02-mac-mini-claude-accept-v2.png)
+![TouchPass xác nhận prompt trên Mac mini](../../assets/demo/02-mac-mini-claude-accept-v2.png)
 
 > **Cách hoạt động:** Khi terminal hỏi xác nhận, bạn chỉ cần chạm nhẹ ngón tay đã đăng ký. TouchPass gửi tín hiệu bàn phím HID gõ chữ `y` tiếp nối bởi phím Enter directly vào terminal-style prompt của bạn. Lưu ý: TouchPass gửi phím gõ HID chuẩn vào cửa sổ đang focus; thiết bị không thể click hoặc bấm vào các nút giao diện đồ họa GUI.
 
@@ -90,7 +90,7 @@ Bạn lo lắng việc lỡ tay chạm vào cảm biến sẽ vô tình thực t
 
 ## 🎬 Trải Nghiệm Giao Diện Web Portal
 
-![TouchPass Feature Overview](assets/demo/04-features.png)
+![TouchPass Feature Overview](../../assets/demo/04-features.png)
 
 - **Quy trình Onboarding 4 bước**: Hoàn tất cài đặt chỉ trong 5 phút với các bước hướng dẫn tương tác trực quan.
 - **Thư viện AI Preset**: Tích hợp sẵn mẫu phím tắt 1-click cho Claude Code CLI, Cursor IDE, Claude Desktop và Antigravity IDE.
@@ -102,20 +102,20 @@ Bạn lo lắng việc lỡ tay chạm vào cảm biến sẽ vô tình thực t
 
 Bạn đã sẵn sàng tự tay chế tạo thiết bị TouchPass hoặc khám phá các tùy chỉnh nâng cao? Hãy truy cập các bộ hướng dẫn chi tiết dưới đây:
 
-- 🤖 **[Hướng Dẫn Cài Đặt AI Agent 1-Prompt (Bản Tiếng Việt)](docs/AI_AGENT_PROMPT.vi.md)** | **[🌐 English Version](docs/AI_AGENT_PROMPT.md)**
+- 🤖 **[Hướng Dẫn Cài Đặt AI Agent 1-Prompt (Bản Tiếng Việt)](../AI_AGENT_PROMPT.vi.md)** | **[🌐 English Version](../AI_AGENT_PROMPT.md)**
   *Quy trình tự động hóa cài đặt 1-prompt cho Claude Code, Cursor, Antigravity, OpenCode và ChatGPT CLI trên Windows, macOS và Linux.*
 
-- 🛠️ **[Hướng Dẫn Lắp Ráp & Đấu Nối (Tiếng Anh)](docs/BUILD_GUIDE.md)** | **[🇻🇳 Bản Tiếng Việt](docs/BUILD_GUIDE.vi.md)**
+- 🛠️ **[Hướng Dẫn Lắp Ráp & Đấu Nối (Tiếng Anh)](../BUILD_GUIDE.md)** | **[🇻🇳 Bản Tiếng Việt](../BUILD_GUIDE.vi.md)**
   *Sơ đồ đấu nối chân ZW101 ➔ ESP32-S3, đóng vỏ enclosure, biên dịch firmware `arduino-cli`, và script 1-click launcher trên Windows.*
 
-- 📖 **[Cẩm Nang Sử Dụng & AI Presets (Tiếng Anh)](docs/USER_GUIDE.md)** | **[🇻🇳 Bản Tiếng Việt](docs/USER_GUIDE.vi.md)**
+- 📖 **[Cẩm Nang Sử Dụng & AI Presets (Tiếng Anh)](../USER_GUIDE.md)** | **[🇻🇳 Bản Tiếng Việt](../USER_GUIDE.vi.md)**
   *Hướng dẫn đăng ký vân tay, trình ghi phím tắt tương tác, quy tắc an toàn chạm kép, quản lý mật khẩu Credential Manager và xử lý sự cố.*
 
 ---
 
 ## 🙏 Lời Cảm Ơn Tác Giả Gốc & Bản Quyền
 
-TouchPass là phần mềm mã nguồn mở được phát hành theo giấy phép **[MIT License](LICENSE)**.
+TouchPass là phần mềm mã nguồn mở được phát hành theo giấy phép **[MIT License](../../LICENSE)**.
 
 Trân trọng gửi lời cảm ơn chân thành nhất tới tác giả **[Zimeng Xiong](https://github.com/ZimengXiong)**, người sáng tạo dự án mã nguồn mở **[TinyTouch](https://github.com/ZimengXiong/TinyTouch)**. TouchPass được xây dựng với tình yêu công nghệ dựa trên kiến trúc phần cứng và mã nguồn nền tảng xuất sắc của ZimengXiong/TinyTouch.
 
@@ -129,5 +129,5 @@ TouchPass is provided **"AS IS"**, without warranty of any kind, express or impl
 
 Để biết chi tiết về kiến trúc bảo mật, các phiên bản được hỗ trợ, quy trình báo cáo lỗ hổng bảo mật và toàn văn tuyên bố miễn trừ trách nhiệm pháp lý, vui lòng tham khảo **[Chính Sách Bảo Mật (SECURITY.vi.md)](SECURITY.vi.md)**.
 
-For full security architecture details, supported versions, vulnerability reporting procedures, and complete legal disclaimers, please review our **[Security Policy & Legal Disclaimer (SECURITY.md)](SECURITY.md)**.
+For full security architecture details, supported versions, vulnerability reporting procedures, and complete legal disclaimers, please review our **[Security Policy & Legal Disclaimer (../../SECURITY.md)](../../SECURITY.md)**.
 

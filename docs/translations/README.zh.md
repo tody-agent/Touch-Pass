@@ -4,19 +4,19 @@
 
 ### *为每根手指赋予超级能力。*
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Hardware](https://img.shields.io/badge/Hardware-ESP32--S3-orange.svg)](docs/BUILD_GUIDE.zh.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](../../LICENSE)
+[![Hardware](https://img.shields.io/badge/Hardware-ESP32--S3-orange.svg)](../BUILD_GUIDE.zh.md)
 [![Download Executable](https://img.shields.io/badge/📥_Download-TouchPass.exe_(Windows)-blueviolet.svg)](https://github.com/tody-agent/Touch-Pass/releases/download/v2.0.0/TouchPass.exe)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB.svg)](https://python.org)
 [![Web Flasher](https://img.shields.io/badge/🌐_1--Click-Web_Flasher-success.svg)](https://tody-agent.github.io/Touch-Pass/web/flasher/)
-[![AI Setup](https://img.shields.io/badge/🤖_1--Prompt-AI_Agent_Setup-purple.svg)](docs/AI_AGENT_PROMPT.zh.md)
+[![AI Setup](https://img.shields.io/badge/🤖_1--Prompt-AI_Agent_Setup-purple.svg)](../AI_AGENT_PROMPT.zh.md)
 [![Release](https://img.shields.io/badge/Release-v2.0.0-brightgreen.svg)](https://github.com/tody-agent/Touch-Pass/releases/tag/v2.0.0)
 
-[🌐 **English**](README.md) | [🇻🇳 **Tiếng Việt**](README.vi.md) | 🇨🇳 **简体中文** | [📥 **下载 TouchPass.exe**](https://github.com/tody-agent/Touch-Pass/releases/download/v2.0.0/TouchPass.exe) | [🌐 **1-Click Web 刷机**](https://tody-agent.github.io/Touch-Pass/web/flasher/) | [🤖 **1-Prompt AI Agent 设置 (ZH)**](docs/AI_AGENT_PROMPT.zh.md)
+[🌐 **English**](../../README.md) | [🇻🇳 **Tiếng Việt**](README.vi.md) | 🇨🇳 **简体中文** | [📥 **下载 TouchPass.exe**](https://github.com/tody-agent/Touch-Pass/releases/download/v2.0.0/TouchPass.exe) | [🌐 **1-Click Web 刷机**](https://tody-agent.github.io/Touch-Pass/web/flasher/) | [🤖 **1-Prompt AI Agent 设置 (ZH)**](../AI_AGENT_PROMPT.zh.md)
 
 <br />
 
-![TouchPass Hero](assets/demo/02-mac-mini-claude-accept-v2.png)
+![TouchPass Hero](../../assets/demo/02-mac-mini-claude-accept-v2.png)
 
 > **工作原理：** 当您的终端 Prompt 请求确认许可时，轻触已注册的手指。TouchPass 将直接向当前 Focused 窗口发送原生 USB HID 键盘按键信号，自动输入 `y` 并按下 Enter。注意：TouchPass 发送的是原生 USB HID 键盘按键，无法点击或按压图形界面 (GUI) 按钮元素。
 
@@ -85,7 +85,7 @@
 访问 [🌐 **tody-agent.github.io/Touch-Pass/web/flasher/**](https://tody-agent.github.io/Touch-Pass/web/flasher/)，一键完成 ESP32-S3 固件刷写。
 
 ### 🤖 1-Prompt AI Agent 设置
-将标准化设置 Prompt 提供给您的 AI 编程助手。详情请参阅 [🤖 **1-Prompt AI Agent 集成指南**](docs/AI_AGENT_PROMPT.zh.md)。
+将标准化设置 Prompt 提供给您的 AI 编程助手。详情请参阅 [🤖 **1-Prompt AI Agent 集成指南**](../AI_AGENT_PROMPT.zh.md)。
 
 ### Windows 环境
 1. 下载 **[TouchPass.exe](https://github.com/tody-agent/Touch-Pass/releases/download/v2.0.0/TouchPass.exe)** 或克隆代码仓库：
@@ -110,7 +110,7 @@
 
 ## 🎬 功能亮点与视觉演示
 
-![TouchPass 功能概览](assets/demo/04-features.png)
+![TouchPass 功能概览](../../assets/demo/04-features.png)
 
 - **自助式 4 步引导 (Onboarding)**：通过交互式硬件检测与自动串口发现，可在 5 分钟内快速配置上线。
 - **双击确认安全防护 (Double-Touch Guard)**：非密码类动作需在 3 秒内连续触摸同一手指两次，防止误触操作。
@@ -120,20 +120,20 @@
 
 ## 📖 深度指南与文档
 
-- 🤖 **[1-Prompt AI Agent 集成指南](docs/AI_AGENT_PROMPT.zh.md)** | **[🌐 English Version](docs/AI_AGENT_PROMPT.md)** | **[🇻🇳 Bản Tiếng Việt](docs/AI_AGENT_PROMPT.vi.md)**
+- 🤖 **[1-Prompt AI Agent 集成指南](../AI_AGENT_PROMPT.zh.md)** | **[🌐 English Version](../AI_AGENT_PROMPT.md)** | **[🇻🇳 Bản Tiếng Việt](../AI_AGENT_PROMPT.vi.md)**
   *针对 Windows、macOS 及 Linux 环境下的 Claude Code、Cursor、Antigravity、OpenCode 和 ChatGPT CLI 的 1-Prompt 自动化设置指南。*
 
-- 🛠️ **[硬件构建与接线指南](docs/BUILD_GUIDE.zh.md)** | **[🌐 English Version](docs/BUILD_GUIDE.md)** | **[🇻🇳 Bản Tiếng Việt](docs/BUILD_GUIDE.vi.md)**
+- 🛠️ **[硬件构建与接线指南](../BUILD_GUIDE.zh.md)** | **[🌐 English Version](../BUILD_GUIDE.md)** | **[🇻🇳 Bản Tiếng Việt](../BUILD_GUIDE.vi.md)**
   *ESP32-S3 Super Mini 与 ZW101 接线图、外壳组装、`arduino-cli` 固件编译、未授权 UART 安全模型及 1-Click Windows 启动器设置。*
 
-- 📖 **[用户指南与 AI 预设](docs/USER_GUIDE.zh.md)** | **[🌐 English Version](docs/USER_GUIDE.md)** | **[🇻🇳 Bản Tiếng Việt](docs/USER_GUIDE.vi.md)**
+- 📖 **[用户指南与 AI 预设](../USER_GUIDE.zh.md)** | **[🌐 English Version](../USER_GUIDE.md)** | **[🇻🇳 Bản Tiếng Việt](../USER_GUIDE.vi.md)**
   *指纹录制流程、交互式快捷键录制器、双击安全规则、OS 凭据存储管理及故障排查。*
 
 ---
 
 ## 🙏 致谢与开源协议
 
-TouchPass 是一款基于 **[MIT 许可证](LICENSE)** 开源的软件。
+TouchPass 是一款基于 **[MIT 许可证](../../LICENSE)** 开源的软件。
 
 特别感谢并归功于 **[Zimeng Xiong](https://github.com/ZimengXiong)**（**[TinyTouch](https://github.com/ZimengXiong/TinyTouch)** 的原始创作者），其开源硬件生物识别 USB 架构使 TouchPass 成为可能。本项目基于 ZimengXiong/TinyTouch 代码库用 ❤️ 精心打造。
 
@@ -147,4 +147,4 @@ TouchPass is provided **"AS IS"**, without warranty of any kind, express or impl
 
 TouchPass được cung cấp **"NGUYÊN TRẠNG" (AS IS)** và không có bất kỳ bảo hành nào. Người dùng tự chịu toàn bộ trách nhiệm đối với việc lắp ráp phần cứng vật lý, kiểm tra sơ đồ đấu nối dây, an toàn điện áp, hiệu chuẩn cảm biến vân tay quang học và bảo đảm an toàn truy cập vật lý cho thiết bị.
 
-有关安全架构细节、受支持版本、漏洞报告流程和完整法律声明，请参阅我们的 **[安全策略与法律声明 (SECURITY.zh.md)](SECURITY.zh.md)** | **[SECURITY.md](SECURITY.md)**。
+有关安全架构细节、受支持版本、漏洞报告流程和完整法律声明，请参阅我们的 **[安全策略与法律声明 (SECURITY.zh.md)](SECURITY.zh.md)** | **[SECURITY.md](../../SECURITY.md)**。

@@ -6,14 +6,16 @@ ROOT = Path(__file__).resolve().parents[1]
 
 # Root docs
 README = ROOT / "README.md"
-README_VI = ROOT / "README.vi.md"
-README_ZH = ROOT / "README.zh.md"
-README_RU = ROOT / "README.ru.md"
-
 SECURITY = ROOT / "SECURITY.md"
-SECURITY_VI = ROOT / "SECURITY.vi.md"
-SECURITY_ZH = ROOT / "SECURITY.zh.md"
-SECURITY_RU = ROOT / "SECURITY.ru.md"
+
+# Translations in docs/translations/
+README_VI = ROOT / "docs" / "translations" / "README.vi.md"
+README_ZH = ROOT / "docs" / "translations" / "README.zh.md"
+README_RU = ROOT / "docs" / "translations" / "README.ru.md"
+
+SECURITY_VI = ROOT / "docs" / "translations" / "SECURITY.vi.md"
+SECURITY_ZH = ROOT / "docs" / "translations" / "SECURITY.zh.md"
+SECURITY_RU = ROOT / "docs" / "translations" / "SECURITY.ru.md"
 
 # Guides in docs/
 BUILD_GUIDE = ROOT / "docs" / "BUILD_GUIDE.md"
