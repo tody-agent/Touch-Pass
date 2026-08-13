@@ -8,7 +8,7 @@
 [![Web Flasher](https://img.shields.io/badge/🌐_1--Click-Web_Flasher-success.svg)](https://tody-agent.github.io/Touch-Pass/web/flasher/)
 [![AI Setup](https://img.shields.io/badge/🤖_1--Prompt-AI_Agent_Setup-purple.svg)](docs/AI_AGENT_PROMPT.md)
 
-![TouchPass Web Portal Hero Showcase](assets/demo/06-touchpass-portal-hero.jpg)
+![TouchPass Web Portal Hero Showcase](assets/demo/01-hero-showcase-v2.png)
 
 ---
 
@@ -116,3 +116,16 @@ Bạn đã sẵn sàng tự tay chế tạo thiết bị TouchPass hoặc khám 
 ## ⚖️ Bản Quyền & Lời Cảm Ơn
 
 TouchPass là phần mềm mã nguồn mở được phát hành theo giấy phép MIT License. Dự án được xây dựng với tình yêu công nghệ dựa trên kiến trúc nền tảng của [ZimengXiong/TinyTouch](https://github.com/ZimengXiong/TinyTouch).
+
+---
+
+## 🛡️ Chính Sách Bảo Mật & Tuyên Bố Miễn Trừ Trách Nhiệm / Security Policy & Legal Disclaimer
+
+TouchPass được cung cấp **"NGUYÊN TRẠNG" (AS IS)** và không có bất kỳ bảo hành nào dưới bất kỳ hình thức nào. Người dùng tự chịu toàn bộ trách nhiệm đối với việc lắp ráp phần cứng vật lý, kiểm tra sơ đồ đấu nối dây, điện áp hoạt động (an toàn nguồn 3.3V so với 5V), hiệu chuẩn cảm biến vân tay quang học và bảo đảm an toàn truy cập vật lý cho thiết bị. TouchPass tích hợp trực tiếp với kho lưu trữ chứng thư bảo mật của hệ điều hành (Windows Credential Manager / macOS Keychain / Linux Secret Service) và giao tiếp qua Serial UART sử dụng xác thực HMAC-SHA256.
+
+TouchPass is provided **"AS IS"**, without warranty of any kind, express or implied. Users assume full responsibility for physical hardware assembly, wiring diagram verification, voltage levels (3.3V vs 5V safety), optical biometric sensor calibration, and maintaining physical device security.
+
+Để biết chi tiết về kiến trúc bảo mật, các phiên bản được hỗ trợ, quy trình báo cáo lỗ hổng bảo mật và toàn văn tuyên bố miễn trừ trách nhiệm pháp lý, vui lòng tham khảo **[Chính Sách Bảo Mật (SECURITY.md)](SECURITY.md)**.
+
+For full security architecture details, supported versions, vulnerability reporting procedures, and complete legal disclaimers, please review our **[Security Policy & Legal Disclaimer (SECURITY.md)](SECURITY.md)**.
+

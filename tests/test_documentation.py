@@ -4,6 +4,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 README = ROOT / "README.md"
+README_VI = ROOT / "README.vi.md"
 BUILD_GUIDE = ROOT / "docs" / "BUILD_GUIDE.md"
 USER_GUIDE = ROOT / "docs" / "USER_GUIDE.md"
 SECURITY = ROOT / "SECURITY.md"
@@ -14,6 +15,7 @@ APPROVED_IMAGES = {
     "04-features.png",
     "05-exploded-view-v3.png",
 }
+
 
 
 class DocumentationTests(unittest.TestCase):
@@ -92,7 +94,7 @@ class DocumentationTests(unittest.TestCase):
         self.assertRegex(text, r"save[\s\S]{0,180}(?:fails|error|reject)")
 
     def test_local_markdown_links_resolve(self):
-        for document in (README, BUILD_GUIDE, USER_GUIDE, SECURITY):
+        for document in (README, README_VI, BUILD_GUIDE, USER_GUIDE, SECURITY):
             text = document.read_text(encoding="utf-8")
             for target in re.findall(r"!?\[[^]]*\]\(([^)]+)\)", text):
                 if target.startswith(("http://", "https://", "#")):
@@ -119,4 +121,17 @@ class DocumentationTests(unittest.TestCase):
         self.assertIn("Reporting a Vulnerability", text)
         self.assertIn("AS IS", text)
         self.assertIn("NGUYÊN TRẠNG", text)
+
+    def test_disclaimer_embedded_in_docs(self):
+        for doc_path, expected_link in [
+            (README, "SECURITY.md"),
+            (README_VI, "SECURITY.md"),
+            (USER_GUIDE, "../SECURITY.md"),
+        ]:
+            with self.subTest(doc=doc_path.name):
+                text = doc_path.read_text(encoding="utf-8")
+                self.assertIn("AS IS", text)
+                self.assertIn("NGUYÊN TRẠNG", text)
+                self.assertIn(expected_link, text)
+
 

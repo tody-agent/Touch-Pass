@@ -135,3 +135,16 @@ Pass the standardized setup prompt to your AI coding assistant. See [🤖 **1-Pr
 TouchPass is open-source software licensed under the **[MIT License](LICENSE)**.
 
 Built with ❤️ upon the foundational architecture of **[ZimengXiong/TinyTouch](https://github.com/ZimengXiong/TinyTouch)**.
+
+---
+
+## 🛡️ Security Policy & Legal Disclaimer / Tuyên Bố Miễn Trừ Trách Nhiệm
+
+TouchPass is provided **"AS IS"**, without warranty of any kind, express or implied. Users assume full responsibility for physical hardware assembly, wiring diagram verification, voltage levels (3.3V vs 5V safety), optical biometric sensor calibration, and maintaining physical device security. TouchPass integrates directly with OS secure credential stores (Windows Credential Manager / macOS Keychain / Linux Secret Service) and communicates over Serial UART using HMAC-SHA256 challenge-response authentication.
+
+TouchPass được cung cấp **"NGUYÊN TRẠNG" (AS IS)** và không có bất kỳ bảo hành nào. Người dùng tự chịu toàn bộ trách nhiệm đối với việc lắp ráp phần cứng vật lý, kiểm tra sơ đồ đấu nối dây, an toàn điện áp, hiệu chuẩn cảm biến vân tay quang học và bảo đảm an toàn truy cập vật lý cho thiết bị.
+
+For full security architecture details, supported versions, vulnerability reporting procedures, and complete legal disclaimers, please review our **[Security Policy & Legal Disclaimer (SECURITY.md)](SECURITY.md)**.
+
+Chi tiết về kiến trúc bảo mật, các phiên bản được hỗ trợ, quy trình báo cáo lỗ hổng bảo mật và toàn văn tuyên bố miễn trừ trách nhiệm pháp lý có tại **[Chính Sách Bảo Mật (SECURITY.md)](SECURITY.md)**.
+

@@ -123,3 +123,15 @@ The Web Portal contains a real-time event log monitor with color-coded badges:
 | Portal shows `Disconnected` | USB serial port not opened | Check USB data cable and ensure `USB CDC On Boot` is enabled in firmware. |
 | Sensor LED remains Off | Power wiring issue | Recheck `V_TOUCH` and `VCC` connections to `3V3`. |
 | Action save fails or rejects | Exceeded limit | Ensure macro sequence is within 16 steps and 256 encoded bytes. |
+
+---
+
+## 9. 🛡️ Security Policy & Legal Disclaimer / Tuyên Bố Miễn Trừ Trách Nhiệm
+
+TouchPass is provided **"AS IS"** without warranties of any kind, express or implied. Users assume full responsibility for physical hardware assembly, wiring diagram verification, voltage safety (3.3V power rails), biometric sensor calibration, and physical credential security.
+
+TouchPass được cung cấp **"NGUYÊN TRẠNG" (AS IS)** và không có bất kỳ bảo hành nào. Người dùng tự chịu toàn bộ trách nhiệm đối với việc đấu nối phần cứng vật lý, an toàn nguồn 3.3V, hiệu chuẩn cảm biến vân tay quang học và bảo vệ thiết bị.
+
+- 🇺🇸 **English**: For full security architecture details, supported versions, vulnerability reporting, and limitation of liability, see **[Security Policy & Legal Disclaimer (SECURITY.md)](../SECURITY.md)**.
+- 🇻🇳 **Tiếng Việt**: Chi tiết về quy trình báo cáo lỗ hổng, các phiên bản hỗ trợ và miễn trừ trách nhiệm pháp lý, vui lòng tham khảo **[Chính Sách Bảo Mật (SECURITY.md)](../SECURITY.md)**.
+
