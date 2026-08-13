@@ -3,34 +3,210 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>tinyTouch Portal</title>
+    <title>TouchPass Portal</title>
     <link rel="stylesheet" href="/styles.css">
     <script src="/app.js" defer></script>
   </head>
   <body>
     <header class="topbar">
-      <div>
-        <p class="eyebrow">ESP32-S3 · ZW101</p>
-        <h1>tinyTouch Portal</h1>
-        <p class="subtitle">Mười ngón tay, mười hành động — bí mật vẫn nằm trong Keychain.</p>
+      <div class="brand-container">
+        <div>
+          <p class="eyebrow">ESP32-S3 · ZW101</p>
+          <h1>TouchPass Portal</h1>
+          <p class="subtitle">Mười ngón tay, mười hành động — Bảo mật sinh trắc học TouchPass.</p>
+        </div>
+        <div id="device-status" class="status status-offline" aria-live="polite">Đang tìm thiết bị…</div>
       </div>
-      <div id="device-status" class="status status-offline" aria-live="polite">Đang tìm thiết bị…</div>
+      
+      <nav class="nav-tabs" aria-label="Menu điều hướng chính">
+        <button class="tab-button active" data-tab="onboarding" type="button">🚀 Hướng dẫn ban đầu</button>
+        <button class="tab-button" data-tab="slots" type="button">🔑 Quản lý Vân tay (Slots)</button>
+        <button class="tab-button" data-tab="debug" type="button">⚡ Debug & Logs</button>
+        <button class="tab-button" data-tab="guide" type="button">📚 Hướng dẫn & Mẫu</button>
+      </nav>
     </header>
 
     <main>
-      <section class="notice" aria-label="Lưu ý an toàn">
-        <strong>Chạm kép bảo vệ thao tác xác nhận.</strong>
-        Password chạy sau một lần chạm; Accept, Enter, Escape và macro tùy chỉnh cần chạm lại cùng ngón trong 3 giây.
+      <!-- Tab 1: Onboarding Wizard -->
+      <section id="tab-onboarding" class="tab-content active" aria-label="Hướng dẫn ban đầu">
+        <div class="wizard-header">
+          <h2>Chào mừng đến với TouchPass</h2>
+          <p>Hoàn thành 3 bước bên dưới để cài đặt và trải nghiệm thiết bị xác thực vân tay USB HID TouchPass.</p>
+        </div>
+
+        <div class="wizard-steps">
+          <!-- Step 1 Card: Test USB HID -->
+          <article id="step-1" class="wizard-card">
+            <div class="wizard-step-badge">Bước 1</div>
+            <h3>Test USB HID Keyboard Output</h3>
+            <p>TouchPass giả lập bàn phím USB HID phần cứng. Nhấp vào ô văn bản bên dưới và nhấn nút thử nghiệm để kiểm tra tính năng mô phỏng phím gõ.</p>
+            <div class="wizard-action-box">
+              <input type="text" id="hid-test-input" placeholder="Thử nghiệm nhập ký tự tại đây..." autocomplete="off">
+              <button id="btn-test-hid" class="button button-primary" type="button">Thử gõ USB HID (Test)</button>
+            </div>
+          </article>
+
+          <!-- Step 2 Card: Wiring Guide -->
+          <article id="step-2" class="wizard-card">
+            <div class="wizard-step-badge">Bước 2</div>
+            <h3>Hướng dẫn đấu nối phần cứng ZW101</h3>
+            <p>Sơ đồ kết nối giữa vi điều khiển ESP32-S3 và cảm biến vân tay ZW101:</p>
+            <table class="wiring-table">
+              <thead>
+                <tr>
+                  <th>Cảm biến ZW101</th>
+                  <th>Chân ESP32-S3</th>
+                  <th>Ghi chú</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>VCC</td>
+                  <td>3.3V</td>
+                  <td>Nguồn cấp cảm biến</td>
+                </tr>
+                <tr>
+                  <td>GND</td>
+                  <td>GND</td>
+                  <td>Mass chung</td>
+                </tr>
+                <tr>
+                  <td>TX</td>
+                  <td>RX (GPIO 18)</td>
+                  <td>Truyền dữ liệu Serial</td>
+                </tr>
+                <tr>
+                  <td>RX</td>
+                  <td>TX (GPIO 17)</td>
+                  <td>Nhận dữ liệu Serial</td>
+                </tr>
+                <tr>
+                  <td>Touch / IRQ</td>
+                  <td>GPIO 15</td>
+                  <td>Tín hiệu ngắt cảm ứng</td>
+                </tr>
+              </tbody>
+            </table>
+          </article>
+
+          <!-- Step 3 Card: Finger Enrollment -->
+          <article id="step-3" class="wizard-card">
+            <div class="wizard-step-badge">Bước 3</div>
+            <h3>Đăng ký vân tay & Cấu hình Slot</h3>
+            <p>TouchPass hỗ trợ lưu trữ tới 10 mẫu vân tay. Mỗi ngón tay tương ứng với một hành động (nhập mật khẩu, phím Enter, phím Escape, hoặc macro văn bản tùy chỉnh).</p>
+            <div class="wizard-action-box">
+              <button class="button button-primary" data-nav-target="slots" type="button">Chuyển tới Quản lý Vân tay (Slots)</button>
+            </div>
+          </article>
+        </div>
       </section>
 
-      <section class="section-heading">
-        <div>
-          <p class="eyebrow">Cấu hình vân tay</p>
-          <h2>Slot 1–10</h2>
-        </div>
-        <button id="refresh" class="button button-secondary" type="button">Làm mới</button>
+      <!-- Tab 2: Fingerprint Slots -->
+      <section id="tab-slots" class="tab-content" aria-label="Quản lý Vân tay">
+        <section class="notice" aria-label="Lưu ý an toàn">
+          <strong>Chạm kép bảo vệ thao tác xác nhận.</strong>
+          Password chạy sau một lần chạm; Accept, Enter, Escape và macro tùy chỉnh cần chạm lại cùng ngón trong 3 giây.
+        </section>
+
+        <section class="section-heading">
+          <div>
+            <p class="eyebrow">Cấu hình vân tay</p>
+            <h2>Slot 1–10</h2>
+          </div>
+          <button id="refresh" class="button button-secondary" type="button">Làm mới</button>
+        </section>
+        <section id="finger-grid" class="finger-grid" aria-live="polite"></section>
       </section>
-      <section id="finger-grid" class="finger-grid" aria-live="polite"></section>
+
+      <!-- Tab 3: Debug & Logs -->
+      <section id="tab-debug" class="tab-content" aria-label="Debug & Logs">
+        <div class="debug-container">
+          <div class="telemetry-panel">
+            <div class="telemetry-card">
+              <span class="telemetry-label">Trạng thái thiết bị</span>
+              <span id="telemetry-status" class="telemetry-value">--</span>
+            </div>
+            <div class="telemetry-card">
+              <span class="telemetry-label">Cổng Serial</span>
+              <span id="telemetry-port" class="telemetry-value">--</span>
+            </div>
+            <div class="telemetry-card">
+              <span class="telemetry-label">Cảm biến ZW101</span>
+              <span id="telemetry-sensor" class="telemetry-value">--</span>
+            </div>
+            <div class="telemetry-card">
+              <span class="telemetry-label">Tốc độ Baud</span>
+              <span class="telemetry-value">115200 bps</span>
+            </div>
+          </div>
+          
+          <div class="log-header">
+            <h3>Nhật ký hệ thống (Live Logs)</h3>
+            <div class="log-actions">
+              <button id="btn-clear-logs" class="button button-quiet" type="button">Xóa log</button>
+              <button id="btn-pause-logs" class="button button-quiet" type="button">Tạm dừng</button>
+            </div>
+          </div>
+          <div id="log-console" class="log-console" role="log" aria-live="polite">
+            <div class="log-entry log-info"><span class="log-time">[00:00:00]</span> <span class="log-tag log-tag-system">SYSTEM</span> Sẵn sàng kết nối TouchPass Debug Portal...</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tab 4: User Guide & Examples -->
+      <section id="tab-guide" class="tab-content" aria-label="Hướng dẫn & Mẫu">
+        <div class="guide-header">
+          <h2>Hướng dẫn sử dụng & Kịch bản mẫu</h2>
+          <p>Khám phá các kịch bản tự động hóa phổ biến được tối ưu cho TouchPass.</p>
+        </div>
+
+        <div class="guide-grid">
+          <!-- Case 1: Terminal Sudo -->
+          <article class="guide-card">
+            <div class="guide-icon">🖥️</div>
+            <h3>Terminal Sudo</h3>
+            <p>Nhập mật khẩu administrator tự động khi chạy lệnh <code>sudo</code> trong macOS Terminal hoặc iTerm2.</p>
+            <div class="guide-snippet">
+              <code>Preset: Mật khẩu + Enter</code>
+              <code>Chạm 1 lần -> Tự động điền mật khẩu & gửi phím Enter</code>
+            </div>
+          </article>
+
+          <!-- Case 2: Git Commit 'y/N' -->
+          <article class="guide-card">
+            <div class="guide-icon">🔀</div>
+            <h3>Git Commit 'y/N'</h3>
+            <p>Xác nhận câu hỏi 'y/N' trên Terminal khi commit code hoặc push git với chế độ chạm kép an toàn.</p>
+            <div class="guide-snippet">
+              <code>Preset: Accept (Y + Enter)</code>
+              <code>Chạm lần 1 -> Chờ chạm xác nhận trong 3s</code>
+              <code>Chạm lần 2 -> Gửi 'y' + Enter</code>
+            </div>
+          </article>
+
+          <!-- Case 3: Custom Macro -->
+          <article class="guide-card">
+            <div class="guide-icon">⚙️</div>
+            <h3>Custom Macro</h3>
+            <p>Chuỗi hành động kết hợp giữa gõ chữ ASCII, phím Tab/Enter và khoảng hoãn delay thời gian tùy chỉnh.</p>
+            <div class="guide-snippet">
+              <code>Preset: Macro tùy chỉnh</code>
+              <code>Bước 1: Text 'admin' -> Bước 2: Key 'Tab' -> Bước 3: Delay 250ms -> Bước 4: Key 'Enter'</code>
+            </div>
+          </article>
+
+          <!-- Case 4: Password Autofill -->
+          <article class="guide-card">
+            <div class="guide-icon">🔐</div>
+            <h3>Password Autofill</h3>
+            <p>Điền mật khẩu bảo mật dài, phức tạp lưu trong Keychain một cách chính xác mà không lo bị lộ phím.</p>
+            <div class="guide-snippet">
+              <code>Preset: Mật khẩu + Enter</code>
+              <code>Lưu trữ an toàn trong macOS Keychain / Chạm ngón tay trỏ để đăng nhập ngay lập tức</code>
+            </div>
+          </article>
+        </div>
+      </section>
     </main>
 
     <dialog id="profile-dialog">
