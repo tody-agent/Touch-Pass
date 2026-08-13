@@ -212,6 +212,79 @@
             <button class="button button-secondary btn-apply-template" data-preset="password" data-label="Password Autofill" type="button">Áp dụng mẫu này</button>
           </article>
         </div>
+
+        <!-- AI Tools Shortcut Library -->
+        <div class="guide-header" style="margin-top: 36px;">
+          <h2>🤖 AI Tools Shortcut Library</h2>
+          <p>Bộ phím tắt tối ưu cho các công cụ AI Assistant và IDE lập trình. Áp dụng 1-click vào Slot ngón tay.</p>
+        </div>
+
+        <div class="guide-grid">
+          <!-- Card 1: Claude Code CLI -->
+          <article class="guide-card ai-tool-card" data-tool="claude-code">
+            <div class="guide-icon">💻</div>
+            <div class="preset-category">CLI Assistant</div>
+            <h3>Claude Code CLI</h3>
+            <p>Phím tắt điều khiển phiên làm việc dòng lệnh Claude Code CLI.</p>
+            <div class="guide-snippet">
+              <code><span class="shortcut-badge">Ctrl+C</span> Ngắt lệnh · <span class="shortcut-badge">Ctrl+L</span> Clear</code>
+              <code><span class="shortcut-badge">/compact</span> Nén context</code>
+            </div>
+            <button class="button button-secondary btn-apply-preset" data-preset-action='[{"type":"text","value":"/compact"},{"type":"key","key":"enter"}]' data-label="Claude Code: /compact" type="button">Áp dụng phím tắt này</button>
+          </article>
+
+          <!-- Card 2: Cursor IDE -->
+          <article class="guide-card ai-tool-card" data-tool="cursor">
+            <div class="guide-icon">⚡</div>
+            <div class="preset-category">IDE Editor</div>
+            <h3>Cursor IDE</h3>
+            <p>Các tổ hợp phím mở AI Prompt, AI Chat và chuyển focus trong Cursor IDE.</p>
+            <div class="guide-snippet">
+              <code><span class="shortcut-badge">Cmd/Ctrl+K</span> Edit · <span class="shortcut-badge">Cmd/Ctrl+I</span> Composer</code>
+              <code><span class="shortcut-badge">Cmd/Ctrl+L</span> Chat · <span class="shortcut-badge">Shift+Tab</span> Unindent</code>
+            </div>
+            <button class="button button-secondary btn-apply-preset" data-preset-action='[{"type":"key","key":"k","modifiers":2}]' data-label="Cursor: Cmd/Ctrl+K" type="button">Áp dụng phím tắt này</button>
+          </article>
+
+          <!-- Card 3: Claude Desktop -->
+          <article class="guide-card ai-tool-card" data-tool="claude-desktop">
+            <div class="guide-icon">🧡</div>
+            <div class="preset-category">Desktop App</div>
+            <h3>Claude Desktop</h3>
+            <p>Thao tác nhanh trên ứng dụng Claude Desktop cho macOS/Windows.</p>
+            <div class="guide-snippet">
+              <code><span class="shortcut-badge">Cmd/Ctrl+K</span> Quick Search</code>
+              <code><span class="shortcut-badge">Cmd/Ctrl+Shift+O</span> New Chat · <span class="shortcut-badge">Cmd/Ctrl+Shift+C</span> Copy Code</code>
+            </div>
+            <button class="button button-secondary btn-apply-preset" data-preset-action='[{"type":"key","key":"o","modifiers":3}]' data-label="Claude Desktop: New Chat" type="button">Áp dụng phím tắt này</button>
+          </article>
+
+          <!-- Card 4: Antigravity IDE -->
+          <article class="guide-card ai-tool-card" data-tool="antigravity">
+            <div class="guide-icon">🚀</div>
+            <div class="preset-category">AI Workstation</div>
+            <h3>Antigravity IDE</h3>
+            <p>Tổ hợp phím khởi chạy AI Agent, mở panel điều khiển và Command Palette.</p>
+            <div class="guide-snippet">
+              <code><span class="shortcut-badge">Cmd/Ctrl+Shift+A</span> Agent · <span class="shortcut-badge">Cmd/Ctrl+Shift+L</span> Logs</code>
+              <code><span class="shortcut-badge">Cmd/Ctrl+Shift+P</span> Command Palette</code>
+            </div>
+            <button class="button button-secondary btn-apply-preset" data-preset-action='[{"type":"key","key":"a","modifiers":3}]' data-label="Antigravity: AI Agent" type="button">Áp dụng phím tắt này</button>
+          </article>
+
+          <!-- Card 5: OpenCode & Codex CLI -->
+          <article class="guide-card ai-tool-card" data-tool="opencode-codex">
+            <div class="guide-icon">🛠️</div>
+            <div class="preset-category">CLI Agent</div>
+            <h3>OpenCode & Codex CLI</h3>
+            <p>Gửi lệnh trực tiếp hoặc tạo nhiều dòng prompt trong các CLI Agent.</p>
+            <div class="guide-snippet">
+              <code><span class="shortcut-badge">Ctrl+Enter</span> Gửi Prompt lập tức</code>
+              <code><span class="shortcut-badge">Alt+Enter</span> Xuống dòng không gửi</code>
+            </div>
+            <button class="button button-secondary btn-apply-preset" data-preset-action='[{"type":"key","key":"enter","modifiers":2}]' data-label="OpenCode: Ctrl+Enter" type="button">Áp dụng phím tắt này</button>
+          </article>
+        </div>
       </section>
     </main>
 
@@ -249,6 +322,7 @@
             <strong>Các bước macro</strong>
             <span>Tối đa 16 bước</span>
           </div>
+          <div id="shortcut-recorder" class="shortcut-recorder-box"><span class="recorder-prompt">🔴 Bấm vào đây và nhấn tổ hợp phím để bắt phím tự động</span></div>
           <div id="custom-steps"></div>
           <div class="step-actions">
             <button class="button button-quiet" data-add-step="text" type="button">+ Text</button>
