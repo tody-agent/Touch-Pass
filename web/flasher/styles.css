@@ -725,3 +725,29 @@ footer {
     font-size: 10px;
   }
 }
+
+/* Hero Thumbnail Showcase Card */
+.hero-thumb-card {
+  margin: 24px auto 0;
+  max-width: 780px;
+  width: 100%;
+  border-radius: var(--radius);
+  border: 1px solid var(--card-border);
+  background: var(--card);
+  overflow: hidden;
+  box-shadow: var(--shadow), 0 0 24px var(--accent-light);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-thumb-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.7), 0 0 32px rgba(34, 197, 94, 0.25);
+}
+
+.hero-thumb-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
