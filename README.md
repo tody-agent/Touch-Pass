@@ -1,110 +1,126 @@
-# TouchPass
+<div align="center">
+
+# 🖐️ TouchPass
+
+### *Give every finger a superpower.*
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Hardware](https://img.shields.io/badge/Hardware-ESP32--S3-orange.svg)](docs/BUILD_GUIDE.md)
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB.svg)](https://python.org)
+[![Release](https://img.shields.io/badge/Release-v2.0.0-brightgreen.svg)](https://github.com/ZimengXiong/TinyTouch)
 
 🌐 **English** | [🇻🇳 **Tiếng Việt**](README.vi.md)
 
-> **Give every finger a superpower.**
+<br />
+
+![TouchPass Hero](assets/demo/02-mac-mini-claude-accept-v2.png)
+
+> **How it works:** When your terminal-style prompt asks for approval, tap your enrolled finger. TouchPass sends a key action that types `y` followed by enter directly into your prompt. Note: TouchPass sends native USB HID keyboard keystrokes to the focused field; it cannot click or press GUI button elements.
+
+</div>
 
 ---
 
+## ⚡ Problem vs. Solution: Designed for AI Developers
 
-## ⚡ The Story: Why We Built TouchPass
+### 🔴 The Problem: Micro-Interruptions Kill Deep Work
+When pairing with AI agentic CLI tools and IDEs (**Claude Code**, **Cursor**, **Antigravity**, **OpenCode**), your workflow is constantly halted by prompt confirmations:
+> *"Allow execution of `git status`? (y/n)"* or *`Sudo password required`*.
 
-Imagine this: You are in the flow state, building a complex feature with AI coding tools like **Claude Code CLI**, **Cursor**, or **Antigravity**.
+Swapping context, repositioning your hands, typing `y` + `Enter`, or mistyping a 20-character password every 30 seconds breaks your flow state and wastes valuable developer time.
 
-Every 30 seconds, your terminal pauses and asks:
-> *"Allow execution of `git status`? (y/n)"*
+### 🟢 The Solution: Physical Hardware Meets Biometric Speed
+**TouchPass** turns biometric touch into physical keyboard actions. Built on an **ESP32-S3 Super Mini** microcontroller and a **ZW101** optical fingerprint sensor, TouchPass lets you assign a dedicated hardware superpower to each finger:
 
-You reach for your keyboard, type `y`, hit `Enter`, and return your eyes to the code. Then 20 seconds later: *`Sudo password required`*. You stop, type your complex 20-character password, hoping you didn't mistype a symbol.
-
-**These micro-interruptions kill your deep work flow.**
-
-That’s why we created **TouchPass**. 
-
-What if your desk had a physical biometric touch pad where **each finger is assigned a dedicated superpower**?
-- ☝️ **Index finger**: Instantly accepts AI terminal prompts (`y` + Enter).
-- 🖕 **Middle finger**: Types your developer sudo/SSH password from encrypted OS credential store.
-- 🖐️ **Ring finger**: Triggers your custom multi-key macro sequence.
-
-No app switching. No copy-pasting credentials. No typing errors. Just **one tap**, and your hardware executes the action at lightning speed.
+- ☝️ **Index Finger**: Instantly accepts AI terminal prompts (`y` followed by Enter).
+- 🖕 **Middle Finger**: Inputs your developer `sudo` / SSH credentials securely from your OS credential store.
+- 🖐️ **Ring Finger**: Triggers multi-step hotkey macros (`Enter`, `Escape`, `Cmd+K`, custom keystroke sequences).
 
 ---
 
-## 🎯 The Solution: Physical Hardware Meets Biometric Security
+## 🎯 Feature Grid
 
-**TouchPass** is an open-source **USB HID Native + Biometric Authentication Platform** built on an **ESP32-S3 Super Mini** microcontroller and a **ZW101** optical fingerprint sensor.
+| Feature | Capabilities & Architecture | Benefit for AI Workflows |
+| :--- | :--- | :--- |
+| 🔌 **Native USB HID** | Emulates a standard USB physical keyboard hardware via ESP32-S3 stack | Driverless plug-and-play across Windows, macOS & Linux; sends keystrokes into whichever window is currently **focused** |
+| 🖐️ **10 Fingerprint Slots** | ZW101 optical biometric sensor (Slots 01–10) matched locally on-chip | Zero cloud dependency; assign unique macro/password triggers to each finger |
+| ⌨️ **Interactive Shortcut Recorder** | Web Portal UI (`http://127.0.0.1:8787/`) with live keystroke capture & action builder | Configure single `key`, `text`, `delay` (ms), `enter`, or `escape` action sequences in seconds |
+| 🤖 **AI Tools Preset Library** | Built-in 1-click profiles for **Claude Code CLI**, **Cursor**, **Antigravity**, **OpenCode** | Instant setup for common AI CLI developer prompts and IDE shortcuts |
+| 🚀 **1-Click Launcher** | Automatic Windows batch launcher (`start_touchpass.bat`) & macOS/Linux CLI | Launch local Flask service & unauthenticated UART serial daemon seamlessly |
 
-Unlike software macro apps that require custom background agents on target machines, TouchPass operates at the **hardware level**:
+---
+
+## 🏗️ Architecture & Data Flow
 
 ```text
-┌───────────────────────┐             ┌───────────────────────┐             ┌───────────────────────┐
-│  Physical Finger Touch│ ──────────► │  ESP32-S3 Hardware    │ ──────────► │  Computer / Terminal  │
-│  (Biometric ZW101)    │             │  (USB HID Keyboard)   │             │  (Instant Keystrokes) │
-└───────────────────────┘             └───────────────────────┘             └───────────────────────┘
+┌─────────────────────────┐
+│   Biometric Sensor      │  Fingerprint Touch (ZW101)
+│  (10 Enrolled Finger ID)│
+└───────────┬─────────────┘
+            │ Local Match (ID 01-10)
+            ▼
+┌─────────────────────────┐
+│    ESP32-S3 Hardware    │   HMAC-SHA256 Challenge / Serial UART
+│  (USB HID Keyboard Stack)│ ◄═════════════════════════════════════════► ┌─────────────────────────┐
+└───────────┬─────────────┘                                              │  TouchPass Portal Engine│
+            │ Native Keyboard Keystroke                                  │  (Python Flask / Web UI)│
+            ▼                                                            └───────────┬─────────────┘
+┌─────────────────────────┐                                                          │ Secure Keychain
+│   Host Computer Window  │  Types 'y' + Enter / Passwords / Hotkeys                 ▼
+│ (Claude Code, Terminals)│ ◄───────────────────────────────────────────────── ┌─────────────────────────┐
+└─────────────────────────┘                                                    │   OS Credential Store   │
+                                                                               │(Win Credential/Keychain)│
+                                                                               └─────────────────────────┘
 ```
 
-Your computer recognizes TouchPass as a **standard USB physical keyboard**. It types text, sends hotkeys, executes delays, or inputs passwords into whichever window currently has cursor focus — **zero drivers or target software required**.
+---
+
+## 🚀 Quick Start Guide
+
+### Windows
+1. Clone the repository and navigate into the project directory:
+   ```cmd
+   git clone https://github.com/ZimengXiong/TinyTouch.git
+   cd TouchPass
+   ```
+2. Double-click or run `start_touchpass.bat` from Command Prompt or PowerShell:
+   ```cmd
+   .\start_touchpass.bat
+   ```
+3. Open `http://127.0.0.1:8787/` in your browser to launch the Web Portal.
+
+### macOS / Linux
+1. Install Python dependencies and launch the TouchPass CLI:
+   ```bash
+   pip install -r requirements.txt
+   python3 -m touchpass.cli start
+   ```
+2. Open `http://127.0.0.1:8787/` in your browser.
 
 ---
 
-## 🚀 Key Use Cases: How TouchPass Transforms Your Workflow
-
-### 1. 🤖 AI Pair Programming Accelerator
-When working with AI agentic CLI tools (such as Claude Code), approving suggestions requires pressing `y` and `Enter` repeatedly.
-
-![TouchPass approving a Claude prompt on a Mac mini](assets/demo/02-mac-mini-claude-accept-v2.png)
-
-> **How it works:** When your terminal prompt asks for approval, tap your enrolled finger. TouchPass sends a key action that types `y` followed by Enter directly into your terminal-style prompt. Note: TouchPass sends native USB HID keyboard keystrokes to the focused field; it cannot click or press GUI button elements.
-
-### 2. 🔑 One-Tap Secure Developer Authentication
-Tired of typing complex passwords for `sudo`, SSH keys, database staging environments, or 2FA codes?
-- TouchPass securely retrieves your password from your native OS Credential Store (Windows Credential Manager / macOS Keychain).
-- The payload is encrypted over serial using HMAC-SHA256 and AES-CTR.
-- The hardware inputs the exact password text instantly with zero typing errors.
-
-### 3. ⌨️ Interactive Custom Keystroke & Macro Execution
-Configure up to 10 distinct biometric slots (Slots 01–10) with custom macros:
-- **Key Actions**: Send single key strokes or hotkey combinations like `Enter`, `Escape`, `Ctrl+C`, or `Cmd+K`.
-- **Text Actions**: Type frequently used boilerplate code, git flags, or email templates.
-- **Delay Actions**: Add millisecond delays between keystrokes for multi-step terminal sequences.
-
-### 4. 🛡️ Double-Touch Confirmation Safety Guard
-Worried about accidentally triggering an execution by bumping the sensor? TouchPass includes an intelligent safety engine:
-- **Password actions**: Execute on a single touch.
-- **Non-password actions** (`Enter`, `Escape`, `Accept`, Custom Macros): Require touching the same finger **twice within 3 seconds** to confirm before sending the keystrokes.
-
----
-
-## 💎 Product Values: Why Developers Love TouchPass
-
-- 🚀 **Plug & Play Universal Compatibility**: Works on Windows, macOS, and Linux as a standard USB HID keyboard.
-- 🔐 **Zero-Cloud Local Privacy**: All biometrics are matched locally on the ZW101 sensor core. No fingerprints or passwords ever touch the cloud.
-- ⚡ **Real-Time Telemetry & Web Portal**: Includes a sleek Web Portal (`http://127.0.0.1:8787/`) with an interactive **Shortcut Recorder** and **Live Debug Log Monitor**.
-- 🛠️ **Open Source & Hackable**: Built on the open-source platform [ZimengXiong/TinyTouch](https://github.com/ZimengXiong/TinyTouch).
-
----
-
-## 🎬 Feature Highlights
+## 🎬 Feature Highlights & Visual Tour
 
 ![TouchPass Feature Overview](assets/demo/04-features.png)
 
-- **Self-Serve 4-Step Onboarding**: Get up and running in 5 minutes with interactive hardware checks.
-- **AI Shortcut Library**: Built-in 1-click presets for Claude Code CLI, Cursor IDE, Claude Desktop, and Antigravity IDE.
-- **Live Event Log Badges**: Monitor real-time hardware telemetry (`TOUCH`, `MATCH`, `PW`, `ERR`, `SYS`).
+- **Self-Serve 4-Step Onboarding**: Get up and running in 5 minutes with interactive hardware check and automatic port discovery.
+- **Double-Touch Confirmation Safety Guard**: Non-password actions require touching the same finger twice within 3 seconds to prevent accidental execution.
+- **Zero-Cloud Local Privacy & Encryption**: Password payloads are encrypted over serial using HMAC-SHA256 and AES-CTR backed by OS Credential Store (Windows Credential Manager / macOS Keychain).
 
 ---
 
 ## 📖 Deep-Dive Guides & Documentation
 
-Ready to build your own TouchPass or explore advanced configurations? Jump into our step-by-step guides:
+- 🛠️ **[Hardware Build & Wiring Guide](docs/BUILD_GUIDE.md)** | **[🇻🇳 Bản Tiếng Việt](docs/BUILD_GUIDE.vi.md)**
+  *ESP32-S3 Super Mini, ZW101 pinout, enclosure assembly, `arduino-cli` firmware compilation, unauthenticated UART security model, and 1-click Windows launcher setup.*
 
-- 🛠️ **[Build TouchPass (English)](docs/BUILD_GUIDE.md)** | **[🇻🇳 Bản Tiếng Việt](docs/BUILD_GUIDE.vi.md)**
-  *Hardware wiring diagram, ZW101 pinout, enclosure assembly, `arduino-cli` firmware compilation, and 1-click Windows launcher.*
-
-- 📖 **[User Guide & AI Presets (English)](docs/USER_GUIDE.md)** | **[🇻🇳 Bản Tiếng Việt](docs/USER_GUIDE.vi.md)**
+- 📖 **[User Guide & AI Presets](docs/USER_GUIDE.md)** | **[🇻🇳 Bản Tiếng Việt](docs/USER_GUIDE.vi.md)**
   *Fingerprint enrollment, interactive shortcut recorder, double-touch safety rules, OS credential storage, and troubleshooting.*
 
 ---
 
 ## ⚖️ License & Acknowledgments
 
-TouchPass is open-source software licensed under the MIT License. Built with ❤️ upon the foundational architecture of [ZimengXiong/TinyTouch](https://github.com/ZimengXiong/TinyTouch).
+TouchPass is open-source software licensed under the **[MIT License](LICENSE)**.
+
+Built with ❤️ upon the foundational architecture of **[ZimengXiong/TinyTouch](https://github.com/ZimengXiong/TinyTouch)**.
