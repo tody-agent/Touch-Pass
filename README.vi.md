@@ -113,9 +113,11 @@ Bạn đã sẵn sàng tự tay chế tạo thiết bị TouchPass hoặc khám 
 
 ---
 
-## ⚖️ Bản Quyền & Lời Cảm Ơn
+## 🙏 Lời Cảm Ơn Tác Giả Gốc & Bản Quyền
 
-TouchPass là phần mềm mã nguồn mở được phát hành theo giấy phép MIT License. Dự án được xây dựng với tình yêu công nghệ dựa trên kiến trúc nền tảng của [ZimengXiong/TinyTouch](https://github.com/ZimengXiong/TinyTouch).
+TouchPass là phần mềm mã nguồn mở được phát hành theo giấy phép **[MIT License](LICENSE)**.
+
+Trân trọng gửi lời cảm ơn chân thành nhất tới tác giả **[Zimeng Xiong](https://github.com/ZimengXiong)**, người sáng tạo dự án mã nguồn mở **[TinyTouch](https://github.com/ZimengXiong/TinyTouch)**. TouchPass được xây dựng với tình yêu công nghệ dựa trên kiến trúc phần cứng và mã nguồn nền tảng xuất sắc của ZimengXiong/TinyTouch.
 
 ---
 

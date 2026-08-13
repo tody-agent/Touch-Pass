@@ -131,11 +131,11 @@ Pass the standardized setup prompt to your AI coding assistant. See [🤖 **1-Pr
 
 ---
 
-## ⚖️ License & Acknowledgments
+## 🙏 Acknowledgements & License
 
 TouchPass is open-source software licensed under the **[MIT License](LICENSE)**.
 
-Built with ❤️ upon the foundational architecture of **[ZimengXiong/TinyTouch](https://github.com/ZimengXiong/TinyTouch)**.
+Special thanks and full credit to **[Zimeng Xiong](https://github.com/ZimengXiong)**, the original creator of **[TinyTouch](https://github.com/ZimengXiong/TinyTouch)**, whose open-hardware biometric USB architecture made TouchPass possible. Built with ❤️ upon the foundational codebase of ZimengXiong/TinyTouch.
 
 ---
 

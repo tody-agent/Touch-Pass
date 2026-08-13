@@ -127,6 +127,8 @@ class DocumentationTests(unittest.TestCase):
         self.assertIn("Reporting a Vulnerability", en_text)
         self.assertIn("AS IS", en_text)
         self.assertIn("SECURITY.vi.md", en_text)
+        self.assertIn("Zimeng Xiong", en_text)
+        self.assertIn("TinyTouch", en_text)
 
         vi_text = SECURITY_VI.read_text(encoding="utf-8")
         self.assertIn("Sinh Trắc Học", vi_text)
@@ -136,6 +138,8 @@ class DocumentationTests(unittest.TestCase):
         self.assertIn("Báo Cáo Lỗ Hổng Bảo Mật", vi_text)
         self.assertIn("NGUYÊN TRẠNG", vi_text)
         self.assertIn("SECURITY.md", vi_text)
+        self.assertIn("Zimeng Xiong", vi_text)
+        self.assertIn("TinyTouch", vi_text)
 
     def test_disclaimer_embedded_in_docs(self):
         for doc_path, expected_links in [

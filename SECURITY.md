@@ -89,3 +89,9 @@ To ensure maximum security when deploying and using TouchPass:
 
 - **Physical Wiring & Power Safety**: Users assume full responsibility for physical hardware assembly, wiring diagram verification, voltage level safety (ensuring 3.3V power rails are separated from 5V power rails), and optical sensor calibration.
 - **Credential & Keystroke Safety**: TouchPass automates local keyboard keystrokes and retrieves credentials from native OS secure vaults upon successful biometric verification. Users are solely responsible for securing physical access to their hardware dongle, verifying focused terminal windows, and maintaining operating system account security.
+
+---
+
+## 7. 🙏 Acknowledgements & Original Author Credits
+
+TouchPass is built upon the foundational architecture, hardware biometric concepts, and open-source codebase of **[TinyTouch](https://github.com/ZimengXiong/TinyTouch)** created by **[Zimeng Xiong](https://github.com/ZimengXiong)**. We express our deepest gratitude to Zimeng Xiong and all original open-source contributors for pioneering open-hardware USB biometric security devices.

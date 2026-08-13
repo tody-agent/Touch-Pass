@@ -89,3 +89,9 @@ Chúng tôi coi trọng bảo mật của TouchPass. Nếu bạn phát hiện ho
 
 - **Đấu Nối Phần Cứng & An Toàn Nguồn Điện**: Người dùng tự chịu toàn bộ trách nhiệm đối với việc lắp ráp phần cứng vật lý, kiểm tra sơ đồ đấu nối dây, an toàn mức điện áp (đảm bảo tách biệt đường nguồn 3.3V và 5V) và hiệu chuẩn cảm biến quang học.
 - **An Toàn Mật Khẩu & Phát Phím**: TouchPass tự động hóa các thao tác bàn phím cục bộ và truy xuất mật khẩu từ kho lưu trữ chứng thư bảo mật OS sau khi xác thực vân tay thành công. Người dùng chịu trách nhiệm duy nhất trong việc bảo vệ thiết bị phần cứng vật lý khỏi việc truy cập trái phép, kiểm tra cửa sổ terminal đang focus và đảm bảo an toàn cho tài khoản hệ điều hành.
+
+---
+
+## 7. 🙏 Lời Cảm Ơn & Ghi Nhận Tác Giả Gốc
+
+TouchPass được phát triển dựa trên kiến trúc nền tảng, giải pháp sinh trắc học phần cứng và mã nguồn mở của dự án **[TinyTouch](https://github.com/ZimengXiong/TinyTouch)** sáng tạo bởi tác giả **[Zimeng Xiong](https://github.com/ZimengXiong)**. Chúng tôi xin gửi lời cảm ơn chân thành nhất tới Zimeng Xiong cùng tất cả các nhà đóng góp mã nguồn mở ban đầu đã tạo ra nền tảng thiết bị bảo mật vân tay USB độc đáo này.
