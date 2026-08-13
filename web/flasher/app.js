@@ -17,7 +17,7 @@ const log = document.querySelector("#log");
 
 if (!("serial" in navigator)) {
   button.disabled = true;
-  browserNote.textContent = "Open this page in Google Chrome or Microsoft Edge.";
+  browserNote.textContent = "Open this page in Google Chrome, Microsoft Edge, or Brave.";
 }
 
 function writeLog(value) {
@@ -51,9 +51,18 @@ async function loadFirmware() {
 
 function friendlyError(error) {
   const text = error instanceof Error ? error.message : String(error);
-  if (/notfound|no port selected|chooser/i.test(text)) return "No board was selected. Nothing was flashed.";
-  if (/connect|serial data|timeout|sync/i.test(text)) return "Could not connect. Hold BOOT, tap RESET, release BOOT, then try again.";
-  if (/already open|busy|networkerror/i.test(text)) return "The serial port is busy. Close other firmware or serial tools and try again.";
+  if (/not an ESP32-S3|not ESP32-S3/i.test(text)) {
+    return "Connected board is not an ESP32-S3.";
+  }
+  if (/notfound|no port selected|chooser|cancel/i.test(text)) {
+    return "No board was selected. Nothing was flashed.";
+  }
+  if (/already open|busy|networkerror|in use|invalidstate/i.test(text)) {
+    return "Serial port is busy. Please close other serial monitor/flashing tools.";
+  }
+  if (/connect|serial data|timeout|sync/i.test(text)) {
+    return "Could not connect to ESP32-S3. Hold BOOT button, tap RESET button, release BOOT button, then try again.";
+  }
   return text || "Flashing stopped. Nothing else was changed.";
 }
 
@@ -63,23 +72,29 @@ button.addEventListener("click", async () => {
   progressWrap.hidden = false;
   progress.value = 0;
   percent.textContent = "0%";
+  stage.textContent = "Connecting";
   log.textContent = "No device activity yet.";
   show("Choose the ESP32-S3 serial port in the browser window.");
   try {
     const port = await navigator.serial.requestPort();
     transport = new Transport(port, false);
-    const terminal = { clean(){ log.textContent = ""; }, write:writeLog, writeLine:writeLog };
-    const loader = new ESPLoader({ transport, baudrate:460800, terminal, debugLogging:false });
+    const terminal = { clean(){ log.textContent = ""; }, write: writeLog, writeLine: writeLog };
+    const loader = new ESPLoader({ transport, baudrate: 460800, terminal, debugLogging: false });
     show("Connecting to ESP32-S3…");
     const chip = await loader.main();
-    if (!/ESP32-S3/i.test(chip)) throw new Error(`This is ${chip}, not an ESP32-S3.`);
+    if (!/ESP32-S3/i.test(chip)) throw new Error("Connected board is not an ESP32-S3.");
 
     stage.textContent = "Checking firmware";
     const fileArray = await loadFirmware();
     stage.textContent = "Writing firmware";
     const written = [0, 0, 0];
     await loader.writeFlash({
-      fileArray, flashMode:"dio", flashFreq:"80m", flashSize:"4MB", eraseAll:false, compress:true,
+      fileArray,
+      flashMode: "dio",
+      flashFreq: "80m",
+      flashSize: "4MB",
+      eraseAll: false,
+      compress: true,
       reportProgress(index, amount) {
         written[index] = amount;
         const value = Math.min(100, Math.round(written.reduce((sum, item) => sum + item, 0) / totalBytes * 100));
@@ -89,10 +104,11 @@ button.addEventListener("click", async () => {
     });
     progress.value = 100;
     percent.textContent = "100%";
+    stage.textContent = "Finished";
     await loader.after("hard_reset");
     await transport.disconnect();
     transport = undefined;
-    show("Flash complete. Unplug the board and reconnect it once.", "success");
+    show("Flash complete! Unplug your board and reconnect it to use TouchPass USB HID.", "success");
     button.textContent = "Flash another board";
   } catch (error) {
     show(friendlyError(error), "error");

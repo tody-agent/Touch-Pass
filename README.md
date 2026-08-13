@@ -7,9 +7,11 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Hardware](https://img.shields.io/badge/Hardware-ESP32--S3-orange.svg)](docs/BUILD_GUIDE.md)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB.svg)](https://python.org)
+[![Web Flasher](https://img.shields.io/badge/🌐_1--Click-Web_Flasher-success.svg)](https://tody-agent.github.io/Touch-Pass/web/flasher/)
+[![AI Setup](https://img.shields.io/badge/🤖_1--Prompt-AI_Agent_Setup-purple.svg)](docs/AI_AGENT_PROMPT.md)
 [![Release](https://img.shields.io/badge/Release-v2.0.0-brightgreen.svg)](https://github.com/ZimengXiong/TinyTouch)
 
-🌐 **English** | [🇻🇳 **Tiếng Việt**](README.vi.md)
+🌐 **English** | [🇻🇳 **Tiếng Việt**](README.vi.md) | [🌐 **1-Click Web Flasher**](https://tody-agent.github.io/Touch-Pass/web/flasher/) | [🤖 **1-Prompt AI Agent Setup**](docs/AI_AGENT_PROMPT.md)
 
 <br />
 
@@ -42,11 +44,12 @@ Swapping context, repositioning your hands, typing `y` + `Enter`, or mistyping a
 
 | Feature | Capabilities & Architecture | Benefit for AI Workflows |
 | :--- | :--- | :--- |
+| 🌐 **Web Serial Flasher** | Browser-native flashing via Web Serial API (`esptool-js`) on Chrome/Edge | Zero-installation firmware flashing directly from browser with SHA-256 validation |
+| 🤖 **1-Prompt AI Agent Setup** | Copyable setup prompt template for **Claude Code**, **Cursor**, **Antigravity**, **OpenCode** | Automated 1-prompt OS detection, venv creation, daemon launch, and hardware verification |
 | 🔌 **Native USB HID** | Emulates a standard USB physical keyboard hardware via ESP32-S3 stack | Driverless plug-and-play across Windows, macOS & Linux; sends keystrokes into whichever window is currently **focused** |
 | 🖐️ **10 Fingerprint Slots** | ZW101 optical biometric sensor (Slots 01–10) matched locally on-chip | Zero cloud dependency; assign unique macro/password triggers to each finger |
 | ⌨️ **Interactive Shortcut Recorder** | Web Portal UI (`http://127.0.0.1:8787/`) with live keystroke capture & action builder | Configure single `key`, `text`, `delay` (ms), `enter`, or `escape` action sequences in seconds |
-| 🤖 **AI Tools Preset Library** | Built-in 1-click profiles for **Claude Code CLI**, **Cursor**, **Antigravity**, **OpenCode** | Instant setup for common AI CLI developer prompts and IDE shortcuts |
-| 🚀 **1-Click Launcher** | Automatic Windows batch launcher (`start_touchpass.bat`) & macOS/Linux CLI | Launch local Flask service & unauthenticated UART serial daemon seamlessly |
+| 🚀 **1-Click Launcher** | Automatic Windows batch launcher (`start_touchpass.bat`) & POSIX script (`packaging/install.sh`) | Launch local Flask service & unauthenticated UART serial daemon seamlessly |
 
 ---
 
@@ -77,6 +80,12 @@ Swapping context, repositioning your hands, typing `y` + `Enter`, or mistyping a
 
 ## 🚀 Quick Start Guide
 
+### 🌐 Browser Web Flasher (Zero Install)
+Flash ESP32-S3 firmware in 1 click at [🌐 **tody-agent.github.io/Touch-Pass/web/flasher/**](https://tody-agent.github.io/Touch-Pass/web/flasher/).
+
+### 🤖 1-Prompt AI Agent Setup
+Pass the standardized setup prompt to your AI coding assistant. See [🤖 **1-Prompt AI Agent Integration Guide**](docs/AI_AGENT_PROMPT.md).
+
 ### Windows
 1. Clone the repository and navigate into the project directory:
    ```cmd
@@ -90,10 +99,9 @@ Swapping context, repositioning your hands, typing `y` + `Enter`, or mistyping a
 3. Open `http://127.0.0.1:8787/` in your browser to launch the Web Portal.
 
 ### macOS / Linux
-1. Install Python dependencies and launch the TouchPass CLI:
+1. Run the one-line POSIX installer:
    ```bash
-   pip install -r requirements.txt
-   python3 -m touchpass.cli start
+   curl -fsSL https://raw.githubusercontent.com/tody-agent/Touch-Pass/main/packaging/install.sh | bash
    ```
 2. Open `http://127.0.0.1:8787/` in your browser.
 
@@ -110,6 +118,9 @@ Swapping context, repositioning your hands, typing `y` + `Enter`, or mistyping a
 ---
 
 ## 📖 Deep-Dive Guides & Documentation
+
+- 🤖 **[1-Prompt AI Agent Integration Guide](docs/AI_AGENT_PROMPT.md)**
+  *Automated 1-prompt setup instructions for Claude Code, Cursor, Antigravity, and OpenCode across Windows, macOS, and Linux.*
 
 - 🛠️ **[Hardware Build & Wiring Guide](docs/BUILD_GUIDE.md)** | **[🇻🇳 Bản Tiếng Việt](docs/BUILD_GUIDE.vi.md)**
   *ESP32-S3 Super Mini, ZW101 pinout, enclosure assembly, `arduino-cli` firmware compilation, unauthenticated UART security model, and 1-click Windows launcher setup.*

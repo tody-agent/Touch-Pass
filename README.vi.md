@@ -1,8 +1,12 @@
-# TouchPass
-
-[🌐 **English**](README.md) | 🇻🇳 **Tiếng Việt**
+[🌐 **English**](README.md) | 🇻🇳 **Tiếng Việt** | [🌐 **1-Click Web Flasher**](https://tody-agent.github.io/Touch-Pass/web/flasher/) | [🤖 **Cài đặt AI Agent 1-Prompt**](docs/AI_AGENT_PROMPT.md)
 
 > **Cho mỗi ngón tay một siêu năng lực.**
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Hardware](https://img.shields.io/badge/Hardware-ESP32--S3-orange.svg)](docs/BUILD_GUIDE.md)
+[![Python](https://img.shields.io/badge/Python-3.11+-3776AB.svg)](https://python.org)
+[![Web Flasher](https://img.shields.io/badge/🌐_1--Click-Web_Flasher-success.svg)](https://tody-agent.github.io/Touch-Pass/web/flasher/)
+[![AI Setup](https://img.shields.io/badge/🤖_1--Prompt-AI_Agent_Setup-purple.svg)](docs/AI_AGENT_PROMPT.md)
 
 ![TouchPass Web Portal Hero Showcase](assets/demo/06-touchpass-portal-hero.jpg)
 
@@ -97,6 +101,9 @@ Bạn lo lắng việc lỡ tay chạm vào cảm biến sẽ vô tình thực t
 ## 📖 Thư Viện Tài Liệu Chi Tiết
 
 Bạn đã sẵn sàng tự tay chế tạo thiết bị TouchPass hoặc khám phá các tùy chỉnh nâng cao? Hãy truy cập các bộ hướng dẫn chi tiết dưới đây:
+
+- 🤖 **[Hướng Dẫn Cài Đặt AI Agent 1-Prompt](docs/AI_AGENT_PROMPT.md)**
+  *Quy trình tự động hóa cài đặt 1-prompt cho Claude Code, Cursor, Antigravity và OpenCode trên Windows, macOS và Linux.*
 
 - 🛠️ **[Hướng Dẫn Lắp Ráp & Đấu Nối (Tiếng Anh)](docs/BUILD_GUIDE.md)** | **[🇻🇳 Bản Tiếng Việt](docs/BUILD_GUIDE.vi.md)**
   *Sơ đồ đấu nối chân ZW101 ➔ ESP32-S3, đóng vỏ enclosure, biên dịch firmware `arduino-cli`, và script 1-click launcher trên Windows.*
