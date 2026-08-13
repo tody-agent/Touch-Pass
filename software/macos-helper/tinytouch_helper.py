@@ -37,26 +37,31 @@ PREFERRED_SERIAL = "B8F862FB478C"
 STATE_DIR = Path.home() / "Library" / "Application Support" / "tinyTouch"
 MAX_SEEN_NONCES = 256
 
-_COMMON_CRYPTO = ctypes.CDLL("/usr/lib/system/libcommonCrypto.dylib")
-_COMMON_CRYPTO.CCCryptorCreateWithMode.argtypes = [
-    ctypes.c_uint32, ctypes.c_uint32, ctypes.c_uint32, ctypes.c_uint32,
-    ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p,
-    ctypes.c_size_t, ctypes.c_int, ctypes.c_uint32, ctypes.POINTER(ctypes.c_void_p),
-]
-_COMMON_CRYPTO.CCCryptorCreateWithMode.restype = ctypes.c_int32
-_COMMON_CRYPTO.CCCryptorUpdate.argtypes = [
-    ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p,
-    ctypes.c_size_t, ctypes.POINTER(ctypes.c_size_t),
-]
-_COMMON_CRYPTO.CCCryptorUpdate.restype = ctypes.c_int32
-_COMMON_CRYPTO.CCCryptorRelease.argtypes = [ctypes.c_void_p]
-_COMMON_CRYPTO.CCCryptorRelease.restype = ctypes.c_int32
+import platform
 
-_CC_ENCRYPT = 0
-_CC_MODE_CTR = 4
-_CC_ALGORITHM_AES = 0
-_CC_NO_PADDING = 0
-_CC_MODE_OPTION_CTR_BE = 0x0002
+if platform.system() == "Darwin":
+    _COMMON_CRYPTO = ctypes.CDLL("/usr/lib/system/libcommonCrypto.dylib")
+    _COMMON_CRYPTO.CCCryptorCreateWithMode.argtypes = [
+        ctypes.c_uint32, ctypes.c_uint32, ctypes.c_uint32, ctypes.c_uint32,
+        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p,
+        ctypes.c_size_t, ctypes.c_int, ctypes.c_uint32, ctypes.POINTER(ctypes.c_void_p),
+    ]
+    _COMMON_CRYPTO.CCCryptorCreateWithMode.restype = ctypes.c_int32
+    _COMMON_CRYPTO.CCCryptorUpdate.argtypes = [
+        ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_void_p,
+        ctypes.c_size_t, ctypes.POINTER(ctypes.c_size_t),
+    ]
+    _COMMON_CRYPTO.CCCryptorUpdate.restype = ctypes.c_int32
+    _COMMON_CRYPTO.CCCryptorRelease.argtypes = [ctypes.c_void_p]
+    _COMMON_CRYPTO.CCCryptorRelease.restype = ctypes.c_int32
+
+    _CC_ENCRYPT = 0
+    _CC_MODE_CTR = 4
+    _CC_ALGORITHM_AES = 0
+    _CC_NO_PADDING = 0
+    _CC_MODE_OPTION_CTR_BE = 0x0002
+else:
+    from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 
 def normalize_serial(value: str) -> str:
@@ -166,6 +171,10 @@ def session_key(pairing_key: bytes, nonce_hex: str) -> bytes:
 def aes_ctr_crypt(key: bytes, iv: bytes, data: bytes) -> bytes:
     if len(key) not in {16, 24, 32} or len(iv) != 16:
         raise ValueError("AES-CTR requires a 16/24/32-byte key and a 16-byte IV")
+    if platform.system() != "Darwin":
+        cipher = Cipher(algorithms.AES(key), modes.CTR(iv))
+        encryptor = cipher.encryptor()
+        return encryptor.update(data) + encryptor.finalize()
     cryptor = ctypes.c_void_p()
     key_buffer = ctypes.create_string_buffer(key, len(key))
     iv_buffer = ctypes.create_string_buffer(iv, len(iv))
@@ -199,9 +208,9 @@ def aes_ctr_crypt(key: bytes, iv: bytes, data: bytes) -> bytes:
             len(data),
             ctypes.byref(moved),
         )
-        if status != 0 or moved.value != len(data):
-            raise RuntimeError(f"CommonCrypto AES-CTR failed ({status})")
-        return output_buffer.raw[:moved.value]
+        if status != 0:
+            raise RuntimeError(f"CommonCrypto AES-CTR update failed ({status})")
+        return bytes(output_buffer.raw[: moved.value])
     finally:
         _COMMON_CRYPTO.CCCryptorRelease(cryptor)
 

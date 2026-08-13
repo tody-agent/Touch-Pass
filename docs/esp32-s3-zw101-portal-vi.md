@@ -112,7 +112,34 @@ Mật khẩu không nằm trong JSON cấu hình và portal không đọc ngư�
 hiển thị. Khi đổi slot từ Password sang hành động khác hoặc xóa slot, Keychain
 item tương ứng cũng bị xóa.
 
-## 6. Chẩn đoán nhanh
+## 6. Giải thích kiến trúc & Cơ chế an toàn (FAQ)
+
+### 6.1 Helper là gì và hoạt động ở đâu?
+- **Helper** (`tinytouch_helper.py`) là một ứng dụng/dịch vụ chạy **trên máy tính** (macOS/Windows), không phải trên chip ESP32.
+- **Nhiệm vụ của Helper:**
+  1. Chạy Web Portal cục bộ (`http://127.0.0.1:8787`) để người dùng cấu hình ngón tay và đăng ký vân tay qua trình duyệt.
+  2. Lắng nghe tín hiệu quét vân tay từ ESP32 gửi qua cổng USB.
+  3. Tra cứu hành động tương ứng với ngón tay đó, giải mã mật khẩu từ kho lưu trữ an toàn của máy tính và gửi trả lại cho ESP32 thực hiện gõ phím.
+
+### 6.2 Dữ liệu và mật khẩu được lưu trữ ở đâu?
+
+| Loại dữ liệu | Vị trí lưu trữ | Chi tiết bảo mật |
+| --- | --- | --- |
+| **Bản mẫu vân tay (Fingerprint)** | Cảm biến ZW101 / ESP32 | Lưu trong bộ nhớ flash của cảm biến ZW101 dưới dạng dữ liệu sinh trắc mã hóa theo ID slot (1 - 10). |
+| **Cấu hình ngón tay (Profile/Settings)** | Máy tính (`profiles.json`) | Lưu tên ngón tay, loại hành động (Password, Macro, Key) trên máy tính. |
+| **Mật khẩu (Passwords)** | Máy tính (macOS Keychain) | Mật khẩu được lưu trực tiếp trong **macOS Keychain** hệ thống. **ESP32 không lưu mật khẩu thô trong chip**. |
+
+### 6.3 Mật khẩu có an toàn không?
+- **Điểm an toàn:** Mật khẩu nằm trong macOS Keychain mã hóa phần cứng. ESP32 chỉ nhận mật khẩu tạm thời qua kết nối USB mã hóa (Pairing Key) ngay tại thời điểm bạn chạm đúng vân tay. Dù ai đó lấy trộm phần cứng ESP32 cũng không thể lấy được mật khẩu.
+- **Rủi ro lưu ý:** 
+  - Đóng vai trò như Bàn phím USB HID tự động gõ ký tự vào ô đang focus, nên nếu bạn bấm nhầm khi con trỏ ở sai vị trí (ví dụ ô chat), mật khẩu sẽ bị gõ ra ngoài.
+  - Tín hiệu UART giữa cảm biến ZW101 và ESP32 chưa mã hóa phần cứng, cần lưu ý rủi ro can thiệp vật lý trực tiếp.
+
+### 6.4 Hệ thống dùng được cho Windows chưa hay chỉ macOS?
+- **macOS:** Hỗ trợ chính thức và hoàn chỉnh nhất (tích hợp bảo mật macOS Keychain).
+- **Windows:** Đã hỗ trợ khởi chạy Web Portal cài đặt và các tính năng USB HID cơ bản (gõ văn bản, phím tắt, macro, Enter/Escape). Tuy nhiên, tính năng lưu trữ mật khẩu bảo mật qua hệ thống Credential Manager của Windows hiện đang được hoàn thiện thêm.
+
+## 7. Chẩn đoán nhanh
 
 - Portal báo **Chưa tìm thấy ESP32-S3**: kiểm tra cáp data, USB CDC On Boot và
   tùy chọn `--port`.
@@ -130,3 +157,4 @@ HID gửi phím tới cửa sổ đang được focus và không thể xác minh
 Đường UART giữa ZW101 và ESP32 cũng không được xác thực. Không dùng thiết bị này
 để bảo vệ dữ liệu có yêu cầu an ninh cao hoặc trong môi trường có nguy cơ truy
 cập vật lý trái phép.
+

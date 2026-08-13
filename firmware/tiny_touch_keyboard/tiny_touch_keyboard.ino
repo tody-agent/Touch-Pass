@@ -21,7 +21,7 @@ static const uint16_t START_SLOT = 1;
 static const uint16_t END_SLOT = 10;
 static const uint32_t RESULT_HOLD_MS = 500;
 static const uint32_t HELPER_TIMEOUT_MS = 6000;
-static const bool ENABLE_TEST_COMMANDS = false;
+static const bool ENABLE_TEST_COMMANDS = true;
 static const bool DEBUG_FP_PACKETS = false;
 
 static const uint8_t FP_LED_GREEN = 0x02;
