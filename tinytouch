@@ -16,8 +16,13 @@ import shlex
 import shutil
 import subprocess
 import sys
-import termios
-import tempfile
+try:
+    import termios
+    termios_error = termios.error
+except ImportError:
+    termios = None
+    termios_error = OSError
+
 import time
 from pathlib import Path
 
@@ -527,7 +532,7 @@ def serial_command(port: str, command: str, *, timeout: float = 20.0) -> list[st
                     show_device_line(line)
                     if line.startswith(("OK ", "ERR ")) or line in {"PONG", "OK"}:
                         break
-        except (OSError, serial.SerialException, termios.error) as exc:
+        except (OSError, serial.SerialException, termios_error) as exc:
             raise ToolError(f"Could not open {port}: {exc}") from exc
     finally:
         if was_loaded:

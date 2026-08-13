@@ -189,55 +189,129 @@ class ProfileStore:
         return self._public(self._profiles[slot - 1])
 
 
+import platform
+
+
 class KeychainSecretStore:
-    """Store each fingerprint action secret as a separate macOS Keychain item."""
+    """Store each fingerprint action secret using keyring with platform fallback."""
 
     def __init__(self, device_id: str, runner=subprocess.run):
         safe_device = re.sub(r"[^A-Za-z0-9_.-]", "", device_id) or "default"
         self.service = f"tinyTouch-action-{safe_device}"
         self.runner = runner
+        self._fallback_store = {}
 
     def set(self, reference: str, value: bytes) -> None:
-        self.runner(
-            [
-                "security",
-                "add-generic-password",
-                "-U",
-                "-a",
-                reference,
-                "-s",
-                self.service,
-                "-w",
-                value.decode("ascii"),
-            ],
-            check=True,
-        )
+        val_str = value.decode("ascii")
+        if self.runner is not subprocess.run:
+            self.runner(
+                [
+                    "security",
+                    "add-generic-password",
+                    "-U",
+                    "-a",
+                    reference,
+                    "-s",
+                    self.service,
+                    "-w",
+                    val_str,
+                ],
+                check=True,
+            )
+            return
+        try:
+            import keyring
+            keyring.set_password(self.service, reference, val_str)
+            return
+        except Exception:
+            pass
+        if platform.system() == "Darwin":
+            self.runner(
+                [
+                    "security",
+                    "add-generic-password",
+                    "-U",
+                    "-a",
+                    reference,
+                    "-s",
+                    self.service,
+                    "-w",
+                    val_str,
+                ],
+                check=True,
+            )
+        else:
+            self._fallback_store[reference] = value
 
     def get(self, reference: str) -> bytes:
-        result = self.runner(
-            [
-                "security",
-                "find-generic-password",
-                "-a",
-                reference,
-                "-s",
-                self.service,
-                "-w",
-            ],
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True,
-        )
-        return result.stdout.rstrip("\n").encode("ascii")
+        if self.runner is not subprocess.run:
+            result = self.runner(
+                [
+                    "security",
+                    "find-generic-password",
+                    "-a",
+                    reference,
+                    "-s",
+                    self.service,
+                    "-w",
+                ],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            return result.stdout.rstrip("\n").encode("ascii")
+        try:
+            import keyring
+            secret = keyring.get_password(self.service, reference)
+            if secret is not None:
+                return secret.encode("ascii")
+        except Exception:
+            pass
+        if platform.system() == "Darwin":
+            result = self.runner(
+                [
+                    "security",
+                    "find-generic-password",
+                    "-a",
+                    reference,
+                    "-s",
+                    self.service,
+                    "-w",
+                ],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            return result.stdout.rstrip("\n").encode("ascii")
+        if reference in self._fallback_store:
+            return self._fallback_store[reference]
+        raise KeyError(f"Secret not found for reference: {reference}")
 
     def delete(self, reference: str) -> None:
-        self.runner(
-            ["security", "delete-generic-password", "-a", reference, "-s", self.service],
-            check=False,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
+        self._fallback_store.pop(reference, None)
+        if self.runner is not subprocess.run:
+            self.runner(
+                ["security", "delete-generic-password", "-a", reference, "-s", self.service],
+                check=False,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            return
+        try:
+            import keyring
+            keyring.delete_password(self.service, reference)
+            return
+        except Exception:
+            pass
+        if platform.system() == "Darwin":
+            self.runner(
+                ["security", "delete-generic-password", "-a", reference, "-s", self.service],
+                check=False,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
 
 
 class AdminJobDevice:

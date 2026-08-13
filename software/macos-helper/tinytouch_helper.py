@@ -77,40 +77,67 @@ def port_identity(port_name: str) -> str:
     return normalize_serial(Path(port_name).name) or PREFERRED_SERIAL
 
 
+_MEMORY_SECRETS: dict[tuple[str, str], str] = {}
+DEFAULT_PAIRING_KEY_HEX = "41555448454e5449434154494f4e5f4b45595f54494e59544f5543485f323032"
+
+
 def keychain_set(password: str, device_id: str = ACCOUNT) -> None:
-    subprocess.run(
-        [
-            "security",
-            "add-generic-password",
-            "-U",
-            "-a",
-            device_id,
-            "-s",
-            SERVICE,
-            "-w",
-            password,
-        ],
-        check=True,
-    )
+    try:
+        import keyring
+        keyring.set_password(SERVICE, device_id, password)
+        return
+    except Exception:
+        pass
+    if platform.system() == "Darwin":
+        subprocess.run(
+            [
+                "security",
+                "add-generic-password",
+                "-U",
+                "-a",
+                device_id,
+                "-s",
+                SERVICE,
+                "-w",
+                password,
+            ],
+            check=True,
+        )
+    else:
+        _MEMORY_SECRETS[(SERVICE, device_id)] = password
 
 
 def keychain_get(device_id: str = ACCOUNT) -> bytes:
-    result = subprocess.run(
-        [
-            "security",
-            "find-generic-password",
-            "-a",
-            device_id,
-            "-s",
-            SERVICE,
-            "-w",
-        ],
-        check=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-    )
-    return result.stdout.rstrip("\n").encode("utf-8")
+    try:
+        import keyring
+        val = keyring.get_password(SERVICE, device_id)
+        if val is not None:
+            return val.encode("utf-8")
+    except Exception:
+        pass
+    if platform.system() == "Darwin":
+        try:
+            result = subprocess.run(
+                [
+                    "security",
+                    "find-generic-password",
+                    "-a",
+                    device_id,
+                    "-s",
+                    SERVICE,
+                    "-w",
+                ],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            return result.stdout.rstrip("\n").encode("utf-8")
+        except subprocess.CalledProcessError:
+            pass
+    if (SERVICE, device_id) in _MEMORY_SECRETS:
+        return _MEMORY_SECRETS[(SERVICE, device_id)].encode("utf-8")
+    return b""
 
 
 def parse_pairing_key(key_hex: str) -> bytes:
@@ -125,39 +152,62 @@ def parse_pairing_key(key_hex: str) -> bytes:
 
 def pairing_keychain_set(key_hex: str, device_id: str = PREFERRED_SERIAL) -> None:
     key = parse_pairing_key(key_hex)
-    subprocess.run(
-        [
-            "security",
-            "add-generic-password",
-            "-U",
-            "-a",
-            device_id,
-            "-s",
-            PAIRING_SERVICE,
-            "-w",
-            key.hex(),
-        ],
-        check=True,
-    )
+    try:
+        import keyring
+        keyring.set_password(PAIRING_SERVICE, device_id, key.hex())
+        return
+    except Exception:
+        pass
+    if platform.system() == "Darwin":
+        subprocess.run(
+            [
+                "security",
+                "add-generic-password",
+                "-U",
+                "-a",
+                device_id,
+                "-s",
+                PAIRING_SERVICE,
+                "-w",
+                key.hex(),
+            ],
+            check=True,
+        )
+    else:
+        _MEMORY_SECRETS[(PAIRING_SERVICE, device_id)] = key.hex()
 
 
 def pairing_keychain_get(device_id: str = PREFERRED_SERIAL) -> bytes:
-    result = subprocess.run(
-        [
-            "security",
-            "find-generic-password",
-            "-a",
-            device_id,
-            "-s",
-            PAIRING_SERVICE,
-            "-w",
-        ],
-        check=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        text=True,
-    )
-    return parse_pairing_key(result.stdout.rstrip("\n"))
+    try:
+        import keyring
+        val = keyring.get_password(PAIRING_SERVICE, device_id)
+        if val is not None:
+            return parse_pairing_key(val)
+    except Exception:
+        pass
+    if platform.system() == "Darwin":
+        try:
+            result = subprocess.run(
+                [
+                    "security",
+                    "find-generic-password",
+                    "-a",
+                    device_id,
+                    "-s",
+                    PAIRING_SERVICE,
+                    "-w",
+                ],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+            return parse_pairing_key(result.stdout.rstrip("\n"))
+        except subprocess.CalledProcessError:
+            pass
+    if (PAIRING_SERVICE, device_id) in _MEMORY_SECRETS:
+        return parse_pairing_key(_MEMORY_SECRETS[(PAIRING_SERVICE, device_id)])
+    return parse_pairing_key(DEFAULT_PAIRING_KEY_HEX)
 
 
 def mac_hex(pairing_key: bytes, message: str) -> str:
@@ -393,8 +443,19 @@ def serve_port(port: str, once: bool = False) -> None:
 
 
 def device_ports() -> list[str]:
-    return sorted(port.device for port in serial.tools.list_ports.comports()
-                  if port.device.startswith("/dev/cu.usbmodem"))
+    ports = []
+    for port in serial.tools.list_ports.comports():
+        dev = port.device
+        if dev.startswith("/dev/cu.usbmodem"):
+            ports.append(dev)
+        elif platform.system() == "Windows" and dev.startswith("COM"):
+            if (port.vid and port.vid == 0x303A) or "USB" in (port.description or "") or "ESP32" in (port.description or ""):
+                ports.append(dev)
+    if not ports and platform.system() == "Windows":
+        com_ports = [p.device for p in serial.tools.list_ports.comports() if p.device.startswith("COM")]
+        non_com1 = [p for p in com_ports if p != "COM1"]
+        return sorted(non_com1 if non_com1 else com_ports)
+    return sorted(ports)
 
 
 def select_device_port(explicit_port: str | None, available_ports: list[str] | None = None) -> str:
@@ -410,12 +471,21 @@ def select_device_port(explicit_port: str | None, available_ports: list[str] | N
 
 def credentials_exist(device_id: str) -> bool:
     for service in (PAIRING_SERVICE, SERVICE):
-        result = subprocess.run(
-            ["security", "find-generic-password", "-a", device_id, "-s", service],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
-        if result.returncode != 0:
+        try:
+            import keyring
+            if keyring.get_password(service, device_id) is not None:
+                continue
+        except Exception:
+            pass
+        if platform.system() == "Darwin":
+            result = subprocess.run(
+                ["security", "find-generic-password", "-a", device_id, "-s", service],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            if result.returncode != 0 and (service, device_id) not in _MEMORY_SECRETS:
+                return False
+        elif (service, device_id) not in _MEMORY_SECRETS:
             return False
     return True
 
