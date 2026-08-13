@@ -215,7 +215,21 @@
       </p>
 
       <div class="prompt-box">
-        <pre><code id="ai-prompt-text" data-i18n="promptText">Set up TouchPass on this system: install the daemon/CLI, register auto-start, verify USB HID keybinding for 'y'+'Enter' confirmation, and test hardware connection.</code></pre>
+        <pre><code id="ai-prompt-text" data-i18n="promptText">Set up TouchPass on this machine for non-technical 1-prompt automated operation:
+
+Phase 1: Environment Preflight
+- Detect OS (Windows, macOS, Linux) &amp; verify Python 3.11+ is installed.
+- Ensure codebase is cloned locally from https://github.com/tody-agent/Touch-Pass.git or use current workspace.
+
+Phase 2: Local Helper Setup
+- Create Python virtual environment in software/.venv if missing.
+- Install dependencies from software/requirements.txt.
+- Start local portal daemon (python run_portal_win.py on Win or python3 software/app.py on Mac/Linux) listening in background at http://127.0.0.1:8787/.
+
+Phase 3: Web Flashing &amp; Verification
+- Check http://127.0.0.1:8787/api/status to confirm daemon health.
+- Direct user to https://tody-agent.github.io/Touch-Pass/web/flasher/ if ESP32-S3 firmware flashing is needed.
+- Verify USB serial hardware connection and guide initial fingerprint enrollment for 'y' + Enter AI CLI auto-approval.</code></pre>
         <button id="ai-prompt-copy" type="button" class="btn-copy">
           <span class="copy-icon">📋</span>
           <span class="copy-text" data-i18n="copyPrompt">Copy Prompt</span>

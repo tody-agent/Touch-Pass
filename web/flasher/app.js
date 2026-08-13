@@ -36,7 +36,21 @@ const i18n = {
     promptTitle: "AI Agent 1-Prompt Setup",
     promptTag: "Automated Setup",
     promptDesc: "Copy this prompt into your AI coding assistant (Claude Code, Cursor, Antigravity, OpenCode) to automatically set up TouchPass on your machine.",
-    promptText: "Set up TouchPass on this system: install the daemon/CLI, register auto-start, verify USB HID keybinding for 'y'+'Enter' confirmation, and test hardware connection.",
+    promptText: `Set up TouchPass on this machine for non-technical 1-prompt automated operation:
+
+Phase 1: Environment Preflight
+- Detect OS (Windows, macOS, Linux) & verify Python 3.11+ is installed.
+- Ensure codebase is cloned locally from https://github.com/tody-agent/Touch-Pass.git or use current workspace.
+
+Phase 2: Local Helper Setup
+- Create Python virtual environment in software/.venv if missing.
+- Install dependencies from software/requirements.txt.
+- Start local portal daemon (python run_portal_win.py on Win or python3 software/app.py on Mac/Linux) listening in background at http://127.0.0.1:8787/.
+
+Phase 3: Web Flashing & Verification
+- Check http://127.0.0.1:8787/api/status to confirm daemon health.
+- Direct user to https://tody-agent.github.io/Touch-Pass/web/flasher/ if ESP32-S3 firmware flashing is needed.
+- Verify USB serial hardware connection and guide initial fingerprint enrollment for 'y' + Enter AI CLI auto-approval.`,
     copyPrompt: "Copy Prompt",
     copied: "Copied!",
     techLog: "Technical Flashing Log",
@@ -90,7 +104,21 @@ const i18n = {
     promptTitle: "1-Prompt Tự động cho AI Agent",
     promptTag: "Cài đặt Tự động",
     promptDesc: "Copy đoạn prompt này dán vào AI Agent của bạn (Claude Code, Cursor, Antigravity, OpenCode) để tự động cài đặt TouchPass trên máy tính.",
-    promptText: "Cài đặt TouchPass trên máy tính này: cài đặt daemon/CLI, đăng ký tự khởi chạy, xác minh phím tắt USB HID 'y'+'Enter', và kiểm tra kết nối phần cứng.",
+    promptText: `Tự động cài đặt và thiết lập TouchPass trên máy tính này để xác thực AI CLI:
+
+Bước 1: Kiểm tra Môi trường (Preflight)
+- Nhận diện HĐH (Windows, macOS, Linux) & kiểm tra Python 3.11+.
+- Đảm bảo repo đã được clone từ https://github.com/tody-agent/Touch-Pass.git hoặc sử dụng thư mục hiện tại.
+
+Bước 2: Cài đặt Local Helper Daemon
+- Tạo môi trường ảo Python tại software/.venv nếu chưa có.
+- Cài đặt thư viện phụ thuộc từ software/requirements.txt.
+- Chạy dịch vụ daemon (python run_portal_win.py trên Win hoặc python3 software/app.py trên Mac/Linux) lắng nghe ngầm tại http://127.0.0.1:8787/.
+
+Bước 3: Nạp Firmware Web & Xác minh
+- Kiểm tra http://127.0.0.1:8787/api/status để xác nhận daemon hoạt động.
+- Hướng dẫn người dùng mở https://tody-agent.github.io/Touch-Pass/web/flasher/ nếu cần nạp firmware ESP32-S3.
+- Kiểm tra kết nối USB phần cứng và hướng dẫn đăng ký vân tay để tự động duyệt lệnh 'y' + Enter cho AI CLI.`,
     copyPrompt: "Sao chép Prompt",
     copied: "Đã sao chép!",
     techLog: "Nhật ký Kỹ thuật Nạp Chip",
@@ -144,7 +172,21 @@ const i18n = {
     promptTitle: "AI Agent 1-Prompt 自动配置",
     promptTag: "全自动配置",
     promptDesc: "复制此提示词并粘贴到您的 AI 编程助手（Claude Code、Cursor、Antigravity、OpenCode）中，即可在您的电脑上自动配置 TouchPass。",
-    promptText: "在本机配置 TouchPass：安装后台服务/CLI，注册开机自启，验证 'y'+'Enter' 确认按键，并测试硬件连接。",
+    promptText: `在本机自动配置 TouchPass 以实现 AI CLI 命令行自动确认：
+
+阶段 1：环境预检
+- 检测操作系统 (Windows, macOS, Linux) 并验证 Python 3.11+ 已安装。
+- 确保代码已从 https://github.com/tody-agent/Touch-Pass.git 克隆到本地或使用当前工作区。
+
+阶段 2：本地服务配置
+- 创建 Python 虚拟环境 software/.venv（如果不存在）。
+- 从 software/requirements.txt 安装所需依赖。
+- 启动本地后台服务（Windows 运行 python run_portal_win.py，Mac/Linux 运行 python3 software/app.py），监听在 http://127.0.0.1:8787/。
+
+阶段 3：网页刷机与连接验证
+- 检查 http://127.0.0.1:8787/api/status 确认服务状态。
+- 如需烧录 ESP32-S3 固件，引导用户打开 https://tody-agent.github.io/Touch-Pass/web/flasher/。
+- 验证 USB 串口硬件连接，并指引进行指纹录入，以测试 'y' + Enter 按键自动确认。`,
     copyPrompt: "复制提示词",
     copied: "已复制！",
     techLog: "刷机技术日志",
@@ -198,7 +240,21 @@ const i18n = {
     promptTitle: "1-Prompt Настройка для ИИ-Агента",
     promptTag: "Авто-настройка",
     promptDesc: "Скопируйте этот промпт в ваш ИИ-ассистент (Claude Code, Cursor, Antigravity, OpenCode) для автоматической настройки TouchPass.",
-    promptText: "Настрой TouchPass на этой системе: установи демона/CLI, добавь в автозапуск, проверь сочетание клавиш 'y'+'Enter' и проверь подключение.",
+    promptText: `Автоматически настрой TouchPass на этом компьютере для авто-подтверждения AI CLI:
+
+Этап 1: Проверка окружения
+- Определи ОС (Windows, macOS, Linux) и проверь наличие Python 3.11+.
+- Убедись, что репозиторий клонирован с https://github.com/tody-agent/Touch-Pass.git или используй файлы рабочей области.
+
+Этап 2: Настройка локальной службы
+- Создай виртуальное окружение Python в software/.venv (если нет).
+- Установи зависимости из software/requirements.txt.
+- Запусти локальную службу демона (python run_portal_win.py на Win или python3 software/app.py на Mac/Linux) в фоновом режиме на http://127.0.0.1:8787/.
+
+Этап 3: Веб-прошивка и Проверка
+- Проверь http://127.0.0.1:8787/api/status для подтверждения работы демона.
+- Направь пользователя на https://tody-agent.github.io/Touch-Pass/web/flasher/ если требуется прошивка ESP32-S3.
+- Проверь USB-подключение оборудования и проведи первичную регистрацию отпечатков пальцев для авто-одобрения 'y' + Enter.`,
     copyPrompt: "Скопировать промпт",
     copied: "Скопировано!",
     techLog: "Технический журнал прошивки",
