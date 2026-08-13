@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+from collections import deque
 from collections.abc import Callable
+from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import mimetypes
@@ -343,6 +345,20 @@ class PortalAPI:
         self.profiles = profiles
         self.device = device
         self.csrf_token = csrf_token or secrets.token_urlsafe(32)
+        self._log_lock = threading.Lock()
+        self.log_buffer: deque[dict] = deque(maxlen=200)
+
+    def add_log(self, tag: str, message: str) -> dict:
+        """Add an event log entry with ISO timestamp to the thread-safe ring buffer."""
+        timestamp = datetime.now(timezone.utc).isoformat()
+        entry = {
+            "timestamp": timestamp,
+            "tag": tag,
+            "message": message,
+        }
+        with self._log_lock:
+            self.log_buffer.append(entry)
+        return entry
 
     @staticmethod
     def _header(headers: dict, name: str) -> str:
@@ -363,6 +379,18 @@ class PortalAPI:
         try:
             if method == "GET" and path == "/api/status":
                 return 200, {"device": self.device.status(), "csrf_token": self.csrf_token}
+            if method == "GET" and path == "/api/logs":
+                with self._log_lock:
+                    logs = list(self.log_buffer)
+                return 200, {"logs": logs}
+            if path == "/api/test":
+                if method != "POST":
+                    return 405, {"error": "method not allowed"}
+                action = body.get("action")
+                if action not in {"ping", "type_test"}:
+                    return 400, {"error": "action must be 'ping' or 'type_test'"}
+                self.add_log("TEST", f"Triggered test action: {action}")
+                return 200, {"status": "ok", "action": action}
             if method == "GET" and path == "/api/fingers":
                 return 200, {"fingers": self.profiles.list_profiles()}
             if match := self._enroll_path.match(path):
@@ -371,19 +399,24 @@ class PortalAPI:
                 slot = int(match.group(1))
                 self.profiles._validate_slot(slot)
                 job = self.device.start_enroll(slot, lambda: self.profiles.set_enrolled(slot, True))
+                self.add_log("ENROLL", f"Started enroll job for slot {slot}")
                 return 202, {"job": job}
             if match := self._finger_path.match(path):
                 slot = int(match.group(1))
                 if method == "PUT":
-                    return 200, {"finger": self.profiles.update_profile(slot, body)}
+                    profile = self.profiles.update_profile(slot, body)
+                    self.add_log("CONFIG", f"Updated slot {slot} profile")
+                    return 200, {"finger": profile}
                 if method == "DELETE":
                     job = self.device.start_delete(slot, lambda: self.profiles.delete_profile(slot))
+                    self.add_log("DELETE", f"Started delete job for slot {slot}")
                     return 202, {"job": job}
                 return 405, {"error": "method not allowed"}
             if match := self._cancel_path.match(path):
                 if method != "POST":
                     return 405, {"error": "method not allowed"}
                 job = self.device.cancel_job(match.group(1))
+                self.add_log("JOB", f"Cancelled job {match.group(1)}")
                 return 200, {"job": job}
             if match := self._job_path.match(path):
                 if method != "GET":
