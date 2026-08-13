@@ -1,6 +1,6 @@
 # 🛡️ Chính Sách Bảo Mật & Tuyên Bố Miễn Trừ Trách Nhiệm TouchPass
 
-[🌐 **English**](SECURITY.md) | 🇻🇳 **Tiếng Việt**
+[🌐 **English**](SECURITY.md) | 🇻🇳 **Tiếng Việt** | [🇨🇳 **简体中文**](SECURITY.zh.md) | [🇷🇺 **Русский**](SECURITY.ru.md)
 
 ---
 
