@@ -88,12 +88,12 @@ Flash ESP32-S3 firmware in 1 click at [🌐 **tody-agent.github.io/Touch-Pass/we
 Pass the standardized setup prompt to your AI coding assistant. See [🤖 **1-Prompt AI Agent Integration Guide**](docs/AI_AGENT_PROMPT.md).
 
 ### Windows
-1. Clone the repository and navigate into the project directory:
+1. Download **[TouchPass.exe](https://github.com/tody-agent/Touch-Pass/releases/download/v2.0.0/TouchPass.exe)** or clone the repository:
    ```cmd
-   git clone https://github.com/ZimengXiong/TinyTouch.git
-   cd TouchPass
+   git clone https://github.com/tody-agent/Touch-Pass.git
+   cd Touch-Pass
    ```
-2. Double-click or run `start_touchpass.bat` from Command Prompt or PowerShell:
+2. Double-click **`TouchPass.exe`** or run **`start_touchpass.bat`**:
    ```cmd
    .\start_touchpass.bat
    ```
