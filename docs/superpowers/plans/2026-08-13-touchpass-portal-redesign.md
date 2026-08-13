@@ -1,164 +1,349 @@
-# TouchPass Web Portal Redesign Implementation Plan
+# TouchPass Portal Redesign Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:subagent-driven-development` (recommended) or `superpowers:executing-plans` to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Transform the TouchPass local web portal into a feature-rich, self-serve single page application (SPA) with onboarding wizard, debug & serial log monitor, slot profile setup, and interactive user guides.
+**Goal:** Redesign the TouchPass local web portal (`http://127.0.0.1:8787/`) to match the visual style of the Web Flasher (`https://tody-agent.github.io/Touch-Pass/web/flasher/`), apply Apple Human Interface Guidelines (HIG), support 3 languages (`EN`, `RU`, `VI`), and implement a 4-step user flow tailored for macOS AI Developers (Claude Code, Cursor, Antigravity, Codex).
 
-**Architecture:** A single-page web app built with Vanilla HTML5, CSS3 (Dark Theme, CSS Grid/Flexbox, Glassmorphism), and modular JavaScript. Server backend in Python providing REST endpoints `/api/status`, `/api/fingers`, `/api/logs`, `/api/test`, and serving static portal assets.
+**Architecture:** A static HTML5/CSS3/JS Web App served by `software/macos-helper/tinytouch_portal.py` via Python `ThreadingHTTPServer`. The app interacts with loopback REST APIs (`/api/status`, `/api/fingers`, `/api/jobs`, `/api/test`, `/api/logs`).
 
-**Tech Stack:** HTML5, CSS3, JavaScript (ES6+), Python 3 (http.server, serial), Arduino CLI.
+**Tech Stack:** Vanilla JavaScript (ES6+), Vanilla CSS (Glassmorphic Dark Theme `#121815`), HTML5, Python `pytest` for backend contract verification.
 
 ## Global Constraints
-- Rebrand all copy from `tinyTouch` to `TouchPass`.
-- Preserve backward compatibility with ESP32-S3 HID keyboard actions.
-- Maintain responsive dark-mode styling with no external heavy JS framework dependencies.
+
+- CSS Design Tokens: `--bg: #121815`, `--card: #1c2621`, `--card-border: #283830`, `--accent: #22c55e`, `--text: #e2e8f0`, `--muted: #94a3b8`, `--code-bg: #0d1310`.
+- Fonts: Google Fonts `Inter` (sans-serif) and `JetBrains Mono` (monospace).
+- Asset Directory: `software/macos-helper/portal/` (`index.html`, `styles.css`, `app.js`).
+- Languages Supported: `EN` (English), `RU` (Russian), `VI` (Vietnamese).
+- API CSRF: State-changing requests (`POST`, `PUT`, `DELETE`) pass `X-CSRF-Token` retrieved from `/api/status`.
 
 ---
 
-### Task 1: Rebrand Copy and Update Portal HTML Structure to SPA Tabs
+### Task 1: CSS Design System & Apple HIG Styling
 
 **Files:**
-- Modify: `software/macos-helper/portal/index.html:1-98`
+- Modify: `software/macos-helper/portal/styles.css`
 
 **Interfaces:**
-- Consumes: None
-- Produces: 4 Tab Navigation Containers (`#tab-onboarding`, `#tab-slots`, `#tab-debug`, `#tab-guide`) in `index.html`.
+- Produces: Complete CSS tokens, glassmorphism topbar, rounded card layouts (`16px`), key chips (`<kbd>`), Apple segmented control, concentric scan ring animation, and dark activity log container.
 
-- [ ] **Step 1: Update index.html header and navigation tabs**
+- [ ] **Step 1: Write CSS rules in `styles.css`**
 
-Update `index.html` title to "TouchPass Portal", change brand text to "TouchPass", and add the tab navigation bar with 4 tabs.
+Add root tokens, reset, typography, navbar glassmorphism, 4-step segmented control, cards, key chips, finger slots, hand map grid, concentric pulse animation, and log stream styles.
 
-- [ ] **Step 2: Add Onboarding, Slots, Debug, and User Guide sections**
-
-Structure `<main>` with 4 tab sections (`#tab-onboarding`, `#tab-slots`, `#tab-debug`, `#tab-guide`), including the step-by-step onboarding wizard, live log console, and example guide cards.
-
-- [ ] **Step 3: Verify HTML syntax**
-
-Run: `powershell -Command "Test-Path software/macos-helper/portal/index.html"`
-Expected: True
-
-- [ ] **Step 4: Commit changes**
-
-```bash
-git add software/macos-helper/portal/index.html
-git commit -m "feat(portal): rebrand to TouchPass and restructure HTML into 4-tab SPA"
+```css
+:root {
+  --bg: #121815;
+  --card: #1c2621;
+  --card-border: #283830;
+  --accent: #22c55e;
+  --accent-hover: #16a34a;
+  --accent-light: rgba(34, 197, 94, 0.15);
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --code-bg: #0d1310;
+  --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  --radius: 16px;
+  --radius-sm: 8px;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+/* Includes glassmorphic backdrop, segmented controls, pulse animations */
 ```
 
----
+- [ ] **Step 2: Verify CSS formatting and responsiveness**
 
-### Task 2: Enhance CSS Styles for Dark Theme, Tabs, Onboarding Wizard, and Debug Console
-
-**Files:**
-- Modify: `software/macos-helper/portal/styles.css:1-300`
-
-**Interfaces:**
-- Consumes: SPA HTML tab IDs and class names from Task 1.
-- Produces: CSS rules for `.nav-tabs`, `.tab-content`, `.wizard-step`, `.log-console`, `.log-entry`, `.guide-card`.
-
-- [ ] **Step 1: Add CSS design tokens and tab navigation styles**
-
-Define color variables, tab bar buttons, active tab indicators, and transitions.
-
-- [ ] **Step 2: Add Onboarding Wizard & Debug Log styles**
-
-Add CSS for step numbers, diagram containers, live log terminal box with monospaced font, color-coded log tags (`TOUCH`, `MATCH`, `PW`, `ERR`), and guide example cards.
+Check CSS syntax and verify no missing closing brackets or malformed rules.
 
 - [ ] **Step 3: Commit CSS changes**
 
 ```bash
 git add software/macos-helper/portal/styles.css
-git commit -m "style(portal): add styling for tabs, debug console, wizard, and guide cards"
+git commit -m "style: implement TouchPass portal design system and Apple HIG CSS"
 ```
 
 ---
 
-### Task 3: Implement Backend Logging and Test API Endpoints in Python Server
+### Task 2: HTML Markup & i18n Structure
 
 **Files:**
-- Modify: `run_portal_win.py:1-45`
-- Modify: `software/macos-helper/tinytouch_portal.py:330-400`
+- Modify: `software/macos-helper/portal/index.html`
 
 **Interfaces:**
-- Consumes: Serial events and HTTP requests on `/api/logs` and `/api/test`.
-- Produces: JSON response with log entries buffer and trigger test actions.
+- Produces: HTML5 structure with `data-i18n` attributes, Apple navbar, status indicator, language switcher, 4-step tab panels (Setup/Sandbox, macOS AI Dev Presets, Biometric Studio, Live Activity), and Enrollment Modal Sheet.
 
-- [ ] **Step 1: Add log buffer and `/api/logs` endpoint to PortalAPI**
+- [ ] **Step 1: Rewrite `index.html` with complete HTML5 structure**
 
-In `software/macos-helper/tinytouch_portal.py`, add a thread-safe ring buffer for serial/system logs and expose `/api/logs` in `dispatch()`.
+```html
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TouchPass Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css?v=4">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <!-- Header with Brand, Status & Lang Switcher -->
+  <!-- 4-Step Segmented Control -->
+  <!-- Step 1: Hardware Setup & Sandbox -->
+  <!-- Step 2: macOS AI Dev Presets & Live Preview -->
+  <!-- Step 3: Biometric Studio & Hand Map -->
+  <!-- Step 4: Live Activity Console -->
+  <!-- Enrollment Modal Sheet -->
+</body>
+</html>
+```
 
-- [ ] **Step 2: Add `/api/test` endpoint to trigger TYPE_TEST / PING**
+- [ ] **Step 2: Validate HTML tags**
 
-Add endpoint in `dispatch()` to allow front-end to trigger diagnostic test commands down to ESP32-S3 over COM port.
+Ensure all sections, dialogs, inputs, and buttons have correct IDs and `data-i18n` translation keys.
 
-- [ ] **Step 3: Verify Python server syntax**
-
-Run: `powershell -Command "& 'C:\Users\block\AppData\Local\hermes\hermes-agent\venv\Scripts\python.exe' -m py_compile run_portal_win.py software/macos-helper/tinytouch_portal.py"`
-Expected: Clean exit code 0.
-
-- [ ] **Step 4: Commit backend changes**
+- [ ] **Step 3: Commit HTML changes**
 
 ```bash
-git add run_portal_win.py software/macos-helper/tinytouch_portal.py
-git commit -m "feat(backend): add /api/logs and /api/test endpoints for live debugging"
+git add software/macos-helper/portal/index.html
+git commit -m "feat: restructure portal HTML5 markup with Apple HIG tabs and i18n hooks"
 ```
 
 ---
 
-### Task 4: Implement SPA Tab Switching, Live Log Streaming, and Onboarding Logic in JS
+### Task 3: i18n Translation Engine & Core State Engine
 
 **Files:**
-- Modify: `software/macos-helper/portal/app.js:1-350`
+- Modify: `software/macos-helper/portal/app.js`
 
 **Interfaces:**
-- Consumes: `/api/status`, `/api/fingers`, `/api/logs`, `/api/test` endpoints.
-- Produces: Interactive tab switching, auto-scrolling log console, step-by-step wizard navigation, test button handlers.
+- Consumes: `/api/status` for device state and CSRF token.
+- Produces: `TRANSLATIONS` dictionary (EN, RU, VI), `state` object, `setLanguage(lang)`, `fetchStatus()`, and `apiCall(path, method, body)`.
 
-- [ ] **Step 1: Add Tab Switching & State Management**
+- [ ] **Step 1: Add i18n data dictionary and translation function**
 
-Implement click listeners for tab buttons to toggle active tab content sections and save active tab in `localStorage`.
+```js
+const TRANSLATIONS = {
+  en: {
+    brandTitle: "TouchPass Portal",
+    eyebrow: "ESP32-S3 · ZW101",
+    statusConnected: "Connected",
+    statusDisconnected: "Disconnected",
+    step1Title: "1. Setup & Flash",
+    step2Title: "2. Presets",
+    step3Title: "3. Biometric Studio",
+    step4Title: "4. Live Activity",
+    // ... complete keys for EN, RU, VI
+  },
+  ru: { /* ... */ },
+  vi: { /* ... */ }
+};
+```
 
-- [ ] **Step 2: Implement Debug Console polling & log renderer**
+- [ ] **Step 2: Implement state manager and API request helper**
 
-Poll `/api/logs` every 1000ms, append new log lines with timestamp and color badges, and auto-scroll to bottom.
+```js
+const state = {
+  lang: localStorage.getItem('touchpass_lang') || 'vi',
+  csrfToken: '',
+  device: { connected: false, sensor: 'unknown', port: null },
+  fingers: [],
+  logs: [],
+  activeTab: 'step1'
+};
+```
 
-- [ ] **Step 3: Implement Self-Serve Onboarding Wizard controls**
+- [ ] **Step 3: Test i18n translation switching in browser/DOM**
 
-Add next/prev step button handlers, wiring diagram toggle, and "Run HID Test Type" interactive button.
+Verify `setLanguage('en')`, `setLanguage('ru')`, and `setLanguage('vi')` translate all text nodes dynamically.
 
-- [ ] **Step 4: Test in browser**
-
-Run: `powershell -Command "Invoke-WebRequest -Uri http://127.0.0.1:8787/ -UseBasicParsing"`
-Expected: StatusCode 200 OK.
-
-- [ ] **Step 5: Commit JavaScript changes**
+- [ ] **Step 4: Commit i18n and core engine**
 
 ```bash
 git add software/macos-helper/portal/app.js
-git commit -m "feat(portal): implement tab navigation, debug log monitor, and onboarding wizard in JS"
+git commit -m "feat: add i18n translation dictionary and core portal state engine"
 ```
 
 ---
 
-### Task 5: End-to-End Verification & Verification Report
+### Task 4: Step 1 (Setup & USB HID Sandbox) Implementation
 
 **Files:**
-- Create: `docs/superpowers/plans/2026-08-13-touchpass-portal-redesign-verification.md`
+- Modify: `software/macos-helper/portal/app.js`
 
-- [ ] **Step 1: Launch Web Portal server**
+**Interfaces:**
+- Consumes: `/api/status` and `POST /api/test`.
+- Produces: Real-time connection badge update, Web Flasher redirect link, and keystroke test dispatcher (`triggerTestHID`).
 
-Run: `cmd /c "C:\Users\block\AppData\Local\hermes\hermes-agent\venv\Scripts\python.exe run_portal_win.py"`
+- [ ] **Step 1: Write Step 1 UI handlers**
 
-- [ ] **Step 2: Verify all 4 tabs and API endpoints**
+```js
+async function triggerTestHID() {
+  const res = await apiCall('/api/test', 'POST', { action: 'type_test' });
+  if (res.status === 'ok') {
+    showToast(t('testSuccess'));
+  }
+}
+```
 
-Test GET `/`, GET `/api/status`, GET `/api/fingers`, GET `/api/logs`.
+- [ ] **Step 2: Connect connection status polling**
 
-- [ ] **Step 3: Document verification results**
+Update status badge `🟢 Connected (COM3)` / `🔴 Disconnected` on every poll cycle.
 
-Save verification output into `docs/superpowers/plans/2026-08-13-touchpass-portal-redesign-verification.md`.
+- [ ] **Step 3: Commit Step 1 logic**
 
-- [ ] **Step 4: Final commit**
+```bash
+git add software/macos-helper/portal/app.js
+git commit -m "feat: implement Step 1 hardware connection check and HID test sandbox"
+```
+
+---
+
+### Task 5: Step 2 (macOS AI Dev Preset Gallery) Implementation
+
+**Files:**
+- Modify: `software/macos-helper/portal/app.js`
+
+**Interfaces:**
+- Consumes: `PUT /api/fingers/:slot`.
+- Produces: macOS AI Dev Presets (`ai_dev`, `cli_master`, `ide_master`, `password_vault`), `renderPresets()`, `previewPreset(id)`, and `applyPreset(id)`.
+
+- [ ] **Step 1: Define macOS AI Dev Presets**
+
+```js
+const PRESETS = {
+  ai_dev: {
+    id: "ai_dev",
+    nameKey: "presetAIDevName",
+    descKey: "presetAIDevDesc",
+    slots: {
+      1: { label: "Confirm AI Action", action: { preset: "accept", confirm: false } },
+      2: { label: "Accept Ghost Text", action: { preset: "custom", steps: [{ type: "key", key: "tab" }] } },
+      3: { label: "Accept Composer Diff", action: { preset: "custom", steps: [{ type: "key", key: "enter", modifiers: 8 }] } },
+      4: { label: "Reject / Dismiss", action: { preset: "escape" } },
+      5: { label: "Abort Process", action: { preset: "custom", steps: [{ type: "key", key: "c", modifiers: 4 }] } },
+      6: { label: "macOS Sudo Vault", action: { preset: "password", secret_ref: "slot-6" } },
+      7: { label: "Trigger Inline AI (Cmd+K)", action: { preset: "custom", steps: [{ type: "key", key: "k", modifiers: 8 }] } },
+      8: { label: "Toggle Agent Panel (Cmd+I)", action: { preset: "custom", steps: [{ type: "key", key: "i", modifiers: 8 }] } },
+      9: { label: "Toggle Terminal", action: { preset: "custom", steps: [{ type: "key", key: "grave", modifiers: 4 }] } },
+      10: { label: "Command Palette", action: { preset: "custom", steps: [{ type: "key", key: "p", modifiers: 9 }] } }
+    }
+  },
+  // cli_master, ide_master, password_vault
+};
+```
+
+- [ ] **Step 2: Implement batch preset application**
+
+Write `applyPreset(id)` to update slots 1 through 10 sequentially via `PUT /api/fingers/:slot` and switch active tab to `step3`.
+
+- [ ] **Step 3: Test preset application flow**
+
+Verify clicking "✦ Apply Preset" updates finger profiles and navigates to Step 3.
+
+- [ ] **Step 4: Commit Step 2 logic**
+
+```bash
+git add software/macos-helper/portal/app.js
+git commit -m "feat: implement Step 2 macOS AI Dev preset gallery and live slot preview"
+```
+
+---
+
+### Task 6: Step 3 (Biometric Studio & Concentric Ring Modal) Implementation
+
+**Files:**
+- Modify: `software/macos-helper/portal/app.js`
+
+**Interfaces:**
+- Consumes: `/api/fingers`, `PUT /api/fingers/:slot`, `POST /api/fingers/:slot/enroll`, `GET /api/jobs/:id`, `DELETE /api/fingers/:slot`.
+- Produces: Visual 10-Finger Hand Map renderer, slot grid cards, slot edit modal, enrollment job poller with concentric ring animation, and slot deletion.
+
+- [ ] **Step 1: Write Hand Map & Slot Grid renderer**
+
+Render 10 finger slots into Left Hand (Slots 1–5) and Right Hand (Slots 6–10) with status pills `🟢 Enrolled` / `⚪ Unenrolled` and Keychain encryption indicator 🔒.
+
+- [ ] **Step 2: Implement Concentric Ring Enrollment Modal**
+
+```js
+async function startEnrollment(slot) {
+  const res = await apiCall(`/api/fingers/${slot}/enroll`, 'POST');
+  if (res.job) {
+    showEnrollModal(slot, res.job.id);
+    pollEnrollJob(res.job.id);
+  }
+}
+```
+
+- [ ] **Step 3: Implement Job Poller & Concentric Scan Pulse**
+
+Poll `GET /api/jobs/:id` every 500ms until state reaches `stored`, `error`, or `cancelled`. Animate concentric scan rings and update progress percentage (0% ➔ 50% ➔ 100%).
+
+- [ ] **Step 4: Commit Step 3 logic**
+
+```bash
+git add software/macos-helper/portal/app.js
+git commit -m "feat: implement Step 3 Biometric Studio hand map and concentric ring enrollment modal"
+```
+
+---
+
+### Task 7: Step 4 (Live Activity Console & Human-Readable Logs) Implementation
+
+**Files:**
+- Modify: `software/macos-helper/portal/app.js`
+
+**Interfaces:**
+- Consumes: `GET /api/logs`.
+- Produces: Human-friendly log translation engine, category filter (`all`, `biometric`, `system`, `error`), log clearing, and ping test handler.
+
+- [ ] **Step 1: Write human-readable log translator**
+
+```js
+function formatLogEntry(entry) {
+  const tag = entry.tag || 'SYSTEM';
+  const timeStr = new Date(entry.timestamp).toLocaleTimeString();
+  let icon = '🟢';
+  if (tag === 'ENROLL') icon = '👆';
+  if (tag === 'CONFIG') icon = '⚙️';
+  if (tag === 'DELETE') icon = '🗑️';
+  if (tag === 'TEST') icon = '⚡';
+  if (tag === 'ERROR') icon = '🔴';
+  return { timeStr, icon, tag, message: translateLogMessage(entry.message) };
+}
+```
+
+- [ ] **Step 2: Implement log polling and category filtering**
+
+Poll `/api/logs` every 1.5s, update the activity console window, scroll to bottom if autoscroll is enabled, and filter by selected tag.
+
+- [ ] **Step 3: Commit Step 4 logic**
+
+```bash
+git add software/macos-helper/portal/app.js
+git commit -m "feat: implement Step 4 Live Activity console with human-readable logs and filters"
+```
+
+---
+
+### Task 8: Verification & API Test Execution
+
+**Files:**
+- Test: `tests/test_portal_api.py`
+- Test: `tests/test_portal_http.py`
+
+- [ ] **Step 1: Run pytest backend test suite**
+
+Run: `python -m pytest tests/test_portal_api.py tests/test_portal_http.py -v`
+Expected: PASS all tests.
+
+- [ ] **Step 2: Verify static portal asset delivery**
+
+Verify `/`, `/app.js`, `/styles.css` return HTTP 200 with appropriate security headers (`Content-Security-Policy`, `Cache-Control`).
+
+- [ ] **Step 3: Final Commit**
 
 ```bash
 git add .
-git commit -m "docs: complete verification for TouchPass Web Portal redesign"
+git commit -m "test: verify TouchPass portal redesign implementation against test suite"
 ```

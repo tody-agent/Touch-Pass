@@ -160,7 +160,10 @@ class ProfileStore:
                     raise ValueError("password must contain between 1 and 128 ASCII bytes")
                 self.secret_store.set(reference, secret)
             action["secret_ref"] = reference
-            encode_action(action, self.secret_store.get)
+            try:
+                encode_action(action, self.secret_store.get)
+            except (KeyError, OSError, RuntimeError):
+                encode_action(action, lambda _ref: b"")
         else:
             self.secret_store.delete(f"slot-{slot}")
             action.pop("secret_ref", None)

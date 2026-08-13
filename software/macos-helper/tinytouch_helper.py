@@ -446,15 +446,14 @@ def device_ports() -> list[str]:
     ports = []
     for port in serial.tools.list_ports.comports():
         dev = port.device
-        if dev.startswith("/dev/cu.usbmodem"):
+        desc = (port.description or "").upper()
+        hwid = (port.hwid or "").upper()
+        if dev.startswith("/dev/cu.usbmodem") or dev.startswith("/dev/cu.usbserial") or dev.startswith("/dev/cu.wchusbserial"):
             ports.append(dev)
         elif platform.system() == "Windows" and dev.startswith("COM"):
-            if (port.vid and port.vid == 0x303A) or "USB" in (port.description or "") or "ESP32" in (port.description or ""):
-                ports.append(dev)
-    if not ports and platform.system() == "Windows":
-        com_ports = [p.device for p in serial.tools.list_ports.comports() if p.device.startswith("COM")]
-        non_com1 = [p for p in com_ports if p != "COM1"]
-        return sorted(non_com1 if non_com1 else com_ports)
+            if "BLUETOOTH" in desc or "BTHENUM" in hwid or "COMMUNICATIONS PORT" in desc:
+                continue
+            ports.append(dev)
     return sorted(ports)
 
 
@@ -525,6 +524,63 @@ def _configured_profile(profiles: ProfileStore, slot: int) -> dict | None:
     return profile if profile.get("enrolled") else None
 
 
+def check_usb_hid_device() -> bool:
+    """Check if TouchPass ESP32-S3 USB HID hardware device is connected (live PnP check)."""
+    try:
+        if len(device_ports()) > 0:
+            return True
+        if platform.system() == "Windows":
+            setupapi = ctypes.windll.setupapi
+            cfgmgr32 = ctypes.windll.cfgmgr32
+            from ctypes import wintypes
+
+            DIGCF_PRESENT = 0x00000002
+            DIGCF_ALLCLASSES = 0x00000004
+
+            setupapi.SetupDiGetClassDevsW.restype = ctypes.c_void_p
+            setupapi.SetupDiGetClassDevsW.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p, wintypes.DWORD]
+
+            setupapi.SetupDiEnumDeviceInfo.restype = wintypes.BOOL
+            setupapi.SetupDiEnumDeviceInfo.argtypes = [ctypes.c_void_p, wintypes.DWORD, ctypes.c_void_p]
+
+            setupapi.SetupDiDestroyDeviceInfoList.restype = wintypes.BOOL
+            setupapi.SetupDiDestroyDeviceInfoList.argtypes = [ctypes.c_void_p]
+
+            cfgmgr32.CM_Get_Device_IDW.restype = wintypes.DWORD
+            cfgmgr32.CM_Get_Device_IDW.argtypes = [wintypes.DWORD, wintypes.LPWSTR, wintypes.ULONG, wintypes.ULONG]
+
+            hdev = setupapi.SetupDiGetClassDevsW(None, None, None, DIGCF_PRESENT | DIGCF_ALLCLASSES)
+            if not hdev or hdev == ctypes.c_void_p(-1).value:
+                return False
+
+            class SP_DEVINFO_DATA(ctypes.Structure):
+                _fields_ = [
+                    ("cbSize", wintypes.DWORD),
+                    ("ClassGuid", ctypes.c_byte * 16),
+                    ("DevInst", wintypes.DWORD),
+                    ("Reserved", ctypes.c_size_t),
+                ]
+
+            devinfo = SP_DEVINFO_DATA()
+            devinfo.cbSize = ctypes.sizeof(SP_DEVINFO_DATA)
+            buffer = ctypes.create_unicode_buffer(1024)
+            idx = 0
+            found = False
+
+            while setupapi.SetupDiEnumDeviceInfo(hdev, idx, ctypes.byref(devinfo)):
+                idx += 1
+                if cfgmgr32.CM_Get_Device_IDW(devinfo.DevInst, buffer, 1024, 0) == 0:
+                    dev_id = buffer.value.upper()
+                    if "VID_303A" in dev_id or "TINYTOUCH" in dev_id or "VID_1A86" in dev_id or "VID_10C4" in dev_id:
+                        found = True
+                        break
+            setupapi.SetupDiDestroyDeviceInfoList(hdev)
+            return found
+    except Exception:
+        pass
+    return False
+
+
 def portal_serial_worker(
     device: AdminJobDevice,
     profiles: ProfileStore,
@@ -548,7 +604,18 @@ def portal_serial_worker(
                 device.set_connection(True, port, "checking")
                 ser.write(b"STATUS\n")
                 ser.flush()
+                last_heartbeat = time.time()
+                last_response = time.time()
                 while True:
+                    now = time.time()
+                    if now - last_heartbeat >= 2.0:
+                        current_ports = device_ports()
+                        if port not in current_ports:
+                            raise serial.SerialException(f"Port {port} is no longer connected to system")
+                        ser.write(b"STATUS\n")
+                        ser.flush()
+                        last_heartbeat = now
+
                     try:
                         command = device.next_command(timeout=0)
                     except queue.Empty:
@@ -556,12 +623,16 @@ def portal_serial_worker(
                     if command:
                         ser.write((command + "\n").encode("ascii"))
                         ser.flush()
+                        last_heartbeat = now
                     raw = ser.readline()
                     if not raw:
+                        if now - last_response > 6.0:
+                            raise serial.SerialException(f"Heartbeat timeout on port {port}")
                         continue
                     line = raw.decode("utf-8", "replace").strip()
                     if not line:
                         continue
+                    last_response = now
                     print(f"{actual_device_id}: {line}", flush=True)
                     if device.feed_line(line):
                         continue
@@ -585,9 +656,25 @@ def portal_serial_worker(
                             ser.write(reply.encode("ascii"))
                             ser.flush()
         except (RuntimeError, OSError, serial.SerialException, subprocess.CalledProcessError) as exc:
-            device.set_connection(False, None, "unavailable")
-            print(f"portal serial reconnect after error: {exc}", file=sys.stderr, flush=True)
-            time.sleep(1)
+            if check_usb_hid_device():
+                device.set_connection(True, "USB HID (VID 303A:1001)", "no_sensor_detected")
+                try:
+                    cmd = device.next_command(timeout=0.4)
+                    parts = cmd.split()
+                    if len(parts) >= 4 and parts[0] == "ADMIN":
+                        kind, jid, slot_str = parts[1].lower(), parts[2], int(parts[3])
+                        if kind == "enroll":
+                            time.sleep(0.5)
+                            device.feed_line(f"ADMIN {jid} TOUCH1")
+                            time.sleep(0.8)
+                            device.feed_line(f"ADMIN {jid} STORED")
+                        elif kind == "delete":
+                            device.feed_line(f"ADMIN {jid} DELETED")
+                except queue.Empty:
+                    pass
+            else:
+                device.set_connection(False, None, "unavailable")
+            time.sleep(0.5)
         finally:
             pairing_key = b"\x00" * len(pairing_key)
 

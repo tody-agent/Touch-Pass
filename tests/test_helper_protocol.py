@@ -144,6 +144,23 @@ class HelperProtocolTests(unittest.TestCase):
         self.assertEqual(args.portal_host, "127.0.0.1")
         self.assertEqual(args.portal_port, 8787)
 
+    def test_admin_job_device_connection_status(self):
+        device = helper.AdminJobDevice()
+        self.assertFalse(device.status()["connected"])
+        
+        device.set_connection(True, "COM3", "ok")
+        status = device.status()
+        self.assertTrue(status["connected"])
+        self.assertEqual(status["port"], "COM3")
+        self.assertEqual(status["sensor"], "ok")
+
+        device.set_connection(False, None, "unavailable")
+        status_off = device.status()
+        self.assertFalse(status_off["connected"])
+        self.assertIsNone(status_off["port"])
+        self.assertEqual(status_off["sensor"], "unavailable")
+
 
 if __name__ == "__main__":
     unittest.main()
+

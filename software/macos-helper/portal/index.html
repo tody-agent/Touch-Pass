@@ -11,6 +11,12 @@
   <script src="app.js" defer></script>
 </head>
 <body>
+  <!-- Persistent Server Offline Banner -->
+  <div id="server-offline-banner" class="server-offline-banner" style="display: none;">
+    <span>⚠️</span>
+    <span data-i18n="serverOfflineMsg">Mất kết nối tới TouchPass Local Server (127.0.0.1:8787). Đang tự động thử lại...</span>
+  </div>
+
   <!-- Header Navbar with Brand, Status Badge & Language Switcher -->
   <header class="navbar">
     <div class="brand-container">
@@ -23,7 +29,7 @@
     <div class="navbar-right">
       <div id="device-status" class="status-pill status-offline" aria-live="polite">
         <span class="status-dot"></span>
-        <span id="device-status-text" data-i18n="statusDisconnected">🔴 Disconnected</span>
+        <span id="device-status-text" data-i18n="statusDisconnected">Disconnected</span>
       </div>
       <div class="lang-switcher" aria-label="Language selection">
         <button class="lang-btn" data-lang="en" type="button">EN</button>
@@ -63,21 +69,31 @@
         <p class="section-desc" data-i18n="step1Desc">Đấu nối vi điều khiển ESP32-S3 với cảm biến ZW101, nạp firmware qua Web Flasher và thử nghiệm phím USB HID.</p>
       </div>
 
+      <!-- Disconnected Device Troubleshooting Banner -->
+      <div id="troubleshoot-banner" class="troubleshoot-card" style="display: none;">
+        <h4 class="troubleshoot-title">🔌 <span data-i18n="troubleshootTitle">Hướng dẫn khắc phục khi chưa nhận thiết bị USB</span></h4>
+        <ul class="troubleshoot-list">
+          <li data-i18n="troubleshootStep1">Kiểm tra cáp USB ESP32-S3 đã cắm chắc chắn vào máy tính (dùng cáp dữ liệu Data Cable, không dùng cáp sạc thuần túy).</li>
+          <li data-i18n="troubleshootStep2">Nếu đã từng nạp firmware TouchPass: Giữ nút BOOT ➔ Bấm nhả RESET ➔ Thả BOOT để đưa mạch về chế độ Bootloader khi muốn nạp lại.</li>
+          <li data-i18n="troubleshootStep3">Nếu thiết bị mới hoặc chưa có firmware, nhấp nút <strong>Mở Web Flasher</strong> bên dưới để nạp firmware 1-Click.</li>
+        </ul>
+      </div>
+
       <div class="preset-grid">
         <!-- Connection Status Card -->
         <article id="connection-card" class="card">
           <h3 data-i18n="connStatusCardTitle">Trạng thái kết nối Hardware</h3>
           <div class="telemetry-panel" style="margin-top: 14px;">
             <div class="telemetry-card">
-              <span class="telemetry-label">Thiết bị</span>
+              <span class="telemetry-label" data-i18n="telemetryLabelDevice">Thiết bị</span>
               <span id="telemetry-device" class="telemetry-value">--</span>
             </div>
             <div class="telemetry-card">
-              <span class="telemetry-label">Cổng Serial</span>
+              <span class="telemetry-label" data-i18n="telemetryLabelPort">Cổng Serial</span>
               <span id="telemetry-port" class="telemetry-value">--</span>
             </div>
             <div class="telemetry-card">
-              <span class="telemetry-label">Cảm biến ZW101</span>
+              <span class="telemetry-label" data-i18n="telemetryLabelSensor">Cảm biến ZW101</span>
               <span id="telemetry-sensor" class="telemetry-value">--</span>
             </div>
           </div>
@@ -103,7 +119,7 @@
           </div>
           <div style="display: flex; gap: 12px; max-width: 500px; margin: 0 auto;">
             <input type="text" id="hid-test-input" placeholder="Thử nghiệm nhập ký tự tại đây..." autocomplete="off" data-i18n-placeholder="hidTestPlaceholder">
-            <button id="btn-test-hid" class="button button-primary" type="button" data-i18n="hidTestBtn">Thử gõ USB HID (Test)</button>
+            <button id="btn-test-hid" class="button button-primary btn-hardware-required" type="button" data-i18n="hidTestBtn">Thử gõ USB HID (Test)</button>
           </div>
         </div>
       </article>
@@ -115,36 +131,36 @@
           <table class="wiring-table" style="width: 100%; border-collapse: collapse; margin-top: 14px;">
           <thead>
             <tr style="border-bottom: 1px solid var(--card-border); text-align: left;">
-              <th style="padding: 10px;">Cảm biến ZW101</th>
-              <th style="padding: 10px;">Chân ESP32-S3</th>
-              <th style="padding: 10px;">Ghi chú</th>
+              <th style="padding: 10px;" data-i18n="colSensor">Cảm biến ZW101</th>
+              <th style="padding: 10px;" data-i18n="colEspPin">Chân ESP32-S3</th>
+              <th style="padding: 10px;" data-i18n="colNote">Ghi chú</th>
             </tr>
           </thead>
           <tbody>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
               <td style="padding: 10px;">VCC</td>
               <td style="padding: 10px;"><kbd>3.3V</kbd></td>
-              <td style="padding: 10px;">Nguồn cấp cảm biến ZW101</td>
+              <td style="padding: 10px;" data-i18n="wiringNoteVcc">Nguồn cấp cảm biến ZW101</td>
             </tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
               <td style="padding: 10px;">GND</td>
               <td style="padding: 10px;"><kbd>GND</kbd></td>
-              <td style="padding: 10px;">Mass chung hệ thống</td>
+              <td style="padding: 10px;" data-i18n="wiringNoteGnd">Mass chung hệ thống</td>
             </tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
               <td style="padding: 10px;">TX</td>
               <td style="padding: 10px;"><kbd>RX (GPIO 18)</kbd></td>
-              <td style="padding: 10px;">Truyền dữ liệu Serial</td>
+              <td style="padding: 10px;" data-i18n="wiringNoteTx">Truyền dữ liệu Serial</td>
             </tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
               <td style="padding: 10px;">RX</td>
               <td style="padding: 10px;"><kbd>TX (GPIO 17)</kbd></td>
-              <td style="padding: 10px;">Nhận dữ liệu Serial</td>
+              <td style="padding: 10px;" data-i18n="wiringNoteRx">Nhận dữ liệu Serial</td>
             </tr>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
               <td style="padding: 10px;">Touch / IRQ</td>
               <td style="padding: 10px;"><kbd>GPIO 15</kbd></td>
-              <td style="padding: 10px;">Tín hiệu ngắt cảm ứng vân tay</td>
+              <td style="padding: 10px;" data-i18n="wiringNoteIrq">Tín hiệu ngắt cảm ứng vân tay</td>
             </tr>
           </tbody>
         </table>
@@ -201,34 +217,15 @@
 
     <!-- Step 3 Panel: Biometric Studio & 10-Finger Hand Map -->
     <section id="tab-step3" class="tab-content" aria-label="Biometric Studio">
-      <div class="section-header" style="display: flex; justify-content: space-between; align-items: flex-end;">
-        <div>
-          <span class="hero-badge">Step 3</span>
-          <h2 class="section-title" data-i18n="step3Header">3. Biometric Studio</h2>
-          <p class="section-desc" data-i18n="step3Desc">Bản đồ 10 ngón tay tương ứng 10 Slot sinh trắc học. Đăng ký vân tay mới hoặc tùy chỉnh hành động.</p>
-        </div>
-        <button id="refresh" class="button button-secondary" type="button" data-i18n="refreshBtn">Làm mới</button>
+      <div class="section-header">
+        <span class="hero-badge">Step 3</span>
+        <h2 class="section-title" data-i18n="step3Header">3. Biometric Studio</h2>
+        <p class="section-desc" data-i18n="step3Desc">Bản đồ 10 ngón tay tương ứng 10 Slot sinh trắc học. Đăng ký vân tay mới hoặc tùy chỉnh hành động.</p>
       </div>
 
-      <!-- 10-Finger Hand Map -->
-      <div id="hand-map" class="hand-map-container">
-        <div class="hand-grid">
-          <!-- Left Hand Slots 1-5 -->
-          <div class="hand-section">
-            <div class="hand-title" data-i18n="leftHandTitle">Bàn tay trái (Slot 1–5)</div>
-            <div id="left-hand-slots" class="finger-grid"></div>
-          </div>
-          <!-- Right Hand Slots 6-10 -->
-          <div class="hand-section">
-            <div class="hand-title" data-i18n="rightHandTitle">Bàn tay phải (Slot 6–10)</div>
-            <div id="right-hand-slots" class="finger-grid"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Full Slot Grid Container (Fallback / Grid Alias) -->
-      <div id="slot-grid" class="finger-grid" aria-live="polite"></div>
-      <div id="finger-grid" class="finger-grid" aria-live="polite" style="display: none;"></div>
+      <!-- 10-Finger Hand Map Header & Slot Grid -->
+      <div id="hand-map" class="hand-map-container" style="margin-bottom: 20px;"></div>
+      <div id="slot-grid" aria-live="polite"></div>
     </section>
 
     <!-- Step 4 Panel: Live Activity Console -->
@@ -275,77 +272,108 @@
 
   <!-- Enrollment Modal Sheet -->
   <dialog id="enroll-modal" class="modal-sheet">
-    <div style="text-align: center; padding: 24px 16px;">
-      <h3 style="margin-bottom: 20px;" data-i18n="enrollModalTitle">Đăng ký vân tay ZW101</h3>
-      <!-- Concentric Scan Ring Animation -->
-      <div class="pulse-ring-container">
-        <div id="pulse-ring" class="pulse-ring-wrapper">
-          <div class="pulse-ring"></div>
-          <div class="pulse-ring"></div>
-          <div class="pulse-ring"></div>
+    <div class="modal-header">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="font-size: 1.3rem;">🖐️</span>
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <h3 id="enroll-finger-name" style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #ffffff; white-space: nowrap;">Ngón cái trái (Slot 1)</h3>
+          <span style="font-size: 0.78rem; color: var(--muted); white-space: nowrap;" data-i18n="enrollModalTitle">Đăng ký vân tay ZW101</span>
         </div>
-        <span class="pulse-ring-icon">👆</span>
       </div>
+      <button id="btn-close-enroll" class="btn-close" type="button" aria-label="Close">×</button>
+    </div>
 
-      <!-- Status Prompt & Progress Bar -->
-      <p id="enroll-status-text" style="font-weight: 600; margin-bottom: 16px;" data-i18n="enrollPrompt">Đặt ngón tay lên cảm biến ZW101...</p>
-      <div style="background: var(--code-bg); border-radius: 999px; height: 8px; width: 100%; overflow: hidden; margin-bottom: 24px; border: 1px solid var(--card-border);">
-        <div id="enroll-progress-bar" style="background: var(--accent); height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+    <!-- 3-Step Visual Progress Stepper -->
+    <div class="enroll-stepper">
+      <div id="step-node-1" class="stepper-step active">① <span data-i18n="enrollStep1">Đặt ngón</span></div>
+      <div id="step-node-2" class="stepper-step">② <span data-i18n="enrollStep2">Chạm lần 2</span></div>
+      <div id="step-node-3" class="stepper-step">③ <span data-i18n="enrollStep3">Hoàn tất</span></div>
+    </div>
+
+    <!-- Concentric Scan Ring Animation -->
+    <div class="pulse-ring-container">
+      <div id="pulse-ring" class="pulse-ring-wrapper">
+        <div class="pulse-ring"></div>
+        <div class="pulse-ring"></div>
+        <div class="pulse-ring"></div>
       </div>
+      <span class="pulse-ring-icon">👆</span>
+    </div>
 
+    <!-- Status Prompt & Progress Bar -->
+    <p id="enroll-status-text" style="font-weight: 600; text-align: center; margin-bottom: 14px; min-height: 38px; font-size: 0.95rem; line-height: 1.4;" data-i18n="enrollPrompt">Đặt ngón tay vuông góc lên cảm biến ZW101...</p>
+    <div style="background: var(--code-bg); border-radius: 999px; height: 8px; width: 100%; overflow: hidden; margin-bottom: 20px; border: 1px solid var(--card-border);">
+      <div id="enroll-progress-bar" style="background: var(--accent); height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+    </div>
+
+    <!-- Compact Sensor Hardware Alert / Simulation Banner -->
+    <div id="sim-banner" style="display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 14px; padding: 12px 16px; margin-bottom: 20px; font-size: 0.84rem; color: #f87171;">
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+        <div>
+          <strong style="color: #ffffff; font-size: 0.88rem;">⚠️ Chưa cắm cảm biến ZW101</strong>
+          <div style="font-size: 0.78rem; color: var(--muted); margin-top: 2px;">Nối 4 dây: VCC(3.3V) · GND · TX(GPIO18) · RX(GPIO17)</div>
+        </div>
+        <button id="btn-sim-touch" class="button button-primary" type="button" style="padding: 6px 14px; font-size: 0.82rem; white-space: nowrap;" data-i18n="simBtn">🧪 Mô phỏng Chạm Cảm Biến</button>
+      </div>
+    </div>
+
+    <div style="display: flex; justify-content: flex-end;">
       <button id="btn-cancel-enroll" class="button button-secondary" type="button" data-i18n="cancelEnrollBtn">Hủy đăng ký</button>
-      <button id="cancel-job" style="display: none;" type="button">Hủy</button>
+      <button id="cancel-job" style="display: none !important;" type="button">Hủy</button>
     </div>
   </dialog>
 
   <!-- Slot Edit Modal Sheet -->
   <dialog id="edit-modal" class="modal-sheet">
-    <form id="edit-form" method="dialog" style="padding: 24px 16px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h3 id="dialog-title" data-i18n="editModalTitle">Cấu hình Slot Vân Tay</h3>
-        <button class="button button-secondary" value="cancel" type="submit" style="padding: 4px 10px; min-width: auto;">×</button>
+    <form id="edit-form" method="dialog">
+      <div class="modal-header">
+        <h3 id="dialog-title" class="modal-title" data-i18n="editModalTitle">⚙️ Cấu hình Slot Vân Tay</h3>
+        <button id="btn-close-edit" class="btn-close" type="button" aria-label="Close">×</button>
       </div>
 
       <input id="edit-slot" type="hidden">
       <input id="profile-slot" type="hidden">
 
-      <div style="display: flex; flex-direction: column; gap: 16px;">
-        <label style="display: flex; flex-direction: column; gap: 6px; font-weight: 600; font-size: 0.9rem;">
-          <span data-i18n="editLabelField">Tên ngón / Chức năng</span>
-          <input id="edit-label" maxlength="64" required autocomplete="off">
-          <input id="profile-label" type="hidden">
-        </label>
+      <div class="form-group">
+        <label class="form-label" data-i18n="editLabelField">Tên ngón / Chức năng</label>
+        <input id="edit-label" class="form-input" maxlength="64" required autocomplete="off">
+        <input id="profile-label" type="hidden">
+      </div>
 
-        <label style="display: flex; flex-direction: column; gap: 6px; font-weight: 600; font-size: 0.9rem;">
-          <span data-i18n="editPresetField">Hành động (Preset)</span>
-          <select id="edit-preset">
-            <option value="password">Mật khẩu + Enter</option>
-            <option value="accept">Accept: Y + Enter</option>
-            <option value="enter">Enter</option>
-            <option value="escape">Escape</option>
-            <option value="custom">Chuỗi tùy chỉnh</option>
-          </select>
-          <select id="profile-preset" style="display: none;"></select>
-        </label>
+      <div class="form-group">
+        <label class="form-label" data-i18n="editPresetField">Hành động (Preset)</label>
+        <select id="edit-preset" class="form-select">
+          <option value="password">Mật khẩu + Enter</option>
+          <option value="accept">Accept: Y + Enter</option>
+          <option value="enter">Enter</option>
+          <option value="escape">Escape</option>
+          <option value="custom">Chuỗi tùy chỉnh</option>
+        </select>
+        <select id="profile-preset" style="display: none;"></select>
+      </div>
 
-        <label id="secret-field" style="display: flex; flex-direction: column; gap: 6px; font-weight: 600; font-size: 0.9rem;">
-          <span data-i18n="editSecretField">Mật khẩu bảo mật</span>
-          <input id="edit-secret" type="password" maxlength="128" autocomplete="new-password">
-          <input id="profile-secret" type="hidden">
-          <span id="secret-hint" style="color: var(--muted); font-size: 0.78rem; font-weight: 400;" data-i18n="editSecretHint">Lưu an toàn trong macOS Keychain. Để trống để giữ nguyên.</span>
-        </label>
+      <div id="secret-field" class="form-group">
+        <label class="form-label" data-i18n="editSecretField">Mật khẩu bảo mật</label>
+        <input id="edit-secret" class="form-input" type="password" maxlength="128" autocomplete="new-password">
+        <input id="profile-secret" type="hidden">
+        <span id="secret-hint" class="form-hint" data-i18n="editSecretHint">Lưu an toàn trong macOS Keychain. Để trống để giữ nguyên.</span>
+      </div>
 
-        <label style="display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.9rem; margin-top: 4px;">
-          <input type="checkbox" id="edit-confirm" style="width: auto;">
+      <div class="form-group" style="margin-top: 8px;">
+        <label class="form-checkbox-label">
+          <input type="checkbox" id="edit-confirm">
           <span data-i18n="editConfirmLabel">Chạm kép bảo vệ (Confirm Touch)</span>
         </label>
       </div>
 
-      <p id="form-error" class="error" role="alert" style="color: var(--danger); font-size: 0.85rem; margin-top: 12px;"></p>
+      <p id="form-error" class="error" role="alert" style="color: var(--danger); font-size: 0.85rem; margin-top: 10px;"></p>
 
-      <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
-        <button id="btn-cancel-edit" class="button button-secondary" value="cancel" type="button" data-i18n="cancelEditBtn">Hủy</button>
-        <button id="btn-save-slot" class="button button-primary" type="button" data-i18n="saveSlotBtn">Lưu cấu hình</button>
+      <div class="modal-actions">
+        <button id="btn-delete-slot-modal" class="button button-danger" type="button" style="font-size: 0.82rem;" data-i18n="resetSlotBtn">🗑️ Reset Slot</button>
+        <div class="modal-actions-right">
+          <button id="btn-cancel-edit" class="button button-secondary" value="cancel" type="button" data-i18n="cancelEditBtn">Hủy</button>
+          <button id="btn-save-slot" class="button button-primary" type="button" data-i18n="saveSlotBtn">Lưu cấu hình</button>
+        </div>
         <button id="save-profile" style="display: none;" type="button">Lưu</button>
       </div>
     </form>
