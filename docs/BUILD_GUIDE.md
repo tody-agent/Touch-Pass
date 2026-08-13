@@ -1,19 +1,19 @@
 # Build Touch Pass
 
-This guide takes you from loose parts to the local Touch Pass portal on a Mac.
+This guide takes you from loose parts to the local Touch Pass portal on Windows or macOS.
 Work through it from the root of this repository (the folder that contains
 `README.md`). Touch Pass is a convenient HID keyboard interface, not a
-security boundary: it types into whichever Mac field is focused, and the
+security boundary: it types into whichever active window/field is focused on your computer, and the
 sensor connection is an unauthenticated UART link.
 
 ## What you are building
 
 You will connect a ZW101 fingerprint sensor to an ESP32-S3 Super Mini, flash
 the [Touch Pass firmware](../firmware/tiny_touch_keyboard/tiny_touch_keyboard.ino),
-then run a local macOS helper and portal. The portal manages fingerprint slots
+then run a local helper service and Web Portal (`http://127.0.0.1:8787/`). The portal manages fingerprint slots
 1 through 10 and assigns actions to enrolled fingers. Password actions are
-stored by the helper in macOS Keychain; the firmware and helper share a pairing
-key to authenticate and encrypt action messages.
+stored cross-platform by the helper in the native OS Credential Store (Windows Credential Manager / macOS Keychain); the firmware and helper share a pairing
+key to authenticate and encrypt action messages over USB CDC.
 
 ![Exploded view of the Touch Pass parts](../assets/demo/05-exploded-view-v3.png)
 
@@ -39,8 +39,8 @@ small modules sold under the same name can have different dimensions.
   soldered three-way splice is also suitable when fully insulated.
 - A USB **data** cable for the ESP32-S3; many charging-only cables cannot
   upload firmware or expose the serial port.
-- A Mac with Arduino IDE, Terminal, `python3`, and an internet connection for
-  the helper's Python dependency.
+- A computer (Windows 10/11, macOS, or Linux) with Arduino IDE or `arduino-cli`, Python 3.9+, and an internet connection for
+  the helper's Python dependencies.
 - Ruler or calipers, masking tape, a pencil or fine marker, a small drill with
   pilot bits (and a step bit if available), a craft saw or rotary tool for
   rectangular openings, a small file, and eye protection.
@@ -270,7 +270,22 @@ Also select the serial port that belongs to your ESP32-S3. On a Waveshare
 ESP32-S3-Zero, if uploading does not begin, hold **BOOT**, press and release
 **RESET**, release **BOOT**, then start the upload again.
 
-## Flash
+### Option A: Using `arduino-cli` (Command Line)
+
+You can compile and flash the firmware directly using `arduino-cli`:
+
+```bash
+# Compile firmware
+arduino-cli compile --fqbn esp32:esp32:esp32s3:CDCOnBoot=cdc,UploadMode=cdc firmware/tiny_touch_keyboard
+
+# Flash firmware (Windows COM port example)
+arduino-cli upload -p COM3 --fqbn esp32:esp32:esp32s3:CDCOnBoot=cdc,UploadMode=cdc firmware/tiny_touch_keyboard
+
+# Flash firmware (macOS device example)
+arduino-cli upload -p /dev/cu.usbmodem101 --fqbn esp32:esp32:esp32s3:CDCOnBoot=cdc,UploadMode=cdc firmware/tiny_touch_keyboard
+```
+
+### Option B: Using Arduino IDE GUI
 
 1. In Arduino IDE, click **Verify**. Fix any reported error before continuing.
 2. Click **Upload** and wait for Arduino IDE to report that the upload
@@ -283,21 +298,29 @@ does not prove that the sensor is wired correctly.
 
 ## Start helper and portal
 
+### Windows (1-Click Launcher - Recommended)
+
+Simply double-click **`start_touchpass.bat`** in the project root directory. It automatically launches the helper service and opens `http://127.0.0.1:8787/` in your default browser!
+
+Or run manually via Command Prompt / PowerShell:
+```powershell
+python run_portal_win.py
+```
+
+### macOS / Linux
+
 From the repository root, start the helper. It starts the portal automatically
-and listens only on your Mac's loopback address:
+and listens on your computer's loopback address:
 
 ```bash
 .venv/bin/python software/macos-helper/tinytouch_helper.py
 ```
 
 Open [http://127.0.0.1:8787](http://127.0.0.1:8787) in a browser. If more than
-one `/dev/cu.usbmodem*` device is attached, the helper reports the multiple
-devices and tells you to rerun with `--port`. Stop it with `Control-C` and run
-it with the board's actual port:
+one USB CDC device is attached, specify your device port:
 
 ```bash
-.venv/bin/python software/macos-helper/tinytouch_helper.py \
-  --port /dev/cu.usbmodemYOUR_DEVICE
+.venv/bin/python software/macos-helper/tinytouch_helper.py --port COM3
 ```
 
 The helper normally discovers a single USB CDC device itself. Do not run
@@ -350,10 +373,18 @@ For the existing Vietnamese hardware and portal guide, see
 
 ## What automated tests prove
 
-Run the documentation test suite from the repository root:
+Run the automated quality test gate from the repository root:
 
 ```bash
-.venv/bin/python -m unittest tests/test_documentation.py
+python run_test_gate.py
+```
+
+This runs a 4-stage automated gate: syntax compilation check across Python files, complete pytest unit test suite (70 test cases), live Web Portal HTTP & CSRF API verification, and CLI sanity check.
+
+To run individual documentation or protocol tests:
+
+```bash
+python -m unittest tests/test_documentation.py
 ```
 
 It checks that the project guides and approved image assets exist, that local
