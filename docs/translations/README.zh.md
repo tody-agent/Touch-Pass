@@ -16,7 +16,7 @@
 
 <br />
 
-![TouchPass Hero](../../assets/demo/02-mac-mini-claude-accept-v2.png)
+![TouchPass Hero](../../assets/demo/03-login-success.png)
 
 > **工作原理：** 当您的终端 Prompt 请求确认许可时，轻触已注册的手指。TouchPass 将直接向当前 Focused 窗口发送原生 USB HID 键盘按键信号，自动输入 `y` 并按下 Enter。注意：TouchPass 发送的是原生 USB HID 键盘按键，无法点击或按压图形界面 (GUI) 按钮元素。
 

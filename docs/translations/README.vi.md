@@ -8,7 +8,7 @@
 [![Web Flasher](https://img.shields.io/badge/🌐_1--Click-Web_Flasher-success.svg)](https://tody-agent.github.io/Touch-Pass/web/flasher/)
 [![AI Setup](https://img.shields.io/badge/🤖_1--Prompt-AI_Agent_Setup-purple.svg)](../AI_AGENT_PROMPT.vi.md)
 
-![TouchPass Web Portal Hero Showcase](../../assets/demo/01-hero-showcase-v2.png)
+![TouchPass Hero Showcase](../../assets/demo/03-login-success.png)
 
 ---
 

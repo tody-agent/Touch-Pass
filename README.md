@@ -16,7 +16,7 @@
 
 <br />
 
-![TouchPass Hero](assets/demo/02-mac-mini-claude-accept-v2.png)
+![TouchPass Hero](assets/demo/03-login-success.png)
 
 > **How it works:** When your terminal-style prompt asks for approval, tap your enrolled finger. TouchPass sends a key action that types `y` followed by enter directly into your prompt. Note: TouchPass sends native USB HID keyboard keystrokes to the focused field; it cannot click or press GUI button elements.
 

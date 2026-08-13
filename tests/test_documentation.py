@@ -82,7 +82,7 @@ class DocumentationTests(unittest.TestCase):
 
     def test_readme_claude_example_explains_accept_limit(self):
         text = README.read_text(encoding="utf-8")
-        image = "02-mac-mini-claude-accept-v2.png"
+        image = "03-login-success.png"
         self.assertIn(image, text)
         nearby = text[text.index(image) : text.index(image) + 700].lower()
         self.assertRegex(nearby, r"`?y`?\s*(?:\+|followed by|then)\s*(?:return|enter)")
