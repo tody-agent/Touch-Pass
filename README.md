@@ -2,7 +2,7 @@
 
 > Give every finger a superpower.
 
-![TouchPass Enclosure Showcase](assets/demo/01-hero-showcase-v2.png)
+![TouchPass Web Portal Hero Showcase](assets/demo/06-touchpass-portal-hero.jpg)
 
 ## What is TouchPass?
 
@@ -31,9 +31,17 @@ It combines hardware USB HID keyboard emulation, a local background helper servi
 
 **Accept** sends only lowercase `y` + Return. Use it only in a focused terminal-style prompt that visibly expects that input; Touch Pass cannot click arbitrary GUI buttons. Accept and other non-password control actions need a deliberate confirmation: touch the same finger twice within three seconds.
 
-![TouchPass Feature Overview](assets/demo/04-features.png)
+### Visual Showcase
+
+![TouchPass Hardware Setup](assets/demo/01-hero-showcase-v2.png)
+
+![TouchPass Lock Screen Unlock Action](assets/demo/03-login-success.png)
+
+![TouchPass Key Features Breakdown](assets/demo/04-features.png)
 
 *Note: The "secure" language in this overview refers to local encrypted helper and OS Keychain handling. It does **not** mean TouchPass is a hardware secure enclave or that the sensor UART link is unauthenticated.*
+
+![TouchPass Hardware Exploded View](assets/demo/05-exploded-view-v3.png)
 
 ---
 
