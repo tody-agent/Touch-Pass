@@ -77,45 +77,45 @@ body {
   color: #ffffff;
 }
 
-.lang-picker {
+.lang-switcher {
   display: flex;
   align-items: center;
   gap: 4px;
   background: var(--card);
   border: 1px solid var(--card-border);
-  padding: 4px;
+  padding: 4px 8px;
   border-radius: var(--radius-sm);
 }
 
 .lang-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
   background: transparent;
   border: none;
   color: var(--muted);
-  font-family: var(--font-sans);
+  font-family: var(--font-mono);
   font-size: 13px;
-  font-weight: 600;
-  padding: 4px 8px;
+  font-weight: 700;
+  padding: 3px 6px;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
+  line-height: 1;
 }
 
 .lang-btn:hover {
   color: var(--text);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .lang-btn.active {
-  color: #ffffff;
-  background: var(--card-border);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  color: var(--accent);
+  background: var(--accent-light);
 }
 
-.lang-btn .flag {
-  font-size: 14px;
+.lang-sep {
+  color: var(--card-border);
+  user-select: none;
+  font-size: 12px;
+  font-family: var(--font-mono);
 }
 
 .badge-accent {
@@ -701,26 +701,27 @@ footer {
 
 @media (max-width: 520px) {
   .navbar {
-    justify-content: center;
-    gap: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     padding: 10px 0;
   }
 
-  .brand {
-    width: 100%;
-    justify-content: center;
+  .brand-title {
+    font-size: 18px;
   }
 
-  .lang-picker {
-    width: 100%;
-    justify-content: center;
+  .lang-switcher {
     gap: 2px;
+    padding: 3px 6px;
   }
 
   .lang-btn {
-    padding: 6px 8px;
+    padding: 3px 5px;
     font-size: 12px;
-    flex: 1;
-    justify-content: center;
+  }
+
+  .lang-sep {
+    font-size: 10px;
   }
 }
