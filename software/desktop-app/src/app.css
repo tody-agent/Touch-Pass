@@ -1,0 +1,270 @@
+@import "tailwindcss";
+
+:root {
+  font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+  color: #f8fafc;
+  background: #07090e;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --bg: #0a0c10;
+  --sidebar: rgba(12, 14, 22, 0.72);
+  --card: rgba(25, 30, 44, 0.64);
+  --card-strong: rgba(36, 43, 64, 0.84);
+  --border: rgba(255, 255, 255, 0.08);
+  --accent: #0a84ff;
+  --accent-strong: #0071e3;
+  --success: #30d158;
+  --purple: #bf5af2;
+  --warning: #ff9f0a;
+  --danger: #ff453a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  color: #f8fafc;
+  background:
+    radial-gradient(circle at 22% 18%, rgba(10, 132, 255, 0.12), transparent 28%),
+    radial-gradient(circle at 84% 72%, rgba(191, 90, 242, 0.1), transparent 24%),
+    #07090e;
+  user-select: none;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  border: 0;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+}
+
+.app-stage {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+
+.apple-window {
+  width: min(100vw, 960px);
+  height: min(100vh, 680px);
+  min-width: min(100vw, 900px);
+  min-height: min(100vh, 640px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  background: rgba(16, 19, 28, 0.88);
+  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.74), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(40px) saturate(200%);
+}
+
+.glass-card {
+  border: 1px solid var(--border);
+  background: var(--card);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(22px);
+}
+
+.interactive-card {
+  transition:
+    transform 180ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.interactive-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(10, 132, 255, 0.42);
+  background: var(--card-strong);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.34), 0 0 22px rgba(10, 132, 255, 0.14);
+}
+
+.pill {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.icon-button {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: #94a3b8;
+  background: transparent;
+  transition: color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.icon-button:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.primary-button,
+.secondary-button,
+.danger-button {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 12px;
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 800;
+  transition: transform 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+.primary-button {
+  color: #ffffff;
+  background: var(--accent-strong);
+  box-shadow: 0 14px 24px rgba(10, 132, 255, 0.2);
+}
+
+.primary-button:hover {
+  background: var(--accent);
+}
+
+.secondary-button {
+  color: #e2e8f0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.secondary-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.danger-button {
+  color: #fecaca;
+  border: 1px solid rgba(255, 69, 58, 0.24);
+  background: rgba(255, 69, 58, 0.11);
+}
+
+.danger-button:hover {
+  background: rgba(255, 69, 58, 0.17);
+}
+
+.primary-button:active,
+.secondary-button:active,
+.danger-button:active,
+.icon-button:active {
+  transform: scale(0.97);
+}
+
+.mono {
+  font-family: "JetBrains Mono", "SF Mono", ui-monospace, monospace;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(0.95);
+    opacity: 0.85;
+  }
+}
+
+@keyframes scanline {
+  0% {
+    transform: translateY(-120%);
+    opacity: 0;
+  }
+  48% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(220%);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    transform: translate(-50%, 18px);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+.pulse-glow {
+  animation: pulse-ring 2.4s infinite ease-in-out;
+}
+
+.scanning-line {
+  animation: scanline 1.8s infinite linear;
+}
+
+.hud-enter {
+  animation: slide-up 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (max-width: 720px) {
+  .apple-window {
+    width: 100vw;
+    height: 100vh;
+    min-width: 320px;
+    min-height: 560px;
+    border-radius: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

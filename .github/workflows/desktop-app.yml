@@ -1,0 +1,64 @@
+name: Desktop App
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: windows-x64
+            os: windows-latest
+          - platform: macos-universal
+            os: macos-latest
+          - platform: linux-x64
+            os: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Linux Tauri dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf libssl-dev libudev-dev build-essential
+
+      - name: Install frontend dependencies
+        working-directory: software/desktop-app
+        run: npm install
+
+      - name: Check frontend
+        working-directory: software/desktop-app
+        run: npm run check
+
+      - name: Test frontend
+        working-directory: software/desktop-app
+        run: npm test
+
+      - name: Test Rust backend
+        working-directory: software/desktop-app/src-tauri
+        run: cargo test
+
+      - name: Build Tauri bundle
+        working-directory: software/desktop-app
+        run: npm run tauri:build
+
+      - name: Upload bundle artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: touchpass-${{ matrix.platform }}
+          path: |
+            software/desktop-app/src-tauri/target/release/bundle/**/*
