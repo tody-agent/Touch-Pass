@@ -241,14 +241,23 @@ fn default_profiles() -> Vec<FingerProfile> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::sync::Once;
     use tempfile::tempdir;
+
+    fn test_secret_store(service: &str) -> SecretStore {
+        static INIT: Once = Once::new();
+        INIT.call_once(|| {
+            keyring::set_default_credential_builder(keyring::mock::default_credential_builder());
+        });
+        SecretStore::new(service)
+    }
 
     #[test]
     fn lists_default_profiles_without_exposing_secret() {
         let dir = tempdir().unwrap();
         let store = ProfileStore::new(
             dir.path().join("profiles.json"),
-            SecretStore::new("touchpass-test-list"),
+            test_secret_store("touchpass-test-list"),
         );
         let profiles = store.list_profiles().unwrap();
         assert_eq!(profiles.len(), 10);
@@ -260,7 +269,7 @@ mod tests {
         let dir = tempdir().unwrap();
         let store = ProfileStore::new(
             dir.path().join("profiles.json"),
-            SecretStore::new("touchpass-test-custom"),
+            test_secret_store("touchpass-test-custom"),
         );
         let mut profile = default_profile(1);
         profile.action_type = ActionType::Custom;
@@ -273,7 +282,7 @@ mod tests {
         let dir = tempdir().unwrap();
         let store = ProfileStore::new(
             dir.path().join("profiles.json"),
-            SecretStore::new("touchpass-test-empty-custom"),
+            test_secret_store("touchpass-test-empty-custom"),
         );
         let mut profile = default_profile(1);
         profile.action_type = ActionType::Custom;
@@ -288,7 +297,7 @@ mod tests {
         let dir = tempdir().unwrap();
         let store = ProfileStore::new(
             dir.path().join("profiles.json"),
-            SecretStore::new("touchpass-test-missing-secret"),
+            test_secret_store("touchpass-test-missing-secret"),
         );
         let mut profile = default_profile(1);
         profile.action_type = ActionType::Password;
@@ -304,7 +313,7 @@ mod tests {
         let dir = tempdir().unwrap();
         let store = ProfileStore::new(
             dir.path().join("profiles.json"),
-            SecretStore::new("touchpass-test-enrollment-state"),
+            test_secret_store("touchpass-test-enrollment-state"),
         );
         let profile = default_profile(1);
 
@@ -320,7 +329,7 @@ mod tests {
         let dir = tempdir().unwrap();
         let store = ProfileStore::new(
             dir.path().join("profiles.json"),
-            SecretStore::new("touchpass-test-disable-action"),
+            test_secret_store("touchpass-test-disable-action"),
         );
         let mut profile = default_profile(1);
         profile.configured = true;
@@ -368,7 +377,7 @@ mod tests {
             }"#,
         )
         .unwrap();
-        let store = ProfileStore::new(path.clone(), SecretStore::new("touchpass-test-migrate"));
+        let store = ProfileStore::new(path.clone(), test_secret_store("touchpass-test-migrate"));
 
         let profiles = store.list_profiles().unwrap();
 
@@ -394,7 +403,7 @@ mod tests {
         std::fs::write(&path, malformed).unwrap();
         let store = ProfileStore::new(
             path.clone(),
-            SecretStore::new("touchpass-test-malformed-profile"),
+            test_secret_store("touchpass-test-malformed-profile"),
         );
 
         let error = store.list_profiles().unwrap_err();

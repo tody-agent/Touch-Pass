@@ -19,7 +19,9 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build ESP32-S3 unified firmware
-        run: idf.py -C firmware/tiny_touch_smartcard build
+        run: |
+          . /opt/esp/idf/export.sh
+          idf.py -C firmware/tiny_touch_smartcard build
 
       - name: Stage flash artifacts and checksums
         shell: bash
