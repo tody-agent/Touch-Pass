@@ -13,8 +13,17 @@
 static const char *TAG = "fingerprint";
 
 static const uart_port_t FP_UART = UART_NUM_1;
-static const int FP_TX_PIN = 43;
-static const int FP_RX_PIN = 44;
+typedef struct {
+  int tx_pin;
+  int rx_pin;
+} fp_uart_pins_t;
+
+static const fp_uart_pins_t FP_UART_CANDIDATES[] = {
+  {43, 44},
+  {42, 41},
+  {1, 3},
+};
+static const int FP_UART_BAUD = 57600;
 static const int FP_INT_PIN = 2;
 static const int INT_ACTIVE_VALUE = 1;
 static const uint16_t START_SLOT = 1;
@@ -25,9 +34,41 @@ static const uint8_t FP_LED_GREEN = 0x02;
 static const uint8_t FP_LED_RED = 0x04;
 static const uint8_t FP_LED_FUNC_FLASH = 2;
 static const uint8_t FP_LED_FUNC_STEADY = 3;
+static const uint8_t FP_GET_IMAGE = 0x01;
+static const uint32_t FP_IMAGE_TIMEOUT_MS = 2500;
+static const uint32_t FP_LATE_ACK_WAIT_MS = 1500;
+static const uint32_t FP_BOOT_RESYNC_MS = 3000;
 
 static uint8_t current_led = 0xff;
 static SemaphoreHandle_t fp_mutex;
+static bool auth_waiting_for_lift;
+static bool sensor_ready;
+static int active_tx_pin = -1;
+static int active_rx_pin = -1;
+static uint8_t last_verify_confirm = 0xff;
+static bool last_count_transport_ok;
+static uint8_t last_count_confirm = 0xff;
+static size_t last_count_data_length;
+
+static void fp_resync_uart(uint32_t wait_ms) {
+  uint8_t drain[64];
+  TickType_t start = xTaskGetTickCount();
+  TickType_t deadline = pdMS_TO_TICKS(wait_ms);
+  TickType_t quiet_since = start;
+  bool received = false;
+
+  while ((xTaskGetTickCount() - start) < deadline) {
+    int n = uart_read_bytes(FP_UART, drain, sizeof(drain), pdMS_TO_TICKS(20));
+    TickType_t now = xTaskGetTickCount();
+    if (n > 0) {
+      received = true;
+      quiet_since = now;
+    } else if (received && (now - quiet_since) >= pdMS_TO_TICKS(100)) {
+      break;
+    }
+  }
+  uart_flush_input(FP_UART);
+}
 
 static bool fp_command(uint8_t instruction, const uint8_t *params, size_t param_len,
                        uint8_t *confirm, uint8_t *data, size_t *data_len,
@@ -59,7 +100,7 @@ static bool fp_command(uint8_t instruction, const uint8_t *params, size_t param_
   const size_t data_cap = (data && data_len) ? *data_len : 0;
   TickType_t start = xTaskGetTickCount();
   TickType_t deadline = pdMS_TO_TICKS(timeout_ms);
-  if (data && data_len) *data_len = 0;
+  if (data_len) *data_len = 0;
 
   while ((xTaskGetTickCount() - start) < deadline) {
     int n = uart_read_bytes(FP_UART, response + pos, sizeof(response) - pos, pdMS_TO_TICKS(10));
@@ -79,14 +120,15 @@ static bool fp_command(uint8_t instruction, const uint8_t *params, size_t param_
     fp_ack_t ack;
     if (!fp_protocol_parse_ack(response, expected, &ack)) return false;
     *confirm = ack.confirm;
-    if (data && data_len) {
+    if (data_len) {
       size_t copy_len = ack.data_length < data_cap ? ack.data_length : data_cap;
-      if (copy_len) memcpy(data, ack.data, copy_len);
-      *data_len = copy_len;
+      if (data && copy_len) memcpy(data, ack.data, copy_len);
+      *data_len = ack.data_length;
     }
     return true;
   }
 
+  fp_resync_uart(FP_LATE_ACK_WAIT_MS);
   return false;
 }
 
@@ -96,6 +138,62 @@ static bool fp_take(uint32_t timeout_ms) {
 
 static void fp_give(void) {
   if (fp_mutex) xSemaphoreGive(fp_mutex);
+}
+
+static bool fp_get_image(uint8_t *confirm, uint32_t timeout_ms) {
+  uint8_t reply = 0xff;
+  size_t response_data_length = 0;
+  bool command_ok = fp_command(FP_GET_IMAGE, NULL, 0, &reply,
+                               NULL, &response_data_length, timeout_ms);
+  if (command_ok && response_data_length != 0) {
+    ESP_LOGW(TAG, "discarding stale image ACK payload len=%u",
+             (unsigned)response_data_length);
+    fp_resync_uart(FP_LATE_ACK_WAIT_MS);
+    response_data_length = 0;
+    reply = 0xff;
+    command_ok = fp_command(FP_GET_IMAGE, NULL, 0, &reply,
+                            NULL, &response_data_length, timeout_ms);
+  }
+
+  if (confirm) *confirm = reply;
+  return command_ok && response_data_length == 0;
+}
+
+static bool fp_autodetect_uart(uint8_t *verify_confirm) {
+  static const uint8_t password[] = {0x00, 0x00, 0x00, 0x00};
+  active_tx_pin = -1;
+  active_rx_pin = -1;
+  sensor_ready = false;
+  last_verify_confirm = 0xff;
+  if (verify_confirm) *verify_confirm = 0xff;
+
+  for (size_t i = 0; i < sizeof(FP_UART_CANDIDATES) / sizeof(FP_UART_CANDIDATES[0]); i++) {
+    const fp_uart_pins_t pins = FP_UART_CANDIDATES[i];
+    if (uart_set_pin(FP_UART, pins.tx_pin, pins.rx_pin,
+                     UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE) != ESP_OK) {
+      continue;
+    }
+    uart_flush_input(FP_UART);
+    vTaskDelay(pdMS_TO_TICKS(20));
+
+    uint8_t confirm = 0xff;
+    size_t response_data_length = 0;
+    if (fp_command(0x13, password, sizeof(password), &confirm,
+                   NULL, &response_data_length, FP_IMAGE_TIMEOUT_MS) &&
+        confirm == 0x00 && response_data_length == 0) {
+      active_tx_pin = pins.tx_pin;
+      active_rx_pin = pins.rx_pin;
+      sensor_ready = true;
+      last_verify_confirm = confirm;
+      if (verify_confirm) *verify_confirm = confirm;
+      ESP_LOGI(TAG, "sensor UART detected tx=%d rx=%d baud=%d confirm=0x%02x",
+               active_tx_pin, active_rx_pin, FP_UART_BAUD, confirm);
+      return true;
+    }
+  }
+
+  ESP_LOGW(TAG, "sensor UART not detected on known ESP32-S3 Mini mappings");
+  return false;
 }
 
 static void set_aura(uint8_t color) {
@@ -209,13 +307,22 @@ static bool fingerprint_match_captured(fingerprint_match_t *match, bool quiet) {
 }
 
 bool fingerprint_authorize_poll_once(fingerprint_match_t *match) {
+  if (!sensor_ready) return false;
   if (!fp_take(0)) return false;
   uint8_t confirm = 0xff;
-  if (!fp_command(0x01, NULL, 0, &confirm, NULL, NULL, 350) || confirm != 0x00) {
+  bool command_ok = fp_get_image(&confirm, 2500);
+  fp_image_state_t state = fp_protocol_image_state(command_ok, confirm);
+  if (state == FP_IMAGE_ABSENT) {
+    auth_waiting_for_lift = false;
+    fp_give();
+    return false;
+  }
+  if (state != FP_IMAGE_PRESENT || auth_waiting_for_lift) {
     fp_give();
     return false;
   }
   bool ok = fingerprint_match_captured(match, true);
+  if (ok) auth_waiting_for_lift = true;
   fp_give();
   return ok;
 }
@@ -231,7 +338,7 @@ void fingerprint_init(void) {
   gpio_config(&io);
 
   uart_config_t cfg = {
-    .baud_rate = 57600,
+    .baud_rate = FP_UART_BAUD,
     .data_bits = UART_DATA_8_BITS,
     .parity = UART_PARITY_DISABLE,
     .stop_bits = UART_STOP_BITS_1,
@@ -240,14 +347,17 @@ void fingerprint_init(void) {
   };
   uart_driver_install(FP_UART, 1024, 0, 0, NULL, 0);
   uart_param_config(FP_UART, &cfg);
-  uart_set_pin(FP_UART, FP_TX_PIN, FP_RX_PIN, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
   fp_mutex = xSemaphoreCreateMutex();
 
-  uint8_t params[] = {0x00, 0x00, 0x00, 0x00};
   uint8_t confirm = 0xff;
   fp_take(2000);
-  bool ok = fp_command(0x13, params, sizeof(params), &confirm, NULL, NULL, 2000) && confirm == 0x00;
+  uart_set_pin(FP_UART, FP_UART_CANDIDATES[0].tx_pin,
+               FP_UART_CANDIDATES[0].rx_pin,
+               UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE);
+  fp_resync_uart(FP_BOOT_RESYNC_MS);
+  bool transport_ok = fp_autodetect_uart(&confirm);
   fp_give();
+  bool ok = transport_ok && confirm == 0x00;
   ESP_LOGI(TAG, "sensor verify: %s", ok ? "ok" : "failed");
   fingerprint_led_idle();
 }
@@ -262,7 +372,7 @@ bool fingerprint_authorize_once(void) {
   TickType_t deadline = pdMS_TO_TICKS(FINGER_WAIT_MS);
   bool got_image = false;
   while ((xTaskGetTickCount() - start) < deadline) {
-    if (fp_command(0x01, NULL, 0, &confirm, NULL, NULL, 1000) && confirm == 0x00) {
+    if (fp_get_image(&confirm, FP_IMAGE_TIMEOUT_MS) && confirm == 0x00) {
       got_image = true;
       break;
     }
@@ -276,6 +386,7 @@ bool fingerprint_authorize_once(void) {
   }
 
   bool ok = fingerprint_match_captured(NULL, false);
+  if (ok) auth_waiting_for_lift = true;
   fp_give();
   return ok;
 }
@@ -285,10 +396,52 @@ int fingerprint_count(void) {
   uint8_t confirm = 0xff;
   uint8_t data[2];
   size_t data_len = sizeof(data);
-  bool ok = fp_command(0x1d, NULL, 0, &confirm, data, &data_len, 2000) &&
-            confirm == 0x00 && data_len == sizeof(data);
+  bool transport_ok = fp_command(0x1d, NULL, 0, &confirm,
+                                 data, &data_len, 2000);
+  bool ok = transport_ok && confirm == 0x00 && data_len == sizeof(data);
+  if (!ok) {
+    fp_resync_uart(FP_LATE_ACK_WAIT_MS);
+    if (fp_autodetect_uart(NULL)) {
+      confirm = 0xff;
+      data_len = sizeof(data);
+      transport_ok = fp_command(0x1d, NULL, 0, &confirm,
+                                data, &data_len, 2000);
+      ok = transport_ok && confirm == 0x00 && data_len == sizeof(data);
+    }
+  }
+  last_count_transport_ok = transport_ok;
+  last_count_confirm = confirm;
+  last_count_data_length = data_len;
   fp_give();
   return ok ? ((int)data[0] << 8) | data[1] : -1;
+}
+
+int fingerprint_uart_tx_pin(void) {
+  return active_tx_pin;
+}
+
+int fingerprint_uart_rx_pin(void) {
+  return active_rx_pin;
+}
+
+int fingerprint_uart_baud(void) {
+  return FP_UART_BAUD;
+}
+
+int fingerprint_last_verify_confirm(void) {
+  return last_verify_confirm;
+}
+
+bool fingerprint_last_count_transport_ok(void) {
+  return last_count_transport_ok;
+}
+
+int fingerprint_last_count_confirm(void) {
+  return last_count_confirm;
+}
+
+int fingerprint_last_count_data_length(void) {
+  return (int)last_count_data_length;
 }
 
 static bool wait_for_image_state(bool present, uint32_t timeout_ms,
@@ -297,7 +450,7 @@ static bool wait_for_image_state(bool present, uint32_t timeout_ms,
   TickType_t deadline = pdMS_TO_TICKS(timeout_ms);
   while ((xTaskGetTickCount() - start) < deadline) {
     uint8_t confirm = 0xff;
-    bool command_ok = fp_command(0x01, NULL, 0, &confirm, NULL, NULL, 1000);
+    bool command_ok = fp_get_image(&confirm, FP_IMAGE_TIMEOUT_MS);
     if (last_confirm) *last_confirm = confirm;
     fp_image_state_t state = fp_protocol_image_state(command_ok, confirm);
     if ((present && state == FP_IMAGE_PRESENT) ||
@@ -389,6 +542,7 @@ bool fingerprint_enroll(uint16_t slot, void (*prompt)(const char *message),
   if (!ok) set_enroll_error(error, FP_ENROLL_STAGE_STORE, confirm);
 
 done:
+  if (ok) auth_waiting_for_lift = true;
   show_result(ok);
   fp_give();
   return ok;

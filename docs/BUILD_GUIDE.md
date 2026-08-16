@@ -67,9 +67,15 @@ This mapping is used by the native TouchPass desktop app and the Web Flasher fir
 | V_TOUCH (pin 1) | 3V3 |
 | TouchOut (pin 2) | GPIO2 (optional scan hint) |
 | VCC (pin 3) | 3V3 |
-| TX (pin 4) | GPIO44 / ESP RX |
-| RX (pin 5) | GPIO43 / ESP TX |
+| TX (pin 4) | Board pin `RX` / ESP RX |
+| RX (pin 5) | Board pin `TX` / ESP TX |
 | GND (pin 6) | GND |
+
+Use the physical `TX` and `RX` silkscreen shown on your board. Several 18-pin
+ESP32-S3 Mini variants share this layout but route those labels internally as
+GPIO43/44, GPIO42/41, or GPIO1/3. Unified firmware auto-detects the working
+mapping by requiring a valid checksummed EF-01 response; do not move the wires
+between numbered pins to select a mapping.
 
 ### Legacy Arduino sketch
 
@@ -381,7 +387,7 @@ the focused-window behavior with a harmless action in a text editor.
 | --- | --- |
 | Helper says no ESP32-S3 USB CDC device was found | Use a USB data cable, reconnect the board, confirm `USB CDC On Boot` is enabled, then retry with `--port` if needed. |
 | Arduino cannot upload | Confirm the selected port and board settings. For the Waveshare ESP32-S3-Zero, use the BOOT/RESET sequence in **Configure Arduino**. |
-| ESP32-S3 connects but the sensor is unavailable | For unified firmware, recheck sensor TX→GPIO44, RX→GPIO43, both supply pins→3V3, and common GND. GPIO6/7 applies only to the legacy Arduino sketch. |
+| ESP32-S3 connects but the sensor is unavailable | On the 18-pin ESP32-S3 Super Mini, recheck sensor TX→board `RX`, RX→board `TX`, both supply pins→3V3, and common GND. Unified firmware probes the known GPIO43/44, GPIO42/41, and GPIO1/3 layouts automatically. GPIO6/7 applies only to the legacy Arduino sketch. |
 | A recognized finger does not perform the configured action | Confirm that `secrets.h` and the macOS Keychain use the exact same pairing key, then reflash after changing `secrets.h`. |
 | Text appears in the wrong place | This is expected HID behavior when the wrong app or field is focused. Focus a harmless target before touching the sensor. |
 | Password characters are incorrect | Switch the macOS input source to `ABC` or `US`; password actions type ASCII keyboard input. |
