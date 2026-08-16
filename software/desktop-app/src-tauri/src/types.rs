@@ -67,6 +67,9 @@ pub struct AppStatusResponse {
     pub firmware_mode: String,
     pub fingerprint_count: usize,
     pub hid_key_configured: bool,
+    pub hid_configuration_supported: bool,
+    pub local_pairing_key_configured: bool,
+    pub pairing_in_doubt: bool,
     pub background_worker: WorkerStatus,
 }
 
@@ -76,6 +79,11 @@ pub struct DeviceStatusChange {
     pub connected: bool,
     pub port: Option<String>,
     pub sensor_status: SensorStatus,
+    pub firmware_mode: String,
+    pub hid_key_configured: bool,
+    pub hid_configuration_supported: bool,
+    pub local_pairing_key_configured: bool,
+    pub pairing_in_doubt: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -111,6 +119,7 @@ pub enum ErrorCode {
     InvalidPassword,
     InvalidCustomPayload,
     HardwareUnavailable,
+    DeviceConfigurationFailed,
     PersistenceFailed,
     Internal,
 }

@@ -32,6 +32,7 @@ static const uint32_t FINGER_WAIT_MS = 7000;
 static const uint8_t FP_LED_BLUE = 0x01;
 static const uint8_t FP_LED_GREEN = 0x02;
 static const uint8_t FP_LED_RED = 0x04;
+static const uint8_t FP_LED_YELLOW = 0x06;
 static const uint8_t FP_LED_FUNC_FLASH = 2;
 static const uint8_t FP_LED_FUNC_STEADY = 3;
 static const uint8_t FP_GET_IMAGE = 0x01;
@@ -223,6 +224,20 @@ void fingerprint_led_idle(void) {
   fp_give();
 }
 
+void fingerprint_led_action_result(bool ok) {
+  if (!fp_take(1000)) return;
+  show_result(ok);
+  fp_give();
+}
+
+void fingerprint_led_unconfigured(void) {
+  if (!fp_take(1000)) return;
+  flash_aura(FP_LED_YELLOW);
+  vTaskDelay(pdMS_TO_TICKS(500));
+  set_aura(FP_LED_BLUE);
+  fp_give();
+}
+
 static bool finger_present(void) {
   return gpio_get_level(FP_INT_PIN) == INT_ACTIVE_VALUE;
 }
@@ -263,7 +278,7 @@ static bool fingerprint_match_captured(fingerprint_match_t *match, bool quiet) {
       match->slot = slot;
       match->score = score;
     }
-    if (!quiet || ok) show_result(ok);
+    if (!quiet) show_result(ok);
     return ok;
   } else if (!quiet) {
     ESP_LOGW(TAG, "search failed confirm=0x%02x len=%u", confirm, (unsigned)search_len);
@@ -293,7 +308,7 @@ static bool fingerprint_match_captured(fingerprint_match_t *match, bool quiet) {
           match->slot = slot;
           match->score = score;
         }
-        show_result(true);
+        if (!quiet) show_result(true);
         return true;
       }
     }

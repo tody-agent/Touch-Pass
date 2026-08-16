@@ -9,6 +9,7 @@
 
 #if !ARDUINO_USB_MODE && !ARDUINO_USB_CDC_ON_BOOT
 USBCDC USBSerial;
+#define Serial USBSerial
 #endif
 
 static const uint32_t UART_BAUD = 57600;
@@ -22,7 +23,7 @@ static const uint16_t END_SLOT = 10;
 static const uint32_t RESULT_HOLD_MS = 500;
 static const uint32_t HELPER_TIMEOUT_MS = 6000;
 static const bool ENABLE_TEST_COMMANDS = true;
-static const bool DEBUG_FP_PACKETS = false;
+static const bool DEBUG_FP_PACKETS = true;
 
 static const uint8_t FP_LED_GREEN = 0x02;
 static const uint8_t FP_LED_WHITE = 0x07;
@@ -108,9 +109,6 @@ static bool fpCommand(uint8_t instruction, const uint8_t *params, size_t paramLe
                       uint8_t *confirm, uint8_t *data, size_t *dataLen, uint32_t timeoutMs) {
   while (Finger.available()) Finger.read();
   size_t dataCapacity = (data && dataLen) ? *dataLen : 0;
-  size_t outLen = 0;
-  bool sawAck = false;
-  uint32_t postAckUntil = 0;
   if (data && dataLen) *dataLen = 0;
 
   uint8_t payload[32];
@@ -141,53 +139,64 @@ static bool fpCommand(uint8_t instruction, const uint8_t *params, size_t paramLe
         uint8_t packetId = response[6];
         uint16_t respLen = ((uint16_t)response[7] << 8) | response[8];
         size_t expected = 9 + respLen;
-        if (pos >= expected) {
-          if (packetId == 0x07) {
-            *confirm = response[9];
-            sawAck = true;
-            size_t actualDataLen = respLen > 3 ? respLen - 3 : 0;
-            if (DEBUG_FP_PACKETS && (instruction == 0x04 || instruction == 0x03)) {
-              Serial.printf("FP_ACK %02x len=%u confirm=%u data=%s\n",
-                            instruction, actualDataLen, *confirm,
-                            actualDataLen ? toHex(response + 10, actualDataLen).c_str() : "-");
-              Serial.flush();
-            }
-            if (data && dataLen && actualDataLen) {
-              size_t copyLen = actualDataLen;
-              if (copyLen > dataCapacity - outLen) copyLen = dataCapacity - outLen;
-              memcpy(data + outLen, response + 10, copyLen);
-              outLen += copyLen;
-              *dataLen = outLen;
-            }
-            if (*confirm != 0x00 || !data || !dataLen || outLen >= dataCapacity) return true;
-            postAckUntil = millis() + 120;
-          } else if (packetId == 0x02 && data && dataLen) {
-            size_t actualDataLen = respLen > 2 ? respLen - 2 : 0;
-            if (DEBUG_FP_PACKETS && (instruction == 0x04 || instruction == 0x03)) {
-              Serial.printf("FP_DATA %02x len=%u data=%s\n",
-                            instruction, actualDataLen,
-                            actualDataLen ? toHex(response + 9, actualDataLen).c_str() : "-");
-              Serial.flush();
-            }
-            if (actualDataLen) {
-              size_t copyLen = actualDataLen;
-              if (copyLen > dataCapacity - outLen) copyLen = dataCapacity - outLen;
-              memcpy(data + outLen, response + 9, copyLen);
-              outLen += copyLen;
-              *dataLen = outLen;
-            }
-            if (sawAck && outLen >= dataCapacity) return true;
+        if (respLen < 3 || expected > sizeof(response)) {
+          if (DEBUG_FP_PACKETS) {
+            Serial.printf("FP_BAD_LENGTH ins=%02x pos=%u len=%u raw=%s\n",
+                          instruction, (unsigned)pos, respLen,
+                          toHex(response, pos).c_str());
+            Serial.flush();
           }
-          size_t remaining = pos - expected;
-          if (remaining) memmove(response, response + expected, remaining);
-          pos = remaining;
+          return false;
         }
+        if (pos < expected) continue;
+        if (packetId != 0x07) {
+          if (DEBUG_FP_PACKETS) {
+            Serial.printf("FP_BAD_PACKET ins=%02x packet=%02x raw=%s\n",
+                          instruction, packetId,
+                          toHex(response, expected).c_str());
+            Serial.flush();
+          }
+          return false;
+        }
+
+        size_t payloadLen = respLen - 2;
+        uint16_t receivedChecksum = ((uint16_t)response[expected - 2] << 8) |
+                                    response[expected - 1];
+        uint16_t calculatedChecksum = fpChecksum(packetId, response + 9, payloadLen);
+        if (calculatedChecksum != receivedChecksum) {
+          if (DEBUG_FP_PACKETS) {
+            Serial.printf("FP_BAD_CHECKSUM ins=%02x calc=%04x got=%04x raw=%s\n",
+                          instruction, calculatedChecksum, receivedChecksum,
+                          toHex(response, expected).c_str());
+            Serial.flush();
+          }
+          return false;
+        }
+
+        *confirm = response[9];
+        size_t actualDataLen = respLen - 3;
+        if (DEBUG_FP_PACKETS) {
+          Serial.printf("FP_ACK %02x len=%u confirm=%u data=%s\n",
+                        instruction, actualDataLen, *confirm,
+                        actualDataLen ? toHex(response + 10, actualDataLen).c_str() : "-");
+          Serial.flush();
+        }
+        if (data && dataLen) {
+          size_t copyLen = actualDataLen < dataCapacity ? actualDataLen : dataCapacity;
+          if (copyLen) memcpy(data, response + 10, copyLen);
+          *dataLen = copyLen;
+        }
+        return true;
       }
     }
-    if (sawAck && postAckUntil && millis() > postAckUntil) return true;
     delay(5);
   }
-  return sawAck;
+  if (DEBUG_FP_PACKETS) {
+    Serial.printf("FP_TIMEOUT ins=%02x pos=%u raw=%s\n", instruction,
+                  (unsigned)pos, pos ? toHex(response, pos).c_str() : "-");
+    Serial.flush();
+  }
+  return false;
 }
 
 static void setAura(uint8_t color) {
@@ -286,13 +295,32 @@ static bool deleteAllFingerprints() {
   return fpCommand(0x0d, nullptr, 0, &confirm, nullptr, nullptr, 2000) && confirm == 0x00;
 }
 
+static int fingerprintCountFromStorageMap() {
+  uint8_t confirm = 0xff;
+  uint8_t page[] = {0x00};
+  uint8_t storageMap[32] = {0};
+  size_t dataLen = sizeof(storageMap);
+  if (!fpCommand(0x1f, page, sizeof(page), &confirm, storageMap, &dataLen, 2000) ||
+      confirm != 0x00) return -1;
+
+  size_t bytesNeeded = (END_SLOT / 8) + 1;
+  if (dataLen < bytesNeeded) return -1;
+
+  int count = 0;
+  for (uint16_t slot = START_SLOT; slot <= END_SLOT; slot++) {
+    if (storageMap[slot / 8] & (1U << (slot % 8))) count++;
+  }
+  return count;
+}
+
 static int fingerprintCount() {
   uint8_t confirm = 0xff;
   uint8_t data[2];
   size_t dataLen = sizeof(data);
   if (!fpCommand(0x1d, nullptr, 0, &confirm, data, &dataLen, 2000) ||
-      confirm != 0x00 || dataLen != sizeof(data)) return -1;
-  return ((int)data[0] << 8) | data[1];
+      confirm != 0x00) return -1;
+  if (dataLen == sizeof(data)) return ((int)data[0] << 8) | data[1];
+  return fingerprintCountFromStorageMap();
 }
 
 static bool scanMatch(uint16_t *matchId, uint16_t *score) {

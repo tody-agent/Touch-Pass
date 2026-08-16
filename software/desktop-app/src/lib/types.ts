@@ -10,6 +10,7 @@ export type CommandErrorCode =
   | 'invalid_password'
   | 'invalid_custom_payload'
   | 'hardware_unavailable'
+  | 'device_configuration_failed'
   | 'persistence_failed'
   | 'internal';
 
@@ -32,6 +33,9 @@ export interface AppStatusResponse {
   firmwareMode: string;
   fingerprintCount: number;
   hidKeyConfigured: boolean;
+  hidConfigurationSupported: boolean;
+  localPairingKeyConfigured: boolean;
+  pairingInDoubt: boolean;
   backgroundWorker: WorkerStatus;
 }
 
@@ -39,6 +43,11 @@ export interface DeviceStatusChange {
   connected: boolean;
   port?: string;
   sensorStatus: SensorStatus;
+  firmwareMode: string;
+  hidKeyConfigured: boolean;
+  hidConfigurationSupported: boolean;
+  localPairingKeyConfigured: boolean;
+  pairingInDoubt: boolean;
 }
 
 export interface EnrollStepProgress {
@@ -85,6 +94,9 @@ export function defaultStatus(): AppStatusResponse {
     firmwareMode: 'unknown',
     fingerprintCount: 0,
     hidKeyConfigured: false,
+    hidConfigurationSupported: false,
+    localPairingKeyConfigured: false,
+    pairingInDoubt: false,
     backgroundWorker: 'starting'
   };
 }

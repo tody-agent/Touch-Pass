@@ -8,6 +8,10 @@ use std::sync::{mpsc, Arc, Mutex};
 #[derive(Debug)]
 pub enum AdminCommand {
     Enroll(usize),
+    ConfigureHid {
+        rotate: bool,
+        reply: mpsc::Sender<Result<(), CommandError>>,
+    },
     Delete {
         slot: usize,
         reply: mpsc::Sender<Result<FingerProfile, CommandError>>,
@@ -29,6 +33,8 @@ impl AppState {
         drop(admin_rx);
         let data_dir = app_data_dir(&app_handle)?;
         let secret_store = SecretStore::new("TouchPass");
+        let local_pairing_key_configured = secret_store.has_live_pairing_key("default");
+        let pairing_in_doubt = secret_store.has_pending_pairing_key("default");
         let profiles = ProfileStore::new(data_dir.join("profiles.json"), secret_store.clone());
         let preferences = PreferenceStore::new(data_dir.join("preferences.json"));
         Ok(Self {
@@ -43,6 +49,9 @@ impl AppState {
                 firmware_mode: "unknown".to_string(),
                 fingerprint_count: 0,
                 hid_key_configured: false,
+                hid_configuration_supported: false,
+                local_pairing_key_configured,
+                pairing_in_doubt,
                 background_worker: WorkerStatus::Starting,
             })),
             admin_tx,

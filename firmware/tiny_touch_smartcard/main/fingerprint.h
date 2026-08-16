@@ -30,6 +30,8 @@ typedef struct {
 void fingerprint_init(void);
 bool fingerprint_present_hint(void);
 void fingerprint_led_idle(void);
+void fingerprint_led_action_result(bool ok);
+void fingerprint_led_unconfigured(void);
 bool fingerprint_authorize_poll_once(fingerprint_match_t *match);
 bool fingerprint_authorize_once(void);
 int fingerprint_count(void);

@@ -7,6 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "firmware" / "tiny_touch_smartcard" / "main" / "fingerprint.c"
 HEADER = ROOT / "firmware" / "tiny_touch_smartcard" / "main" / "fingerprint.h"
 CONSOLE = ROOT / "firmware" / "tiny_touch_smartcard" / "main" / "config_console.c"
+TOUCH_HID = ROOT / "firmware" / "tiny_touch_smartcard" / "main" / "touch_pin_hid.c"
 
 
 class FingerprintFirmwareContractTests(unittest.TestCase):
@@ -89,6 +90,41 @@ class FingerprintFirmwareContractTests(unittest.TestCase):
         header = HEADER.read_text(encoding="utf-8")
         self.assertRegex(header, r"typedef\s+struct\s*\{[^}]*uint16_t\s+slot;[^}]*uint16_t\s+score;[^}]*\}\s*fingerprint_match_t", re.S)
         self.assertIn("fingerprint_authorize_poll_once(fingerprint_match_t *match)", header)
+
+    def test_unconfigured_piv_match_never_types_dummy_pin(self):
+        source = TOUCH_HID.read_text(encoding="utf-8")
+        task = source[source.index("static void touch_hid_task"):source.index("void touch_pin_hid_start")]
+        self.assertIn("piv_uses_provisioned_keys()", task)
+        self.assertRegex(
+            task,
+            r"if\s*\(!piv_uses_provisioned_keys\(\)\)\s*\{"
+            r"[\s\S]*?notify_unconfigured\(&match,\s*\"piv\",\s*\"keys\"\)"
+            r"[\s\S]*?\}\s*else\s*\{[\s\S]*?type_dummy_pin\(\)",
+        )
+
+    def test_unconfigured_event_reports_real_match_and_reason(self):
+        source = TOUCH_HID.read_text(encoding="utf-8")
+        self.assertIn(
+            '"EV UNCONFIGURED slot=%u score=%u mode=%s reason=%s"',
+            source,
+        )
+        self.assertIn("match->slot, match->score, mode, reason", source)
+        self.assertIn("fingerprint_led_unconfigured()", source)
+
+    def test_background_match_defers_led_until_action_outcome(self):
+        source = SOURCE.read_text(encoding="utf-8")
+        header = HEADER.read_text(encoding="utf-8")
+        self.assertRegex(source, r"FP_LED_YELLOW\s*=\s*0x06")
+        self.assertIn("void fingerprint_led_action_result(bool ok)", source)
+        self.assertIn("void fingerprint_led_unconfigured(void)", source)
+        self.assertIn("fingerprint_led_action_result(bool ok);", header)
+        self.assertIn("fingerprint_led_unconfigured(void);", header)
+        matching = source[
+            source.index("static bool fingerprint_match_captured"):
+            source.index("bool fingerprint_authorize_poll_once")
+        ]
+        self.assertNotIn("if (!quiet || ok) show_result(ok);", matching)
+        self.assertIn("if (!quiet) show_result(ok);", matching)
 
 
 if __name__ == "__main__":

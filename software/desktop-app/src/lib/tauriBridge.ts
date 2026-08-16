@@ -24,6 +24,7 @@ const commandErrorCodes = new Set<CommandErrorCode>([
   'invalid_password',
   'invalid_custom_payload',
   'hardware_unavailable',
+  'device_configuration_failed',
   'persistence_failed',
   'internal'
 ]);
@@ -131,6 +132,11 @@ export async function startEnrollment(fingerId: number): Promise<void> {
     return;
   }
   return invoke<void>('start_enrollment', { fingerId });
+}
+
+export async function configureHidMode(repair: boolean): Promise<void> {
+  if (!isTauriRuntime()) return;
+  return invoke<void>('configure_hid_mode', { repair });
 }
 
 export async function subscribeDeviceStatus(handler: Handler<DeviceStatusChange>): Promise<UnlistenFn> {

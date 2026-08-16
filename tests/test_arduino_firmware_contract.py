@@ -42,6 +42,21 @@ class ArduinoFirmwareContractTests(unittest.TestCase):
     def test_tinyusb_runtime_uses_the_touchpass_pid(self):
         self.assertIn("USB.VID(0x303A)", self.source)
         self.assertIn("USB.PID(0x4001)", self.source)
+        self.assertIn("#define Serial USBSerial", self.source)
+
+    def test_uart_parser_finishes_from_the_single_ack_payload(self):
+        self.assertIn("actualDataLen = respLen - 3", self.source)
+        self.assertIn("receivedChecksum", self.source)
+        self.assertNotIn("postAckUntil", self.source)
+
+    def test_template_count_falls_back_to_the_storage_bitmap(self):
+        self.assertIn("static int fingerprintCountFromStorageMap()", self.source)
+        self.assertIn("fpCommand(0x1f", self.source)
+        count_body = re.search(
+            r"static int fingerprintCount\(\).*?\n\}", self.source, re.S
+        )
+        self.assertIsNotNone(count_body)
+        self.assertIn("return fingerprintCountFromStorageMap();", count_body.group(0))
 
 
 if __name__ == "__main__":

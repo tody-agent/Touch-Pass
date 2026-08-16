@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { deviceGuidance, enrollmentMessage, fingerName, firmwareModeLabel, resolveLocale, toolbarStatusLabel, translate, translations } from './i18n';
+import { deviceGuidance, enrollmentMessage, fingerName, firmwareModeLabel, hidConfigurationErrorMessage, resolveLocale, toolbarStatusLabel, translate, translations } from './i18n';
 
 describe('i18n', () => {
   it('keeps every locale in key parity with Vietnamese', () => {
@@ -37,8 +37,17 @@ describe('i18n', () => {
 
   it('localizes firmware codes instead of exposing backend values', () => {
     expect(firmwareModeLabel('vi', 'hid')).toBe('Bàn phím HID');
+    expect(firmwareModeLabel('vi', 'piv')).toBe('Thẻ thông minh PIV');
     expect(firmwareModeLabel('en', 'checking')).toBe('Checking');
     expect(firmwareModeLabel('zh-CN', 'unknown')).toBe('未知');
+  });
+
+  it('preserves actionable HID configuration failure details', () => {
+    expect(hidConfigurationErrorMessage('vi', 'device_configuration_failed', 'config_unlock:fingerprint')).toContain('xác thực');
+    expect(hidConfigurationErrorMessage('en', 'device_configuration_failed', 'hid_configuration_timeout')).toContain('timed out');
+    expect(hidConfigurationErrorMessage('en', 'device_configuration_failed', 'timeout')).toContain('timed out');
+    expect(hidConfigurationErrorMessage('vi', 'device_configuration_failed', 'connection_lost')).toContain('Mất kết nối');
+    expect(hidConfigurationErrorMessage('zh-CN', 'persistence_failed', 'persistence_failed')).toContain('保存');
   });
 
   it('gives actionable copy for non-ready device states', () => {

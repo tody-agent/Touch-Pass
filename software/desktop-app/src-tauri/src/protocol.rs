@@ -17,6 +17,7 @@ pub struct StatusLine {
     pub sensor_ok: bool,
     pub fingerprints: usize,
     pub hid_key_configured: bool,
+    pub hid_configuration_supported: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -35,6 +36,10 @@ pub enum FirmwareLine {
     ConfigUnlockOk,
     ConfigUnlockErr(String),
     ConfigLocked,
+    HidKeyOk,
+    HidKeyErr(String),
+    ModeOk(String),
+    ModeErr(String),
     EnrollOk(usize),
     EnrollErr {
         slot: usize,
@@ -54,11 +59,16 @@ pub fn parse_firmware_line(line: &str) -> FirmwareLine {
             .and_then(|v| v.parse::<usize>().ok())
             .unwrap_or(0);
         let hid_key_configured = token_value(line, "hid_key") == Some("configured");
+        let hid_configuration_supported = matches!(
+            token_value(line, "keys"),
+            Some("nvs") | Some("unconfigured")
+        );
         return FirmwareLine::Status(StatusLine {
             mode,
             sensor_ok: line.contains("sensor=ok"),
             fingerprints,
             hid_key_configured,
+            hid_configuration_supported,
         });
     }
     if let Some(message) = line.strip_prefix("PROMPT ") {
@@ -72,6 +82,18 @@ pub fn parse_firmware_line(line: &str) -> FirmwareLine {
     }
     if line.starts_with("ERR CONFIG_LOCKED") {
         return FirmwareLine::ConfigLocked;
+    }
+    if line.starts_with("OK HID_KEY") {
+        return FirmwareLine::HidKeyOk;
+    }
+    if let Some(reason) = line.strip_prefix("ERR HID_KEY") {
+        return FirmwareLine::HidKeyErr(reason.trim().to_string());
+    }
+    if line.starts_with("OK MODE") {
+        return FirmwareLine::ModeOk(token_value(line, "mode").unwrap_or("unknown").to_string());
+    }
+    if line.starts_with("ERR MODE") {
+        return FirmwareLine::ModeErr(token_value(line, "mode").unwrap_or("unknown").to_string());
     }
     if line.starts_with("OK ENROLL") {
         return FirmwareLine::EnrollOk(slot_from_line(line));
@@ -282,9 +304,29 @@ mod tests {
                 assert_eq!(status.fingerprints, 3);
                 assert!(status.sensor_ok);
                 assert!(status.hid_key_configured);
+                assert!(status.hid_configuration_supported);
             }
             _ => panic!("expected status"),
         }
+    }
+
+    #[test]
+    fn distinguishes_writable_and_compiled_hid_key_storage() {
+        let fresh = parse_firmware_line(
+            "OK STATUS firmware=unified mode=piv sensor=ok fingerprints=1 keys=unconfigured hid_key=unconfigured",
+        );
+        let arduino = parse_firmware_line(
+            "OK STATUS firmware=unified mode=hid sensor=ok fingerprints=1 keys=compiled hid_key=configured",
+        );
+
+        assert!(matches!(
+            fresh,
+            FirmwareLine::Status(status) if status.hid_configuration_supported
+        ));
+        assert!(matches!(
+            arduino,
+            FirmwareLine::Status(status) if !status.hid_configuration_supported
+        ));
     }
 
     #[test]
@@ -300,6 +342,26 @@ mod tests {
         assert!(matches!(
             parse_firmware_line("ERR CONFIG_LOCKED run=CONFIG_UNLOCK"),
             FirmwareLine::ConfigLocked
+        ));
+    }
+
+    #[test]
+    fn parses_hid_key_and_mode_outcomes() {
+        assert!(matches!(
+            parse_firmware_line("OK HID_KEY"),
+            FirmwareLine::HidKeyOk
+        ));
+        assert!(matches!(
+            parse_firmware_line("ERR HID_KEY invalid"),
+            FirmwareLine::HidKeyErr(reason) if reason == "invalid"
+        ));
+        assert!(matches!(
+            parse_firmware_line("OK MODE mode=hid"),
+            FirmwareLine::ModeOk(mode) if mode == "hid"
+        ));
+        assert!(matches!(
+            parse_firmware_line("ERR MODE mode=piv"),
+            FirmwareLine::ModeErr(mode) if mode == "piv"
         ));
     }
 

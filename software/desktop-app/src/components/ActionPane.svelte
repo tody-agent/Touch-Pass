@@ -34,9 +34,13 @@
     onEnroll: (id: number) => Promise<void>;
     onReset: (id: number) => Promise<void>;
     onTest: (id: number) => Promise<void>;
+    onDirtyChange: (dirty: boolean) => void;
+    resetRevision: number;
+    interactionLocked: boolean;
+    draftDirty?: boolean;
   }
 
-  let { locale, profile, saving, deviceConnected, onSave, onEnroll, onReset, onTest }: Props = $props();
+  let { locale, profile, saving, deviceConnected, onSave, onEnroll, onReset, onTest, onDirtyChange, resetRevision, interactionLocked, draftDirty = false }: Props = $props();
   let selectedType = $state<ActionType>('enter');
   let customPayload = $state('');
   let secret = $state('');
@@ -46,6 +50,7 @@
   let deleteDialogElement: HTMLDivElement | undefined = $state();
   let moreButtonElement: HTMLButtonElement | undefined = $state();
   let moreMenuElement: HTMLDivElement | undefined = $state();
+  let actionListElement: HTMLDivElement | undefined = $state();
 
   const presets: Array<{ type: ActionType; icon: typeof Bot; accent: string }> = [
     { type: 'ai_accept', icon: Bot, accent: 'text-blue-300' },
@@ -67,6 +72,7 @@
   const canSave = $derived(!validationCode && (profile.configured || deviceConnected));
 
   $effect(() => {
+    void resetRevision;
     selectedType = profile.actionType === 'disabled' ? 'enter' : profile.actionType;
     customPayload = profile.customPayload ?? '';
     secret = '';
@@ -76,6 +82,10 @@
 
   $effect(() => {
     if (moreOpen) queueMicrotask(() => moreMenuElement?.querySelector<HTMLButtonElement>('button:not([disabled])')?.focus());
+  });
+
+  $effect(() => {
+    if (interactionLocked) moreOpen = false;
   });
 
   function handleMenuKeydown(event: KeyboardEvent) {
@@ -103,7 +113,7 @@
   });
 
   async function save() {
-    if (!canSave) return;
+    if (!canSave || interactionLocked) return;
     const draft: FingerProfile = {
       ...profile,
       actionType: selectedType,
@@ -117,6 +127,7 @@
         onSave,
         onEnroll
       );
+      onDirtyChange(false);
     } catch {
       // App-level callbacks localize and surface command errors.
     }
@@ -126,9 +137,16 @@
     moreOpen = false;
     try {
       await onSave({ ...profile, actionType: 'disabled' });
+      onDirtyChange(false);
     } catch {
       // App-level callbacks surface the error.
     }
+  }
+
+  async function rescan() {
+    if (interactionLocked || draftDirty || !deviceConnected) return;
+    moreOpen = false;
+    await onEnroll(profile.id);
   }
 
   async function deleteFingerprint() {
@@ -140,10 +158,35 @@
       // App-level callbacks surface the error.
     }
   }
+
+  function selectAction(type: ActionType) {
+    selectedType = type;
+    onDirtyChange(true);
+  }
+
+  function handleActionKeydown(event: KeyboardEvent, type: ActionType) {
+    const keys = ['ArrowDown', 'ArrowRight', 'ArrowUp', 'ArrowLeft', 'Home', 'End'];
+    if (!keys.includes(event.key) || interactionLocked) return;
+    event.preventDefault();
+    const current = presets.findIndex((preset) => preset.type === type);
+    const next = event.key === 'Home'
+      ? 0
+      : event.key === 'End'
+        ? presets.length - 1
+        : (current + (event.key === 'ArrowDown' || event.key === 'ArrowRight' ? 1 : -1) + presets.length) % presets.length;
+    const nextType = presets[next].type;
+    selectAction(nextType);
+    queueMicrotask(() => actionListElement?.querySelector<HTMLButtonElement>(`[data-action-type="${nextType}"]`)?.focus());
+  }
+
+  function updateConfirm(checked: boolean) {
+    requireConfirm = checked;
+    onDirtyChange(true);
+  }
 </script>
 
-<section class="glass-card rounded-3xl p-5" aria-labelledby="selected-finger-title">
-  <div class="mb-5 flex items-start justify-between gap-4">
+<section class="action-editor" aria-labelledby="selected-finger-title">
+  <div class="action-editor-heading">
     <div class="min-w-0">
       <div class="mono mb-1 text-[11px] font-bold text-blue-300">#{String(profile.id).padStart(2, '0')}</div>
       <h2 id="selected-finger-title" class="text-2xl font-extrabold text-white">{fingerName(locale, profile.id)}</h2>
@@ -157,24 +200,24 @@
     </div>
   </div>
 
-  <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+  <div bind:this={actionListElement} class="action-list" role="radiogroup" aria-label={translate(locale, 'field.action')}>
     {#each presets as preset}
       {@const Icon = preset.icon}
       <button
-        class={`interactive-card action-card ${selectedType === preset.type ? 'action-card-selected' : ''}`}
-        onclick={() => (selectedType = preset.type)}
-        aria-pressed={selectedType === preset.type}
+        class={`action-row ${selectedType === preset.type ? 'action-row-selected' : ''}`}
+        onclick={() => selectAction(preset.type)}
+        onkeydown={(event) => handleActionKeydown(event, preset.type)}
+        role="radio"
+        aria-checked={selectedType === preset.type}
+        tabindex={selectedType === preset.type ? 0 : -1}
+        data-action-type={preset.type}
+        disabled={interactionLocked}
       >
-        <span class="mb-3 flex items-center justify-between">
-          <span class={`grid h-10 w-10 place-items-center rounded-xl bg-white/[0.07] ${preset.accent}`}>
-            <Icon size={20} aria-hidden="true" />
-          </span>
-          {#if selectedType === preset.type}
-            <Check size={18} class="text-blue-300" strokeWidth={3} aria-hidden="true" />
-          {/if}
+        <span class="action-row-radio" aria-hidden="true">
+          {#if selectedType === preset.type}<span></span>{/if}
         </span>
-        <span class="block text-sm font-extrabold text-white">{actionLabel(locale, preset.type)}</span>
-        <span class="mt-1 block text-xs font-medium leading-relaxed text-slate-300">{actionDescription(locale, preset.type)}</span>
+        <Icon size={21} aria-hidden="true" class={preset.accent} />
+        <span class="action-row-copy"><span>{actionLabel(locale, preset.type)}</span><small>{actionDescription(locale, preset.type)}</small></span>
       </button>
     {/each}
   </div>
@@ -186,6 +229,7 @@
         class="text-input"
         type="password"
         bind:value={secret}
+        oninput={() => onDirtyChange(true)}
         autocomplete="current-password"
         placeholder={profile.secretConfigured ? translate(locale, 'field.passwordStored') : translate(locale, 'field.passwordPlaceholder')}
         aria-invalid={validationCode === 'secret_required' || validationCode === 'password_ascii'}
@@ -199,6 +243,7 @@
       <input
         class="text-input"
         bind:value={customPayload}
+        oninput={() => onDirtyChange(true)}
         maxlength="128"
         placeholder={translate(locale, 'field.customPlaceholder')}
         aria-invalid={validationCode === 'custom_required' || validationCode === 'custom_ascii'}
@@ -215,17 +260,17 @@
       <span class="block text-sm font-extrabold text-white">{translate(locale, 'field.confirm')}</span>
       <span class="block text-xs font-medium leading-relaxed text-slate-400">{translate(locale, 'field.confirmDescription')}</span>
     </span>
-    <input class="h-5 w-5 shrink-0 accent-blue-500" type="checkbox" bind:checked={requireConfirm} />
+    <input class="h-5 w-5 shrink-0 accent-blue-500" type="checkbox" checked={requireConfirm} onchange={(event) => updateConfirm(event.currentTarget.checked)} />
   </label>
 
-  <div class="mt-5 flex flex-wrap items-center gap-2 border-t border-white/[0.07] pt-4">
-    <button class="primary-button" disabled={saving || !canSave} onclick={save}>
+  <footer class="action-footer">
+    <button class="primary-button" disabled={saving || !canSave || interactionLocked} onclick={save}>
       {#if profile.configured}<Check size={16} />{:else}<Fingerprint size={16} />{/if}
       <span>{translate(locale, profile.configured ? 'button.saveChanges' : 'button.saveAndEnroll')}</span>
     </button>
 
     <div class="relative">
-      <button bind:this={moreButtonElement} class="secondary-button" aria-haspopup="menu" aria-expanded={moreOpen} onclick={() => (moreOpen = !moreOpen)}>
+      <button bind:this={moreButtonElement} class="secondary-button" disabled={interactionLocked} aria-haspopup="menu" aria-expanded={moreOpen} onclick={() => (moreOpen = !moreOpen)}>
         <Ellipsis size={17} />
         <span>{translate(locale, 'button.more')}</span>
       </button>
@@ -234,7 +279,7 @@
           <button role="menuitem" disabled={!profile.configured || !deviceConnected} onclick={() => { moreOpen = false; void onTest(profile.id); }}>
             <Play size={16} /><span>{translate(locale, 'button.test')}</span>
           </button>
-          <button role="menuitem" disabled={!deviceConnected} onclick={() => { moreOpen = false; void onEnroll(profile.id); }}>
+          <button role="menuitem" disabled={interactionLocked || draftDirty || !deviceConnected} onclick={() => void rescan()}>
             <RotateCw size={16} /><span>{translate(locale, 'button.rescan')}</span>
           </button>
           <button role="menuitem" onclick={disableAction}>
@@ -253,7 +298,7 @@
     {#if !deviceConnected && !profile.configured}
       <span class="text-xs font-semibold text-amber-300">{translate(locale, 'device.disconnectedTitle')}</span>
     {/if}
-  </div>
+  </footer>
 </section>
 
 {#if deleteOpen}

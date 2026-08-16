@@ -2,12 +2,12 @@
   import { onMount } from 'svelte';
   import { AlertTriangle, RefreshCw, ShieldCheck } from 'lucide-svelte';
   import ActionPane from './components/ActionPane.svelte';
+  import DeviceInspector from './components/DeviceInspector.svelte';
   import HandMap from './components/HandMap.svelte';
   import HelpSheet from './components/HelpSheet.svelte';
   import HUDPill from './components/HUDPill.svelte';
   import SettingsPane from './components/SettingsPane.svelte';
   import TitleBar from './components/TitleBar.svelte';
-  import TouchIDModal from './components/TouchIDModal.svelte';
   import {
     actionLabel,
     commandErrorMessage,
@@ -15,10 +15,12 @@
     enrollmentMessage,
     fingerName,
     resolveLocale,
+    hidConfigurationErrorMessage,
     translate,
     type Locale
   } from './lib/i18n';
   import {
+    configureHidMode,
     getAppPreferences,
     getAppStatus,
     getAutostartEnabled,
@@ -35,34 +37,49 @@
     subscribeFingerTouch
   } from './lib/tauriBridge';
   import { defaultProfiles, defaultStatus, type AppStatusResponse, type FingerProfile } from './lib/types';
+  import { focusFirstInDialog, handleDialogKeydown } from './lib/focusTrap';
+  import {
+    beginInlineEnrollment,
+    completeInlineEnrollment,
+    confirmPendingNavigation,
+    createVaultWorkspaceState,
+    dismissCompletedInlineEnrollment,
+    requestFingerSelection,
+    requestWorkspaceMode,
+    updateInlineEnrollment
+  } from './lib/vaultWorkspaceState';
 
   let locale = $state<Locale>(resolveLocale(typeof navigator === 'undefined' ? undefined : navigator.language));
   let profiles = $state<FingerProfile[]>(defaultProfiles());
   let status = $state<AppStatusResponse>(defaultStatus());
-  let selectedFingerId = $state(1);
+  let workspace = $state(createVaultWorkspaceState(1));
   let saving = $state(false);
   let loading = $state(true);
   let loadError = $state(false);
   let hudMessage = $state<string | undefined>(undefined);
-  let settingsOpen = $state(false);
   let helpOpen = $state(false);
   let autostartEnabled = $state(false);
   let autostartLoading = $state(false);
-  let enrollOpen = $state(false);
-  let enrollDismissed = $state(false);
-  let enrollFingerId = $state<number | undefined>(undefined);
-  let enrollStep = $state(1);
-  let enrollStatusMessage = $state(enrollmentMessage('vi'));
+  let hidConfigurationLoading = $state(false);
+  let editorResetRevision = $state(0);
+  let discardDialogElement: HTMLDivElement | undefined = $state();
   let enrollTimer: number | undefined;
+  let enrollmentSuccessTimer: number | undefined;
   let hudTimer: number | undefined;
 
-  const configuredCount = $derived(profiles.filter((profile) => profile.configured).length);
-  const selectedProfile = $derived(profiles.find((profile) => profile.id === selectedFingerId) ?? profiles[0]);
+  const selectedProfile = $derived(profiles.find((profile) => profile.id === workspace.selectedFingerId) ?? profiles[0]);
   const deviceReady = $derived(status.connected && status.sensorStatus === 'ok');
   const unavailableGuidance = $derived(deviceGuidance(locale, status.sensorStatus));
 
   $effect(() => {
     if (typeof document !== 'undefined') document.documentElement.lang = locale;
+  });
+
+  $effect(() => {
+    if (!workspace.pendingNavigation || typeof document === 'undefined') return;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    queueMicrotask(() => focusFirstInDialog(discardDialogElement));
+    return () => previousFocus?.focus();
   });
 
   onMount(() => {
@@ -72,22 +89,23 @@
       status.connected = payload.connected;
       status.port = payload.port;
       status.sensorStatus = payload.sensorStatus;
+      status.firmwareMode = payload.firmwareMode;
+      status.hidKeyConfigured = payload.hidKeyConfigured;
+      status.hidConfigurationSupported = payload.hidConfigurationSupported;
+      status.localPairingKeyConfigured = payload.localPairingKeyConfigured;
+      status.pairingInDoubt = payload.pairingInDoubt;
     }).then((unlisten) => unsubs.push(unlisten));
     void subscribeEnrollProgress((payload) => {
-      if (payload.fingerId && payload.fingerId !== enrollFingerId) enrollFingerId = payload.fingerId;
       if (payload.step <= 0) {
         showHud(enrollmentMessage(locale, payload.message));
-        enrollOpen = false;
+        workspace = { ...workspace, inlineEnrollment: undefined };
         return;
       }
-      if (!enrollDismissed) enrollOpen = true;
-      enrollStep = payload.step;
-      enrollStatusMessage = enrollmentMessage(locale, payload.message);
-      if (enrollDismissed) showHud(enrollStatusMessage);
+      workspace = updateInlineEnrollment(workspace, payload);
       if (payload.step >= payload.total) {
-        markProfileConfigured(payload.fingerId || selectedFingerId);
+        markProfileConfigured(payload.fingerId || workspace.selectedFingerId);
+        finishEnrollmentFeedback();
         showHud(translate(locale, 'hud.fingerprintReady'));
-        window.setTimeout(() => (enrollOpen = false), 850);
       }
     }).then((unlisten) => unsubs.push(unlisten));
     void subscribeFingerTouch((payload) => {
@@ -97,6 +115,7 @@
     return () => {
       unsubs.forEach((unlisten) => unlisten());
       if (enrollTimer) window.clearInterval(enrollTimer);
+      if (enrollmentSuccessTimer) window.clearTimeout(enrollmentSuccessTimer);
       if (hudTimer) window.clearTimeout(hudTimer);
     };
   });
@@ -119,7 +138,7 @@
       const [nextStatus, nextProfiles] = await Promise.all([getAppStatus(), listFingerProfiles()]);
       status = nextStatus;
       profiles = nextProfiles;
-      if (!profiles.some((profile) => profile.id === selectedFingerId)) selectedFingerId = 1;
+      if (!profiles.some((profile) => profile.id === workspace.selectedFingerId)) workspace = { ...workspace, selectedFingerId: 1 };
     } catch (error) {
       loadError = true;
       showCommandError(error);
@@ -178,17 +197,15 @@
   }
 
   async function beginEnrollment(id: number) {
-    enrollFingerId = id;
-    enrollDismissed = false;
-    enrollStep = 1;
-    enrollStatusMessage = enrollmentMessage(locale);
-    enrollOpen = true;
+    if (enrollmentSuccessTimer) window.clearTimeout(enrollmentSuccessTimer);
+    workspace = { ...workspace, selectedFingerId: id };
+    workspace = beginInlineEnrollment(workspace, 4);
     try {
       await startEnrollment(id);
       if (!isTauriRuntime()) simulateEnrollment(id);
       showHud(translate(locale, 'hud.placeFinger'));
     } catch (error) {
-      enrollOpen = false;
+      workspace = { ...workspace, inlineEnrollment: undefined };
       showCommandError(error);
       throw error;
     }
@@ -196,20 +213,29 @@
 
   function simulateEnrollment(id: number) {
     if (enrollTimer) window.clearInterval(enrollTimer);
-    enrollStep = 1;
     enrollTimer = window.setInterval(() => {
-      enrollStep += 1;
-      if (enrollStep >= 4) {
+      const nextStep = (workspace.inlineEnrollment?.step ?? 1) + 1;
+      workspace = updateInlineEnrollment(workspace, { step: nextStep, total: 4, message: nextStep > 2 ? 'touch_again' : 'lift' });
+      if (nextStep >= 4) {
         if (enrollTimer) window.clearInterval(enrollTimer);
         markProfileConfigured(id);
+        finishEnrollmentFeedback();
         showHud(translate(locale, 'hud.fingerprintReady'));
-        window.setTimeout(() => (enrollOpen = false), 850);
       }
     }, 620);
   }
 
   function markProfileConfigured(id: number) {
     profiles = profiles.map((profile) => (profile.id === id ? { ...profile, configured: true } : profile));
+  }
+
+  function finishEnrollmentFeedback() {
+    workspace = completeInlineEnrollment(workspace);
+    if (enrollmentSuccessTimer) window.clearTimeout(enrollmentSuccessTimer);
+    enrollmentSuccessTimer = window.setTimeout(() => {
+      workspace = dismissCompletedInlineEnrollment(workspace);
+      enrollmentSuccessTimer = undefined;
+    }, 2400);
   }
 
   async function testAction(id: number) {
@@ -243,107 +269,97 @@
       autostartLoading = false;
     }
   }
+
+  async function configureHid(repair: boolean) {
+    hidConfigurationLoading = true;
+    showHud(translate(locale, 'hud.hidConfiguring'));
+    try {
+      await configureHidMode(repair);
+      await refresh(false);
+      showHud(translate(locale, 'hud.hidConfigured'));
+    } catch (error) {
+      const normalized = normalizeCommandError(error);
+      if (normalized.detail) console.error('[TouchPass]', normalized.code, normalized.detail);
+      showHud(hidConfigurationErrorMessage(locale, normalized.code, normalized.detail));
+    } finally {
+      hidConfigurationLoading = false;
+    }
+  }
+
+  function selectFinger(id: number) {
+    if (workspace.inlineEnrollment?.state === 'scanning') return;
+    workspace = requestFingerSelection(workspace, id);
+  }
+
+  function requestSettings() {
+    if (workspace.inlineEnrollment?.state === 'scanning') return;
+    workspace = requestWorkspaceMode(workspace, 'settings');
+  }
+
+  function closeSettings() {
+    workspace = requestWorkspaceMode(workspace, 'fingers');
+  }
+
+  function confirmNavigation() {
+    if (!workspace.pendingNavigation) return;
+    editorResetRevision += 1;
+    workspace = confirmPendingNavigation(workspace);
+  }
 </script>
 
-<main class="app-stage">
+<div class="app-stage">
   <div class="apple-window relative">
-    <TitleBar {locale} {status} onSettings={() => (settingsOpen = true)} onHelp={() => (helpOpen = true)} />
+    <TitleBar {locale} {status} onSettings={requestSettings} onHelp={() => (helpOpen = true)} />
 
-    <div class="content-scroll">
-      <div class="mx-auto w-full max-w-6xl space-y-5">
-        <header class="flex flex-wrap items-start justify-between gap-3">
-          <div>
-            <h1 class="text-2xl font-extrabold text-white">{translate(locale, 'main.title')}</h1>
-            <p class="mt-1 max-w-2xl text-sm font-medium leading-relaxed text-slate-300">{translate(locale, 'main.subtitle')}</p>
-          </div>
-          <div class="pill rounded-full px-3 py-2 text-xs font-extrabold text-slate-200">
-            {translate(locale, 'main.configuredCount', { count: configuredCount })}
-          </div>
-        </header>
-
-        {#if loading}
-          <section class="glass-card rounded-3xl p-5" aria-busy="true" aria-label={translate(locale, 'main.loading')}>
-            <div class="animate-pulse" aria-hidden="true">
-              <div class="h-5 w-40 rounded-lg bg-white/[0.09]"></div>
-              <div class="mt-3 h-3 w-72 max-w-full rounded bg-white/[0.06]"></div>
-              <div class="mt-6 grid gap-3 sm:grid-cols-2">
-                {#each Array(2) as _}
-                  <div class="rounded-2xl border border-white/[0.06] bg-black/10 p-3">
-                    <div class="h-3 w-20 rounded bg-white/[0.07]"></div>
-                    <div class="mt-4 grid grid-cols-5 gap-2">
-                      {#each Array(5) as _}
-                        <div class="h-24 rounded-xl bg-white/[0.06]"></div>
-                      {/each}
-                    </div>
-                  </div>
-                {/each}
-              </div>
-            </div>
-          </section>
-        {:else if loadError}
-          <section class="glass-card grid min-h-56 place-items-center rounded-3xl p-6 text-center" role="alert">
-            <div>
-              <AlertTriangle class="mx-auto text-amber-300" size={30} />
-              <p class="mt-3 text-sm font-semibold text-slate-200">{translate(locale, 'main.loadError')}</p>
-              <button class="primary-button mt-4" onclick={() => void refresh(true)}><RefreshCw size={16} />{translate(locale, 'main.retry')}</button>
-            </div>
-          </section>
-        {:else}
+    <div class="workspace-shell">
+      {#if workspace.mode === 'settings'}
+        <SettingsPane
+          open={true}
+          {locale}
+          {status}
+          {autostartEnabled}
+          {autostartLoading}
+          {hidConfigurationLoading}
+          autostartAvailable={isTauriRuntime()}
+          onLocaleChange={changeLocale}
+          onAutostartChange={changeAutostart}
+          onRefresh={async () => {
+            await refresh(false);
+            if (!loadError) showHud(translate(locale, 'hud.refreshed'));
+          }}
+          onConfigureHid={configureHid}
+          onClose={closeSettings}
+        />
+      {:else if loading}
+        <main class="workspace-state" aria-busy="true" aria-label={translate(locale, 'main.loading')}><div class="workspace-skeleton" aria-hidden="true"></div></main>
+      {:else if loadError}
+        <main class="workspace-state" role="alert">
+          <AlertTriangle class="mx-auto text-amber-300" size={30} />
+          <p>{translate(locale, 'main.loadError')}</p>
+          <button class="primary-button" onclick={() => void refresh(true)}><RefreshCw size={16} />{translate(locale, 'main.retry')}</button>
+        </main>
+      {:else if selectedProfile}
+        <HandMap {locale} {profiles} selectedId={workspace.selectedFingerId} locked={workspace.inlineEnrollment?.state === 'scanning'} onSelect={selectFinger} />
+        <main class="workspace-editor-pane">
           {#if !deviceReady}
-            <aside class="device-banner" role="status">
-              <ShieldCheck size={22} class="shrink-0 text-amber-300" />
-              <div>
-                <div class="text-sm font-extrabold text-white">{unavailableGuidance.title}</div>
-                <p class="mt-0.5 text-xs font-medium leading-relaxed text-slate-300">{unavailableGuidance.description}</p>
-              </div>
-            </aside>
+            <aside class="device-banner" role="status"><ShieldCheck size={22} class="shrink-0 text-amber-300" /><div><div>{unavailableGuidance.title}</div><p>{unavailableGuidance.description}</p></div></aside>
           {/if}
-
-          <HandMap {locale} {profiles} selectedId={selectedFingerId} onSelect={(id) => (selectedFingerId = id)} />
-          {#if selectedProfile}
-            <ActionPane
-              {locale}
-              profile={selectedProfile}
-              {saving}
-              deviceConnected={deviceReady}
-              onSave={saveProfile}
-              onEnroll={beginEnrollment}
-              onReset={resetProfile}
-              onTest={testAction}
-            />
-          {/if}
-        {/if}
-      </div>
+          <ActionPane {locale} profile={selectedProfile} {saving} deviceConnected={deviceReady} resetRevision={editorResetRevision} interactionLocked={workspace.inlineEnrollment?.state === 'scanning'} draftDirty={workspace.draftDirty} onSave={saveProfile} onEnroll={beginEnrollment} onReset={resetProfile} onTest={testAction} onDirtyChange={(dirty) => (workspace = { ...workspace, draftDirty: dirty })} />
+        </main>
+        <DeviceInspector {locale} {status} profile={selectedProfile} enrollment={workspace.inlineEnrollment} deviceReady={deviceReady} rescanDisabled={workspace.draftDirty} onEnroll={beginEnrollment} />
+      {/if}
     </div>
 
-    <SettingsPane
-      open={settingsOpen}
-      {locale}
-      {status}
-      {autostartEnabled}
-      {autostartLoading}
-      autostartAvailable={isTauriRuntime()}
-      onLocaleChange={changeLocale}
-      onAutostartChange={changeAutostart}
-      onRefresh={async () => {
-        await refresh(false);
-        if (!loadError) showHud(translate(locale, 'hud.refreshed'));
-      }}
-      onClose={() => (settingsOpen = false)}
-    />
     <HelpSheet open={helpOpen} {locale} onClose={() => (helpOpen = false)} />
-    <TouchIDModal
-      open={enrollOpen}
-      {locale}
-      profile={profiles.find((profile) => profile.id === enrollFingerId)}
-      step={enrollStep}
-      total={4}
-      message={enrollStatusMessage}
-      onDismiss={() => {
-        enrollDismissed = true;
-        enrollOpen = false;
-      }}
-    />
+    {#if workspace.pendingNavigation}
+      <div class="dialog-backdrop items-center justify-center p-4" role="presentation">
+        <div bind:this={discardDialogElement} class="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="discard-title" aria-describedby="discard-description" tabindex="-1" onkeydown={(event) => handleDialogKeydown(event, discardDialogElement, () => (workspace = { ...workspace, pendingNavigation: undefined }))}>
+          <h2 id="discard-title" class="text-lg font-extrabold text-white">{translate(locale, 'discard.title')}</h2>
+          <p id="discard-description" class="mt-2 text-sm leading-relaxed text-slate-300">{translate(locale, 'discard.description')}</p>
+          <div class="mt-5 flex justify-end gap-2"><button class="secondary-button" onclick={() => (workspace = { ...workspace, pendingNavigation: undefined })}>{translate(locale, 'button.cancel')}</button><button class="danger-button" onclick={confirmNavigation}>{translate(locale, 'button.discard')}</button></div>
+        </div>
+      </div>
+    {/if}
     <HUDPill message={hudMessage} />
   </div>
-</main>
+</div>

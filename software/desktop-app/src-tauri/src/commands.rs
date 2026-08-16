@@ -108,3 +108,31 @@ pub async fn start_enrollment(
         .send(AdminCommand::Enroll(finger_id))
         .map_err(|_| CommandError::new(ErrorCode::HardwareUnavailable))
 }
+
+#[tauri::command]
+pub async fn configure_hid_mode(
+    repair: bool,
+    state: State<'_, AppState>,
+) -> Result<(), CommandError> {
+    let (reply_tx, reply_rx) = std::sync::mpsc::channel();
+    state
+        .admin_tx
+        .send(AdminCommand::ConfigureHid {
+            rotate: repair,
+            reply: reply_tx,
+        })
+        .map_err(|_| CommandError::new(ErrorCode::HardwareUnavailable))?;
+
+    tauri::async_runtime::spawn_blocking(move || {
+        reply_rx
+            .recv_timeout(std::time::Duration::from_secs(130))
+            .map_err(|_| {
+                CommandError::with_detail(
+                    ErrorCode::DeviceConfigurationFailed,
+                    "hid_configuration_timeout",
+                )
+            })?
+    })
+    .await
+    .map_err(CommandError::internal)?
+}

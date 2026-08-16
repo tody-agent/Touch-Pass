@@ -185,6 +185,18 @@ done:
   return result;
 }
 
+static void notify_unconfigured(const fingerprint_match_t *match,
+                                const char *mode, const char *reason) {
+  char event[128];
+  snprintf(event, sizeof(event),
+           "EV UNCONFIGURED slot=%u score=%u mode=%s reason=%s",
+           match->slot, match->score, mode, reason);
+  ESP_LOGW(TAG, "finger matched but action is unconfigured: slot=%u mode=%s reason=%s",
+           match->slot, mode, reason);
+  config_console_send_line(event);
+  fingerprint_led_unconfigured();
+}
+
 static void touch_hid_task(void *arg) {
   (void)arg;
   TickType_t last_success = 0;
@@ -195,13 +207,24 @@ static void touch_hid_task(void *arg) {
         (xTaskGetTickCount() - last_success) > pdMS_TO_TICKS(3000) &&
         fingerprint_authorize_poll_once(&match)) {
       if (device_config_mode() == DEVICE_MODE_HID) {
-        ESP_LOGI(TAG, "finger matched slot=%u score=%u; requesting HID action",
-                 match.slot, match.score);
-        if (!request_and_type_password(&match)) ESP_LOGW(TAG, "HID helper request failed");
+        if (!device_config_hid_key_configured()) {
+          notify_unconfigured(&match, "hid", "hid_key");
+        } else {
+          ESP_LOGI(TAG, "finger matched slot=%u score=%u; requesting HID action",
+                   match.slot, match.score);
+          bool ok = request_and_type_password(&match);
+          if (!ok) ESP_LOGW(TAG, "HID helper request failed");
+          fingerprint_led_action_result(ok);
+        }
       } else {
-        ESP_LOGI(TAG, "finger matched; authorizing PIV and typing PIN");
-        piv_note_user_presence();
-        type_dummy_pin();
+        if (!piv_uses_provisioned_keys()) {
+          notify_unconfigured(&match, "piv", "keys");
+        } else {
+          ESP_LOGI(TAG, "finger matched; authorizing PIV and typing PIN");
+          piv_note_user_presence();
+          type_dummy_pin();
+          fingerprint_led_action_result(true);
+        }
       }
       last_success = xTaskGetTickCount();
     }

@@ -26,7 +26,7 @@ const vi = {
   'device.sensorErrorTitle': 'Cảm biến vân tay chưa sẵn sàng',
   'device.sensorErrorDescription': 'Kiểm tra cáp cảm biến rồi làm mới trạng thái trong Cài đặt.',
   'handMap.title': 'Bản đồ ngón tay',
-  'handMap.description': 'Chọn một ngón để cấu hình hoặc quét lại vân tay.',
+  'handMap.description': 'Chọn ngón để cấu hình hoặc quét lại.',
   'hand.left': 'Tay trái',
   'hand.right': 'Tay phải',
   'finger.configured': 'Đã cài',
@@ -45,6 +45,7 @@ const vi = {
   'action.disabled.label': 'Tắt hành động',
   'action.disabled.description': 'Không thực hiện hành động khi chạm ngón này.',
   'field.password': 'Mật khẩu máy tính',
+  'field.action': 'Tác vụ khi chạm',
   'field.passwordStored': 'Đã lưu an toàn. Nhập mật khẩu mới để thay đổi.',
   'field.passwordPlaceholder': 'Nhập mật khẩu ASCII',
   'field.custom': 'Chuỗi phím tắt',
@@ -63,18 +64,27 @@ const vi = {
   'button.confirmDelete': 'Xóa vân tay',
   'delete.title': 'Xóa vân tay này?',
   'delete.description': 'Tác vụ đã gán và dữ liệu vân tay sẽ bị xóa khỏi thiết bị.',
+  'discard.title': 'Bỏ thay đổi?',
+  'discard.description': 'Các thay đổi chưa lưu cho ngón tay này sẽ bị mất.',
+  'button.discard': 'Bỏ thay đổi',
   'validation.secret_required': 'Nhập mật khẩu trước khi lưu tác vụ này.',
   'validation.password_ascii': 'Mật khẩu phải là ASCII và không quá 128 ký tự.',
   'validation.custom_required': 'Nhập chuỗi phím tắt trước khi lưu.',
   'validation.custom_ascii': 'Chuỗi phím tắt phải là ASCII và không quá 128 ký tự.',
   'settings.title': 'Cài đặt',
   'settings.subtitle': 'Tùy chỉnh ngôn ngữ, khởi động và xem trạng thái thiết bị.',
+  'settings.back': 'Quay lại',
+  'settings.navigation': 'Điều hướng cài đặt',
+  'settings.statusSidebar': 'Trạng thái thiết bị và quyền riêng tư',
+  'settings.general': 'Chung',
+  'settings.generalDescription': 'Ngôn ngữ và tùy chọn giao diện.',
   'settings.language': 'Ngôn ngữ',
   'settings.languageDescription': 'Giao diện và menu khay hệ thống sẽ cập nhật ngay lập tức.',
   'locale.vi': 'Tiếng Việt',
   'locale.en': 'English',
   'locale.zh-CN': '简体中文',
   'settings.device': 'Thiết bị',
+  'settings.deviceDescription': 'Kết nối và trạng thái thiết bị TouchPass.',
   'settings.connected': 'Đã kết nối',
   'settings.searching': 'Đang tìm kiếm',
   'settings.port': 'Cổng',
@@ -82,13 +92,29 @@ const vi = {
   'settings.sensor': 'Cảm biến',
   'settings.localSecurity': 'Bảo mật cục bộ',
   'settings.localSecurityDescription': 'Không dùng đám mây, không đồng bộ ra ngoài máy.',
+  'settings.security': 'Bảo mật',
   'settings.autostart': 'Mở TouchPass khi đăng nhập',
   'settings.autostartUnavailable': 'Tùy chọn này chỉ khả dụng trong ứng dụng desktop.',
   'settings.developer': 'Thông tin chẩn đoán',
+  'settings.developerCategory': 'Nhà phát triển',
   'settings.developerDescription': 'Ẩn mặc định để giữ giao diện gọn gàng.',
   'settings.worker': 'Tiến trình nền',
   'settings.fingerprintCount': 'Số vân tay',
   'settings.hidKeyConfigured': 'Khóa HID đã cấu hình',
+  'settings.hidAutomation': 'Tự động hóa HID',
+  'settings.hidReady': 'Sẵn sàng sử dụng',
+  'settings.hidNotReady': 'Cần hoàn tất thiết lập',
+  'settings.hidReadyDescription': 'TouchPass đã ghép khóa an toàn với máy tính này.',
+  'settings.hidNotReadyDescription': 'Cấu hình khóa cục bộ và chuyển firmware sang chế độ bàn phím HID.',
+  'settings.hidTouchToAuthorize': 'Chạm vân tay đã đăng ký trên TouchPass để cho phép thay đổi.',
+  'settings.hidManagedByFirmware': 'Khóa HID được nhúng trong firmware Arduino và không thể thay đổi từ ứng dụng.',
+  'settings.hidRecoveryRequired': 'Ghép nối chưa hoàn tất. Hãy chạy cấu hình lại để khôi phục khóa an toàn.',
+  'settings.configureHid': 'Cấu hình chế độ HID',
+  'settings.repairHid': 'Sửa ghép nối HID',
+  'settings.configuringHid': 'Đang cấu hình…',
+  'settings.repairHidTitle': 'Tạo lại khóa ghép nối HID?',
+  'settings.repairHidDescription': 'Khóa hiện tại sẽ được thay thế trên máy tính và thiết bị. Hãy chạm vân tay đã đăng ký khi được yêu cầu.',
+  'settings.confirmRepairHid': 'Tạo lại khóa',
   'settings.refresh': 'Làm mới trạng thái',
   'common.yes': 'Có',
   'common.no': 'Không',
@@ -108,11 +134,14 @@ const vi = {
   'hud.placeFinger': 'Đặt ngón tay lên cảm biến.',
   'hud.testPrompt': 'Chạm {finger} lên cảm biến để thử {action}.',
   'hud.refreshed': 'Đã làm mới trạng thái thiết bị.',
+  'hud.hidConfiguring': 'Chạm vân tay đã đăng ký để cho phép cấu hình HID.',
+  'hud.hidConfigured': 'TouchPass đã sẵn sàng cho tự động hóa HID.',
   'error.invalid_finger': 'Ngón tay không hợp lệ.',
   'error.secret_required': 'Tác vụ này cần mật khẩu đã lưu.',
   'error.invalid_password': 'Mật khẩu không hợp lệ.',
   'error.invalid_custom_payload': 'Chuỗi phím tắt không hợp lệ.',
   'error.hardware_unavailable': 'Thiết bị hiện không khả dụng.',
+  'error.device_configuration_failed': 'Không thể cấu hình HID. Hãy xác thực vân tay và thử lại.',
   'error.persistence_failed': 'Không thể lưu dữ liệu cục bộ.',
   'error.internal': 'Đã xảy ra lỗi. Hãy thử lại.',
   'status.sensor.ok': 'Sẵn sàng',
@@ -124,6 +153,7 @@ const vi = {
   'status.worker.running': 'Đang chạy',
   'status.worker.unavailable': 'Không khả dụng',
   'status.firmware.hid': 'Bàn phím HID',
+  'status.firmware.piv': 'Thẻ thông minh PIV',
   'status.firmware.checking': 'Đang kiểm tra',
   'status.firmware.bootloader': 'Chế độ nạp',
   'status.firmware.unknown': 'Chưa xác định',
@@ -139,19 +169,19 @@ const en: Record<TranslationKey, string> = {
   'toolbar.deviceReady': 'Device ready', 'toolbar.findingDevice': 'Looking for device', 'toolbar.checkingDevice': 'Checking device', 'toolbar.bootloader': 'Device in bootloader mode', 'toolbar.sensorError': 'Sensor needs attention', 'toolbar.settings': 'Settings', 'toolbar.help': 'Quick guide',
   'main.title': 'Finger configuration', 'main.subtitle': 'Assign one action to each finger. All data is processed locally.', 'main.configuredCount': '{count}/10 configured', 'main.loading': 'Loading configuration…', 'main.loadError': 'Could not load TouchPass status.', 'main.retry': 'Try again',
   'device.disconnectedTitle': 'Device not connected', 'device.disconnectedDescription': 'You can still prepare actions. Connect TouchPass before enrolling or testing.', 'device.checkingTitle': 'Checking TouchPass', 'device.checkingDescription': 'Wait while the app verifies the fingerprint sensor.', 'device.bootloaderTitle': 'TouchPass is in bootloader mode', 'device.bootloaderDescription': 'Release BOOT and restart the device to return to normal operation.', 'device.sensorErrorTitle': 'Fingerprint sensor is not ready', 'device.sensorErrorDescription': 'Check the sensor cable, then refresh status in Settings.',
-  'handMap.title': 'Finger map', 'handMap.description': 'Select a finger to configure it or enroll it again.', 'hand.left': 'Left hand', 'hand.right': 'Right hand',
+  'handMap.title': 'Finger map', 'handMap.description': 'Select a finger to configure or re-enroll.', 'hand.left': 'Left hand', 'hand.right': 'Right hand',
   'finger.configured': 'Configured', 'finger.unconfigured': 'Not configured', 'finger.selectedDescription': 'Choose an action, save it, and enroll your fingerprint to begin.',
   'action.ai_accept.label': 'Approve AI', 'action.ai_accept.description': "Types 'y' and presses Enter when an AI assistant asks.", 'action.password.label': 'Fill password', 'action.password.description': 'Fills a password from the operating system credential vault.', 'action.enter.label': 'Enter key', 'action.enter.description': 'Sends Enter to the active window.', 'action.escape.label': 'Escape key', 'action.escape.description': 'Closes a dialog or cancels the current operation.', 'action.custom.label': 'Custom shortcut', 'action.custom.description': 'Types a custom shortcut sequence or text.', 'action.disabled.label': 'Disable action', 'action.disabled.description': 'Does nothing when this finger is touched.',
-  'field.password': 'Computer password', 'field.passwordStored': 'Stored securely. Enter a new password to replace it.', 'field.passwordPlaceholder': 'Enter an ASCII password', 'field.custom': 'Shortcut sequence', 'field.customPlaceholder': 'Example: /approve', 'field.confirm': 'Touch twice to confirm', 'field.confirmDescription': 'Reduces accidental activation while you work.',
+  'field.password': 'Computer password', 'field.action': 'Action on touch', 'field.passwordStored': 'Stored securely. Enter a new password to replace it.', 'field.passwordPlaceholder': 'Enter an ASCII password', 'field.custom': 'Shortcut sequence', 'field.customPlaceholder': 'Example: /approve', 'field.confirm': 'Touch twice to confirm', 'field.confirmDescription': 'Reduces accidental activation while you work.',
   'button.saveAndEnroll': 'Save and enroll fingerprint', 'button.saveChanges': 'Save changes', 'button.more': 'More', 'button.test': 'Test action', 'button.rescan': 'Enroll fingerprint again', 'button.disable': 'Disable action', 'button.delete': 'Delete fingerprint', 'button.cancel': 'Cancel', 'button.close': 'Close', 'button.confirmDelete': 'Delete fingerprint',
-  'delete.title': 'Delete this fingerprint?', 'delete.description': 'The assigned action and fingerprint data will be removed from the device.',
+  'delete.title': 'Delete this fingerprint?', 'delete.description': 'The assigned action and fingerprint data will be removed from the device.', 'discard.title': 'Discard changes?', 'discard.description': 'Unsaved changes for this finger will be lost.', 'button.discard': 'Discard changes',
   'validation.secret_required': 'Enter a password before saving this action.', 'validation.password_ascii': 'The password must be ASCII and at most 128 characters.', 'validation.custom_required': 'Enter a shortcut sequence before saving.', 'validation.custom_ascii': 'The shortcut must be ASCII and at most 128 characters.',
-  'settings.title': 'Settings', 'settings.subtitle': 'Choose a language, startup behavior, and view device status.', 'settings.language': 'Language', 'settings.languageDescription': 'The interface and system tray menu update immediately.', 'locale.vi': 'Tiếng Việt', 'locale.en': 'English', 'locale.zh-CN': '简体中文', 'settings.device': 'Device', 'settings.connected': 'Connected', 'settings.searching': 'Searching', 'settings.port': 'Port', 'settings.firmware': 'Firmware', 'settings.sensor': 'Sensor', 'settings.localSecurity': 'Local security', 'settings.localSecurityDescription': 'No cloud and no synchronization outside this computer.', 'settings.autostart': 'Open TouchPass at login', 'settings.autostartUnavailable': 'This option is only available in the desktop app.', 'settings.developer': 'Diagnostic information', 'settings.developerDescription': 'Hidden by default to keep the interface focused.', 'settings.worker': 'Background worker', 'settings.fingerprintCount': 'Fingerprints', 'settings.hidKeyConfigured': 'HID key configured', 'settings.refresh': 'Refresh status', 'common.yes': 'Yes', 'common.no': 'No',
+  'settings.title': 'Settings', 'settings.subtitle': 'Choose a language, startup behavior, and view device status.', 'settings.back': 'Back', 'settings.navigation': 'Settings navigation', 'settings.statusSidebar': 'Device and privacy status', 'settings.general': 'General', 'settings.generalDescription': 'Language and interface preferences.', 'settings.language': 'Language', 'settings.languageDescription': 'The interface and system tray menu update immediately.', 'locale.vi': 'Tiếng Việt', 'locale.en': 'English', 'locale.zh-CN': '简体中文', 'settings.device': 'Device', 'settings.deviceDescription': 'TouchPass connection and device status.', 'settings.connected': 'Connected', 'settings.searching': 'Searching', 'settings.port': 'Port', 'settings.firmware': 'Firmware', 'settings.sensor': 'Sensor', 'settings.localSecurity': 'Local security', 'settings.localSecurityDescription': 'No cloud and no synchronization outside this computer.', 'settings.security': 'Security', 'settings.autostart': 'Open TouchPass at login', 'settings.autostartUnavailable': 'This option is only available in the desktop app.', 'settings.developer': 'Diagnostic information', 'settings.developerCategory': 'Developer', 'settings.developerDescription': 'Hidden by default to keep the interface focused.', 'settings.worker': 'Background worker', 'settings.fingerprintCount': 'Fingerprints', 'settings.hidKeyConfigured': 'HID key configured', 'settings.hidAutomation': 'HID automation', 'settings.hidReady': 'Ready to use', 'settings.hidNotReady': 'Setup required', 'settings.hidReadyDescription': 'TouchPass is securely paired with this computer.', 'settings.hidNotReadyDescription': 'Create a local key and switch the firmware to HID keyboard mode.', 'settings.hidTouchToAuthorize': 'Touch an enrolled finger on TouchPass to authorize the change.', 'settings.hidManagedByFirmware': 'The HID key is embedded in Arduino firmware and cannot be changed from the app.', 'settings.hidRecoveryRequired': 'Pairing is incomplete. Run configuration again to recover the secure key.', 'settings.configureHid': 'Configure HID mode', 'settings.repairHid': 'Repair HID pairing', 'settings.configuringHid': 'Configuring…', 'settings.repairHidTitle': 'Replace the HID pairing key?', 'settings.repairHidDescription': 'The current key will be replaced on this computer and the device. Touch an enrolled finger when prompted.', 'settings.confirmRepairHid': 'Replace key', 'settings.refresh': 'Refresh status', 'common.yes': 'Yes', 'common.no': 'No',
   'scan.title': 'Enroll fingerprint', 'scan.doneTitle': 'Fingerprint linked', 'scan.linking': 'Linking {finger}', 'scan.placeFinger': 'Place your finger on the sensor…', 'scan.touchAgain': 'Lift your finger and touch again…', 'scan.complete': 'Complete!', 'scan.step': 'Step {step}/{total}',
-  'hud.sensorMissing': 'Cannot enroll: fingerprint sensor not found.', 'hud.fingerprintReady': 'Fingerprint is ready.', 'hud.touchAgain': 'Touch again to run {action}', 'hud.actionExecuted': 'Ran {action}', 'hud.saved': 'Saved {action} for {finger}.', 'hud.deleted': 'Finger configuration deleted.', 'hud.placeFinger': 'Place your finger on the sensor.', 'hud.testPrompt': 'Touch {finger} on the sensor to test {action}.', 'hud.refreshed': 'Device status refreshed.',
-  'error.invalid_finger': 'Invalid finger.', 'error.secret_required': 'This action requires a stored password.', 'error.invalid_password': 'Invalid password.', 'error.invalid_custom_payload': 'Invalid shortcut sequence.', 'error.hardware_unavailable': 'The device is unavailable.', 'error.persistence_failed': 'Could not save local data.', 'error.internal': 'Something went wrong. Try again.',
+  'hud.sensorMissing': 'Cannot enroll: fingerprint sensor not found.', 'hud.fingerprintReady': 'Fingerprint is ready.', 'hud.touchAgain': 'Touch again to run {action}', 'hud.actionExecuted': 'Ran {action}', 'hud.saved': 'Saved {action} for {finger}.', 'hud.deleted': 'Finger configuration deleted.', 'hud.placeFinger': 'Place your finger on the sensor.', 'hud.testPrompt': 'Touch {finger} on the sensor to test {action}.', 'hud.refreshed': 'Device status refreshed.', 'hud.hidConfiguring': 'Touch an enrolled finger to authorize HID configuration.', 'hud.hidConfigured': 'TouchPass is ready for HID automation.',
+  'error.invalid_finger': 'Invalid finger.', 'error.secret_required': 'This action requires a stored password.', 'error.invalid_password': 'Invalid password.', 'error.invalid_custom_payload': 'Invalid shortcut sequence.', 'error.hardware_unavailable': 'The device is unavailable.', 'error.device_configuration_failed': 'Could not configure HID. Verify your fingerprint and try again.', 'error.persistence_failed': 'Could not save local data.', 'error.internal': 'Something went wrong. Try again.',
   'status.sensor.ok': 'Ready', 'status.sensor.error': 'Error', 'status.sensor.checking': 'Checking', 'status.sensor.bootloader': 'Bootloader mode', 'status.sensor.unavailable': 'Unavailable', 'status.worker.starting': 'Starting', 'status.worker.running': 'Running', 'status.worker.unavailable': 'Unavailable',
-  'status.firmware.hid': 'HID keyboard', 'status.firmware.checking': 'Checking', 'status.firmware.bootloader': 'Bootloader mode', 'status.firmware.unknown': 'Unknown',
+  'status.firmware.hid': 'HID keyboard', 'status.firmware.piv': 'PIV smart card', 'status.firmware.checking': 'Checking', 'status.firmware.bootloader': 'Bootloader mode', 'status.firmware.unknown': 'Unknown',
   'help.title': 'Set up in three steps', 'help.step1': 'Choose a finger and the action you want.', 'help.step2': 'Save the configuration and enroll your fingerprint.', 'help.step3': 'Touch the sensor to run the action immediately.'
 };
 
@@ -162,16 +192,16 @@ const zhCN: Record<TranslationKey, string> = {
   'handMap.title': '手指映射', 'handMap.description': '选择手指以进行配置或重新录入。', 'hand.left': '左手', 'hand.right': '右手',
   'finger.configured': '已配置', 'finger.unconfigured': '未配置', 'finger.selectedDescription': '选择操作，保存并录入指纹即可开始。',
   'action.ai_accept.label': '确认 AI', 'action.ai_accept.description': "AI 助手询问时自动输入 'y' 并按 Enter。", 'action.password.label': '填充密码', 'action.password.description': '从操作系统凭据库中填充密码。', 'action.enter.label': 'Enter 键', 'action.enter.description': '向当前活动窗口发送 Enter 键。', 'action.escape.label': 'Escape 键', 'action.escape.description': '关闭对话框或取消当前操作。', 'action.custom.label': '自定义快捷键', 'action.custom.description': '输入自定义快捷键序列或文本。', 'action.disabled.label': '禁用操作', 'action.disabled.description': '触摸此手指时不执行任何操作。',
-  'field.password': '电脑密码', 'field.passwordStored': '已安全保存。输入新密码即可替换。', 'field.passwordPlaceholder': '输入 ASCII 密码', 'field.custom': '快捷键序列', 'field.customPlaceholder': '例如：/approve', 'field.confirm': '触摸两次以确认', 'field.confirmDescription': '减少工作时意外触发。',
+  'field.password': '电脑密码', 'field.action': '触摸操作', 'field.passwordStored': '已安全保存。输入新密码即可替换。', 'field.passwordPlaceholder': '输入 ASCII 密码', 'field.custom': '快捷键序列', 'field.customPlaceholder': '例如：/approve', 'field.confirm': '触摸两次以确认', 'field.confirmDescription': '减少工作时意外触发。',
   'button.saveAndEnroll': '保存并录入指纹', 'button.saveChanges': '保存更改', 'button.more': '更多', 'button.test': '测试操作', 'button.rescan': '重新录入指纹', 'button.disable': '禁用操作', 'button.delete': '删除指纹', 'button.cancel': '取消', 'button.close': '关闭', 'button.confirmDelete': '删除指纹',
-  'delete.title': '删除此指纹？', 'delete.description': '分配的操作和指纹数据将从设备中删除。',
+  'delete.title': '删除此指纹？', 'delete.description': '分配的操作和指纹数据将从设备中删除。', 'discard.title': '放弃更改？', 'discard.description': '此手指尚未保存的更改将丢失。', 'button.discard': '放弃更改',
   'validation.secret_required': '保存此操作前请输入密码。', 'validation.password_ascii': '密码必须为 ASCII，且不超过 128 个字符。', 'validation.custom_required': '保存前请输入快捷键序列。', 'validation.custom_ascii': '快捷键必须为 ASCII，且不超过 128 个字符。',
-  'settings.title': '设置', 'settings.subtitle': '选择语言、启动方式并查看设备状态。', 'settings.language': '语言', 'settings.languageDescription': '界面和系统托盘菜单将立即更新。', 'locale.vi': 'Tiếng Việt', 'locale.en': 'English', 'locale.zh-CN': '简体中文', 'settings.device': '设备', 'settings.connected': '已连接', 'settings.searching': '正在搜索', 'settings.port': '端口', 'settings.firmware': '固件', 'settings.sensor': '传感器', 'settings.localSecurity': '本地安全', 'settings.localSecurityDescription': '不使用云端，不同步到此电脑之外。', 'settings.autostart': '登录时打开 TouchPass', 'settings.autostartUnavailable': '此选项仅在桌面应用中可用。', 'settings.developer': '诊断信息', 'settings.developerDescription': '默认隐藏，以保持界面简洁。', 'settings.worker': '后台进程', 'settings.fingerprintCount': '指纹数量', 'settings.hidKeyConfigured': 'HID 密钥已配置', 'settings.refresh': '刷新状态', 'common.yes': '是', 'common.no': '否',
+  'settings.title': '设置', 'settings.subtitle': '选择语言、启动方式并查看设备状态。', 'settings.back': '返回', 'settings.navigation': '设置导航', 'settings.statusSidebar': '设备与隐私状态', 'settings.general': '通用', 'settings.generalDescription': '语言与界面偏好。', 'settings.language': '语言', 'settings.languageDescription': '界面和系统托盘菜单将立即更新。', 'locale.vi': 'Tiếng Việt', 'locale.en': 'English', 'locale.zh-CN': '简体中文', 'settings.device': '设备', 'settings.deviceDescription': 'TouchPass 连接与设备状态。', 'settings.connected': '已连接', 'settings.searching': '正在搜索', 'settings.port': '端口', 'settings.firmware': '固件', 'settings.sensor': '传感器', 'settings.localSecurity': '本地安全', 'settings.localSecurityDescription': '不使用云端，不同步到此电脑之外。', 'settings.security': '安全', 'settings.autostart': '登录时打开 TouchPass', 'settings.autostartUnavailable': '此选项仅在桌面应用中可用。', 'settings.developer': '诊断信息', 'settings.developerCategory': '开发者', 'settings.developerDescription': '默认隐藏，以保持界面简洁。', 'settings.worker': '后台进程', 'settings.fingerprintCount': '指纹数量', 'settings.hidKeyConfigured': 'HID 密钥已配置', 'settings.hidAutomation': 'HID 自动化', 'settings.hidReady': '可以使用', 'settings.hidNotReady': '需要完成设置', 'settings.hidReadyDescription': 'TouchPass 已与此电脑安全配对。', 'settings.hidNotReadyDescription': '创建本地密钥并将固件切换为 HID 键盘模式。', 'settings.hidTouchToAuthorize': '请触摸 TouchPass 上已录入的手指以授权更改。', 'settings.hidManagedByFirmware': 'HID 密钥嵌入在 Arduino 固件中，无法从应用更改。', 'settings.hidRecoveryRequired': '配对尚未完成。请重新运行配置以恢复安全密钥。', 'settings.configureHid': '配置 HID 模式', 'settings.repairHid': '修复 HID 配对', 'settings.configuringHid': '正在配置…', 'settings.repairHidTitle': '替换 HID 配对密钥？', 'settings.repairHidDescription': '当前密钥将在此电脑和设备上被替换。出现提示时，请触摸已录入的手指。', 'settings.confirmRepairHid': '替换密钥', 'settings.refresh': '刷新状态', 'common.yes': '是', 'common.no': '否',
   'scan.title': '录入指纹', 'scan.doneTitle': '指纹已关联', 'scan.linking': '正在关联 {finger}', 'scan.placeFinger': '请将手指放在传感器上…', 'scan.touchAgain': '抬起手指后再次触摸…', 'scan.complete': '完成！', 'scan.step': '第 {step}/{total} 步',
-  'hud.sensorMissing': '无法录入：未找到指纹传感器。', 'hud.fingerprintReady': '指纹已就绪。', 'hud.touchAgain': '再次触摸以执行 {action}', 'hud.actionExecuted': '已执行 {action}', 'hud.saved': '已为 {finger} 保存 {action}。', 'hud.deleted': '已删除手指配置。', 'hud.placeFinger': '请将手指放在传感器上。', 'hud.testPrompt': '请触摸 {finger} 以测试 {action}。', 'hud.refreshed': '设备状态已刷新。',
-  'error.invalid_finger': '手指无效。', 'error.secret_required': '此操作需要已保存的密码。', 'error.invalid_password': '密码无效。', 'error.invalid_custom_payload': '快捷键序列无效。', 'error.hardware_unavailable': '设备当前不可用。', 'error.persistence_failed': '无法保存本地数据。', 'error.internal': '出现错误，请重试。',
+  'hud.sensorMissing': '无法录入：未找到指纹传感器。', 'hud.fingerprintReady': '指纹已就绪。', 'hud.touchAgain': '再次触摸以执行 {action}', 'hud.actionExecuted': '已执行 {action}', 'hud.saved': '已为 {finger} 保存 {action}。', 'hud.deleted': '已删除手指配置。', 'hud.placeFinger': '请将手指放在传感器上。', 'hud.testPrompt': '请触摸 {finger} 以测试 {action}。', 'hud.refreshed': '设备状态已刷新。', 'hud.hidConfiguring': '请触摸已录入的手指以授权 HID 配置。', 'hud.hidConfigured': 'TouchPass 已可用于 HID 自动化。',
+  'error.invalid_finger': '手指无效。', 'error.secret_required': '此操作需要已保存的密码。', 'error.invalid_password': '密码无效。', 'error.invalid_custom_payload': '快捷键序列无效。', 'error.hardware_unavailable': '设备当前不可用。', 'error.device_configuration_failed': '无法配置 HID。请验证指纹后重试。', 'error.persistence_failed': '无法保存本地数据。', 'error.internal': '出现错误，请重试。',
   'status.sensor.ok': '已就绪', 'status.sensor.error': '错误', 'status.sensor.checking': '正在检查', 'status.sensor.bootloader': '引导加载模式', 'status.sensor.unavailable': '不可用', 'status.worker.starting': '正在启动', 'status.worker.running': '正在运行', 'status.worker.unavailable': '不可用',
-  'status.firmware.hid': 'HID 键盘', 'status.firmware.checking': '正在检查', 'status.firmware.bootloader': '引导加载模式', 'status.firmware.unknown': '未知',
+  'status.firmware.hid': 'HID 键盘', 'status.firmware.piv': 'PIV 智能卡', 'status.firmware.checking': '正在检查', 'status.firmware.bootloader': '引导加载模式', 'status.firmware.unknown': '未知',
   'help.title': '三步完成设置', 'help.step1': '选择手指和所需操作。', 'help.step2': '保存配置并录入指纹。', 'help.step3': '触摸传感器即可立即执行操作。'
 };
 
@@ -218,6 +248,29 @@ export function commandErrorMessage(locale: Locale, code: CommandErrorCode = 'in
   return translate(locale, `error.${code}` as TranslationKey);
 }
 
+export function hidConfigurationErrorMessage(
+  locale: Locale,
+  code: CommandErrorCode = 'internal',
+  detail?: string
+): string {
+  if (!detail) return commandErrorMessage(locale, code);
+  if (detail === 'hid_configuration_timeout' || detail === 'timeout') return enrollmentMessage(locale, 'timeout');
+  if (
+    detail === 'persistence_failed' ||
+    detail === 'config_locked' ||
+    detail === 'pairing_in_doubt' ||
+    detail === 'connection_lost' ||
+    detail === 'serial_write' ||
+    detail.includes('admin operation is already active') ||
+    detail.startsWith('config_unlock:') ||
+    detail.startsWith('hid_key:') ||
+    detail.startsWith('mode_')
+  ) {
+    return enrollmentMessage(locale, detail);
+  }
+  return commandErrorMessage(locale, code);
+}
+
 export function sensorStatusLabel(locale: Locale, status: SensorStatus): string {
   return translate(locale, `status.sensor.${status}` as TranslationKey);
 }
@@ -254,7 +307,7 @@ export function workerStatusLabel(locale: Locale, status: WorkerStatus): string 
 }
 
 export function firmwareModeLabel(locale: Locale, mode: string): string {
-  const normalized = ['hid', 'checking', 'bootloader'].includes(mode) ? mode : 'unknown';
+  const normalized = ['hid', 'piv', 'checking', 'bootloader'].includes(mode) ? mode : 'unknown';
   return translate(locale, `status.firmware.${normalized}` as TranslationKey);
 }
 
@@ -264,19 +317,19 @@ const enrollmentMessages: Record<Locale, Record<string, string>> = {
     lift: 'Nhấc ngón tay khỏi cảm biến…', touch_again: 'Đặt lại cùng ngón tay lên cảm biến…', stored: 'Vân tay đã được lưu vào cảm biến.',
     timeout: 'Đã hết thời gian quét. Hãy thử lại.', connection_lost: 'Mất kết nối với TouchPass trong khi quét.', serial_write: 'Không thể gửi lệnh tới TouchPass.',
     sensor_unavailable: 'Không tìm thấy cảm biến vân tay.', persistence_failed: 'Không thể lưu trạng thái vân tay. Hãy thử lại.', busy: 'Một thao tác cấu hình khác đang chạy.', unlock_failed: 'Không thể xác thực vân tay đã đăng ký.',
-    image_failed: 'Ảnh vân tay chưa đủ rõ. Lau cảm biến và thử lại.', mismatch: 'Hai lần quét chưa phải cùng một ngón tay.', store_failed: 'Cảm biến không thể lưu mẫu vân tay.'
+    image_failed: 'Ảnh vân tay chưa đủ rõ. Lau cảm biến và thử lại.', mismatch: 'Hai lần quét chưa phải cùng một ngón tay.', store_failed: 'Cảm biến không thể lưu mẫu vân tay.', hid_configuration_failed: 'Không thể cấu hình HID. Hãy xác thực vân tay và thử lại.'
   },
   en: {
     unlock_existing: 'Touch an already enrolled finger to unlock configuration.', touch: 'Place your finger on the sensor…',
     lift: 'Lift your finger from the sensor…', touch_again: 'Place the same finger on the sensor again…', stored: 'The fingerprint was stored on the sensor.',
     timeout: 'Fingerprint enrollment timed out. Try again.', connection_lost: 'Connection to TouchPass was lost during enrollment.', serial_write: 'Could not send a command to TouchPass.',
     sensor_unavailable: 'The fingerprint sensor was not found.', persistence_failed: 'Could not save the fingerprint state. Try again.', busy: 'Another configuration operation is already active.', unlock_failed: 'The enrolled fingerprint could not be verified.',
-    image_failed: 'The fingerprint image was unclear. Clean the sensor and try again.', mismatch: 'Use the same finger for both scans.', store_failed: 'The sensor could not store the fingerprint template.'
+    image_failed: 'The fingerprint image was unclear. Clean the sensor and try again.', mismatch: 'Use the same finger for both scans.', store_failed: 'The sensor could not store the fingerprint template.', hid_configuration_failed: 'Could not configure HID. Verify your fingerprint and try again.'
   },
   'zh-CN': {
     unlock_existing: '请触摸已录入的指纹以解锁配置。', touch: '请将手指放在传感器上…', lift: '请将手指移开…', touch_again: '请再次放置同一根手指…', stored: '指纹已保存到传感器。',
     timeout: '录入已超时，请重试。', connection_lost: '录入过程中与 TouchPass 的连接已断开。', serial_write: '无法向 TouchPass 发送命令。', sensor_unavailable: '未找到指纹传感器。', persistence_failed: '无法保存指纹状态，请重试。',
-    busy: '另一个配置操作正在进行。', unlock_failed: '无法验证已录入的指纹。', image_failed: '指纹图像不清晰，请清洁传感器后重试。', mismatch: '两次扫描必须使用同一根手指。', store_failed: '传感器无法保存指纹模板。'
+    busy: '另一个配置操作正在进行。', unlock_failed: '无法验证已录入的指纹。', image_failed: '指纹图像不清晰，请清洁传感器后重试。', mismatch: '两次扫描必须使用同一根手指。', store_failed: '传感器无法保存指纹模板。', hid_configuration_failed: '无法配置 HID。请验证指纹后重试。'
   }
 };
 
@@ -285,6 +338,7 @@ export function enrollmentMessage(locale: Locale, code?: string): string {
   if (!code) return messages.touch;
   if (messages[code]) return messages[code];
   if (code.startsWith('config_unlock:') || code === 'config_locked') return messages.unlock_failed;
+  if (code.startsWith('hid_key:') || code.startsWith('mode_') || code === 'pairing_in_doubt') return messages.hid_configuration_failed;
   if (code.includes('admin operation is already active')) return messages.busy;
   if (code.startsWith('enroll:reg_model:')) return messages.mismatch;
   if (code.startsWith('enroll:store:')) return messages.store_failed;

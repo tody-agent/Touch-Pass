@@ -8,7 +8,7 @@ Recreate the selected Vault Workspace visual in the existing Svelte 5 + Tauri de
 
 - Selected visual truth: `software/desktop-app/design/references/vault-workspace.png`.
 - Default window `1180x760`; minimum `960x640`; native decorations remain enabled.
-- Grid: `clamp(200px, 19vw, 230px) minmax(460px, 1fr) clamp(260px, 25vw, 320px)`.
+- Grid: `clamp(250px, 29vw, 340px) minmax(390px, 1fr) clamp(270px, 30vw, 350px)`.
 - One primary CTA: a new finger uses Save and Enroll; an enrolled finger uses Save Changes. Enrollment starts only after save succeeds.
 - Settings is a full-window workspace, not a modal or separate native window.
 - Dirty action drafts must be confirmed before changing fingers or entering Settings.

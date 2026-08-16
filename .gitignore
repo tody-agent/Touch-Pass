@@ -12,6 +12,10 @@ verify_apis.py
 *.log
 
 # Secrets & Credentials
+.env
+.env.*
+!.env.example
+.dev.vars
 firmware/tiny_touch_keyboard/secrets.h
 firmware/tiny_touch_smartcard/main/secrets.h
 firmware/tiny_touch_smartcard/build/

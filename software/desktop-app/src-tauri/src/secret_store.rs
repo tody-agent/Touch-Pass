@@ -1,8 +1,15 @@
 use keyring::Entry;
+use rand::{rngs::OsRng, RngCore};
 
 #[derive(Clone)]
 pub struct SecretStore {
     service: String,
+}
+
+pub struct PreparedPairingKey {
+    pub key: Vec<u8>,
+    pub old_key: Option<Vec<u8>>,
+    pub needs_commit: bool,
 }
 
 impl SecretStore {
@@ -60,6 +67,114 @@ impl SecretStore {
         }
         vec![0; 32]
     }
+
+    pub fn prepare_pairing_key(
+        &self,
+        device_id: &str,
+        rotate: bool,
+    ) -> Result<PreparedPairingKey, String> {
+        let live_account = pairing_account(device_id);
+        let pending_account = pending_pairing_account(device_id);
+        let live = self.get_optional(&live_account)?;
+        let mut pending = self.get_optional(&pending_account)?;
+        if live.as_deref().and_then(parse_pairing_key)
+            == pending.as_deref().and_then(parse_pairing_key)
+        {
+            let _ = self.delete(&pending_account);
+            pending = None;
+        }
+        let mut random = OsRng;
+        prepare_pairing_key(
+            live,
+            pending,
+            rotate,
+            |bytes| random.fill_bytes(bytes),
+            |encoded| self.set(&pending_account, encoded),
+        )
+    }
+
+    pub fn commit_prepared_pairing_key(&self, device_id: &str) -> Result<(), String> {
+        let pending_account = pending_pairing_account(device_id);
+        let pending = self
+            .get_optional(&pending_account)?
+            .and_then(|value| parse_pairing_key(&value))
+            .ok_or_else(|| "prepared pairing key is unavailable".to_string())?;
+        self.set(&pairing_account(device_id), hex::encode(pending).as_bytes())?;
+        let _ = self.delete(&pending_account);
+        Ok(())
+    }
+
+    pub fn discard_prepared_pairing_key(&self, device_id: &str) -> Result<(), String> {
+        self.delete(&pending_pairing_account(device_id))
+    }
+
+    pub fn has_live_pairing_key(&self, device_id: &str) -> bool {
+        self.get_optional(&pairing_account(device_id))
+            .ok()
+            .flatten()
+            .as_deref()
+            .and_then(parse_pairing_key)
+            .is_some()
+    }
+
+    pub fn has_pending_pairing_key(&self, device_id: &str) -> bool {
+        let pending = self
+            .get_optional(&pending_pairing_account(device_id))
+            .ok()
+            .flatten()
+            .as_deref()
+            .and_then(parse_pairing_key);
+        let live = self
+            .get_optional(&pairing_account(device_id))
+            .ok()
+            .flatten()
+            .as_deref()
+            .and_then(parse_pairing_key);
+        pending.is_some() && pending != live
+    }
+}
+
+fn pairing_account(device_id: &str) -> String {
+    format!("pairing-{device_id}")
+}
+
+fn pending_pairing_account(device_id: &str) -> String {
+    format!("pairing-{device_id}-pending")
+}
+
+fn prepare_pairing_key(
+    live: Option<Vec<u8>>,
+    pending: Option<Vec<u8>>,
+    rotate: bool,
+    fill_random: impl FnOnce(&mut [u8]),
+    stage: impl FnOnce(&[u8]) -> Result<(), String>,
+) -> Result<PreparedPairingKey, String> {
+    let old_key = live.as_deref().and_then(parse_pairing_key);
+    if let Some(key) = pending.as_deref().and_then(parse_pairing_key) {
+        return Ok(PreparedPairingKey {
+            key,
+            old_key,
+            needs_commit: true,
+        });
+    }
+    if !rotate {
+        if let Some(key) = old_key.clone() {
+            return Ok(PreparedPairingKey {
+                key,
+                old_key,
+                needs_commit: false,
+            });
+        }
+    }
+
+    let mut key = vec![0_u8; 32];
+    fill_random(&mut key);
+    stage(hex::encode(&key).as_bytes())?;
+    Ok(PreparedPairingKey {
+        key,
+        old_key,
+        needs_commit: true,
+    })
 }
 
 fn parse_pairing_key(value: &[u8]) -> Option<Vec<u8>> {
@@ -75,7 +190,8 @@ fn parse_pairing_key(value: &[u8]) -> Option<Vec<u8>> {
 
 #[cfg(test)]
 mod tests {
-    use super::parse_pairing_key;
+    use super::{parse_pairing_key, prepare_pairing_key};
+    use std::cell::Cell;
 
     #[test]
     fn parses_hex_pairing_key() {
@@ -89,5 +205,85 @@ mod tests {
     #[test]
     fn rejects_wrong_pairing_key_length() {
         assert!(parse_pairing_key(b"1234").is_none());
+    }
+
+    #[test]
+    fn creates_and_persists_a_random_pairing_key_when_missing() {
+        let persisted = std::cell::RefCell::new(Vec::new());
+        let prepared = prepare_pairing_key(
+            None,
+            None,
+            false,
+            |bytes| bytes.fill(0x2a),
+            |encoded| {
+                persisted.replace(encoded.to_vec());
+                Ok(())
+            },
+        )
+        .unwrap();
+
+        assert_eq!(prepared.key, vec![0x2a; 32]);
+        assert!(prepared.needs_commit);
+        assert_eq!(persisted.borrow().as_slice(), "2a".repeat(32).as_bytes());
+    }
+
+    #[test]
+    fn reuses_a_valid_pairing_key_without_replacing_secure_storage() {
+        let filled = Cell::new(false);
+        let persisted = Cell::new(false);
+        let existing = "10".repeat(32).into_bytes();
+
+        let prepared = prepare_pairing_key(
+            Some(existing),
+            None,
+            false,
+            |_| filled.set(true),
+            |_| {
+                persisted.set(true);
+                Ok(())
+            },
+        )
+        .unwrap();
+
+        assert_eq!(prepared.key, vec![0x10; 32]);
+        assert!(!prepared.needs_commit);
+        assert!(!filled.get());
+        assert!(!persisted.get());
+    }
+
+    #[test]
+    fn repair_stages_a_new_key_without_replacing_the_live_key() {
+        let staged = std::cell::RefCell::new(Vec::new());
+        let prepared = prepare_pairing_key(
+            Some("10".repeat(32).into_bytes()),
+            None,
+            true,
+            |bytes| bytes.fill(0x4d),
+            |encoded| {
+                staged.replace(encoded.to_vec());
+                Ok(())
+            },
+        )
+        .unwrap();
+
+        assert_eq!(prepared.key, vec![0x4d; 32]);
+        assert!(prepared.needs_commit);
+        assert_eq!(staged.borrow().as_slice(), "4d".repeat(32).as_bytes());
+    }
+
+    #[test]
+    fn recovery_prefers_a_durable_pending_key_over_the_live_key() {
+        let prepared = prepare_pairing_key(
+            Some("10".repeat(32).into_bytes()),
+            Some("20".repeat(32).into_bytes()),
+            false,
+            |_| panic!("recovery must reuse the pending key"),
+            |_| panic!("recovery must not stage another key"),
+        )
+        .unwrap();
+
+        assert_eq!(prepared.key, vec![0x20; 32]);
+        assert_eq!(prepared.old_key, Some(vec![0x10; 32]));
+        assert!(prepared.needs_commit);
     }
 }

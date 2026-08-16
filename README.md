@@ -6,13 +6,13 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Hardware](https://img.shields.io/badge/Hardware-ESP32--S3-orange.svg)](docs/BUILD_GUIDE.md)
-[![Download Executable](https://img.shields.io/badge/📥_Download-TouchPass.exe_(Windows)-blueviolet.svg)](https://github.com/tody-agent/Touch-Pass/releases/download/v2.0.0/TouchPass.exe)
+[![Desktop Release](https://img.shields.io/badge/📥_Desktop-v0.2.0-blueviolet.svg)](https://github.com/tody-agent/Touch-Pass/releases/tag/v0.2.0)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB.svg)](https://python.org)
 [![Web Flasher](https://img.shields.io/badge/🌐_1--Click-Web_Flasher-success.svg)](https://tody-agent.github.io/Touch-Pass/web/flasher/)
 [![AI Setup](https://img.shields.io/badge/🤖_1--Prompt-AI_Agent_Setup-purple.svg)](docs/AI_AGENT_PROMPT.md)
-[![Release](https://img.shields.io/badge/Release-v2.0.0-brightgreen.svg)](https://github.com/tody-agent/Touch-Pass/releases/tag/v2.0.0)
+[![Release](https://img.shields.io/badge/Release-v0.2.0-brightgreen.svg)](https://github.com/tody-agent/Touch-Pass/releases/tag/v0.2.0)
 
-🌐 **English** | [🇻🇳 **Tiếng Việt**](docs/translations/README.vi.md) | [🇨🇳 **简体中文**](docs/translations/README.zh.md) | [🇷🇺 **Русский**](docs/translations/README.ru.md) | [📥 **Download TouchPass.exe**](https://github.com/tody-agent/Touch-Pass/releases/download/v2.0.0/TouchPass.exe) | [🌐 **1-Click Web Flasher**](https://tody-agent.github.io/Touch-Pass/web/flasher/) | [🤖 **1-Prompt AI Agent Setup (EN)**](docs/AI_AGENT_PROMPT.md) | [🇻🇳 **(VI)**](docs/AI_AGENT_PROMPT.vi.md) | [🇨🇳 **(ZH)**](docs/AI_AGENT_PROMPT.zh.md) | [🇷🇺 **(RU)**](docs/AI_AGENT_PROMPT.ru.md)
+🌐 **English** | [🇻🇳 **Tiếng Việt**](docs/translations/README.vi.md) | [🇨🇳 **简体中文**](docs/translations/README.zh.md) | [🇷🇺 **Русский**](docs/translations/README.ru.md) | [📥 **Desktop v0.2.0**](https://github.com/tody-agent/Touch-Pass/releases/tag/v0.2.0) | [🌐 **1-Click Web Flasher**](https://tody-agent.github.io/Touch-Pass/web/flasher/) | [🤖 **1-Prompt AI Agent Setup (EN)**](docs/AI_AGENT_PROMPT.md) | [🇻🇳 **(VI)**](docs/AI_AGENT_PROMPT.vi.md) | [🇨🇳 **(ZH)**](docs/AI_AGENT_PROMPT.zh.md) | [🇷🇺 **(RU)**](docs/AI_AGENT_PROMPT.ru.md)
 
 <br />
 
@@ -92,25 +92,27 @@ TouchPass includes a high-performance native desktop application written in **Ru
 </div>
 
 #### 🪟 Windows (x64)
-- **Installer (.exe)**: Download `TouchPass_0.1.0_x64-setup.exe` from [GitHub Releases](https://github.com/tody-agent/Touch-Pass/releases) and follow setup.
-- **Enterprise (.msi)**: Download `TouchPass_0.1.0_x64_en-US.msi`.
-- **Portable (.zip)**: Download `TouchPass_windows_x64_portable.zip`, extract, and run `TouchPass.exe` directly or via `start_touchpass.bat`.
+- **Installer (.exe)**: Download `TouchPass_0.2.0_x64-setup.exe` from [GitHub Releases](https://github.com/tody-agent/Touch-Pass/releases/tag/v0.2.0) and follow setup.
+- **Portable (.zip)**: Download `TouchPass_windows_x64_portable.zip`, extract, and run `TouchPass.exe` directly.
 
-#### 🍎 macOS (Universal: Apple Silicon & Intel)
-1. Download `TouchPass_0.1.0_universal.dmg` from [GitHub Releases](https://github.com/tody-agent/Touch-Pass/releases).
-2. Open the `.dmg` disk image and drag **TouchPass.app** into your `/Applications` folder.
+#### 🍎 macOS (Apple Silicon and Intel)
+1. Download the `.dmg` matching your Mac: `aarch64` for Apple Silicon or `x64` for Intel.
+2. Open the disk image and drag **TouchPass.app** into `/Applications`.
+3. The current builds are unsigned: Control-click the app and choose **Open** on first launch if macOS blocks it.
 
 #### 🐧 Ubuntu / Debian Linux (x64)
 - **Debian Package (.deb)**:
   ```bash
-  sudo dpkg -i touchpass_0.1.0_amd64.deb
+  sudo dpkg -i touchpass_0.2.0_amd64.deb
   sudo apt-get install -f
   ```
 - **AppImage**:
   ```bash
-  chmod +x touchpass_0.1.0_amd64.AppImage
-  ./touchpass_0.1.0_amd64.AppImage
+  chmod +x touchpass_0.2.0_amd64.AppImage
+  ./touchpass_0.2.0_amd64.AppImage
   ```
+
+See the complete [Desktop install and first-use guide](docs/DESKTOP_APP_GUIDE.md) or [bản tiếng Việt](docs/DESKTOP_APP_GUIDE.vi.md) for HID provisioning, recovery, and troubleshooting.
 
 ---
 
@@ -141,6 +143,9 @@ TouchPass includes a high-performance native desktop application written in **Ru
 
 - 📖 **[User Guide & AI Presets](docs/USER_GUIDE.md)** | **[🇻🇳 Bản Tiếng Việt](docs/USER_GUIDE.vi.md)**
   *Fingerprint enrollment, interactive shortcut recorder, double-touch safety rules, OS credential storage, and troubleshooting.*
+
+- 🖥️ **[Desktop Install & First Use](docs/DESKTOP_APP_GUIDE.md)** | **[🇻🇳 Bản Tiếng Việt](docs/DESKTOP_APP_GUIDE.vi.md)** | **[Changelog](CHANGELOG.md)**
+  *Install Windows, macOS, or Linux artifacts; securely configure unified firmware; recover interrupted pairing.*
 
 ---
 
