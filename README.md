@@ -79,32 +79,45 @@ Swapping context, repositioning your hands, typing `y` + `Enter`, or mistyping a
 
 ---
 
-## 🚀 Quick Start Guide
+### 🖥️ Native Rust Desktop App (Tauri v2 + Svelte 5) - Recommended
 
-### 🌐 Browser Web Flasher (Zero Install)
-Flash ESP32-S3 firmware in 1 click at [🌐 **tody-agent.github.io/Touch-Pass/web/flasher/**](https://tody-agent.github.io/Touch-Pass/web/flasher/).
+TouchPass includes a high-performance native desktop application written in **Rust** and **Tauri v2** with **Svelte 5 UI**, featuring real-time serial hardware monitoring, interactive fingerprint mapping, and OS Keyring integration across **macOS**, **Windows**, and **Linux**.
 
-### 🤖 1-Prompt AI Agent Setup
-Pass the standardized setup prompt to your AI coding assistant. See [🤖 **1-Prompt AI Agent Integration Guide**](docs/AI_AGENT_PROMPT.md) | [🇻🇳 **Bản Tiếng Việt**](docs/AI_AGENT_PROMPT.vi.md).
+<div align="center">
 
-### Windows
-1. Download **[TouchPass.exe](https://github.com/tody-agent/Touch-Pass/releases/download/v2.0.0/TouchPass.exe)** or clone the repository:
-   ```cmd
-   git clone https://github.com/tody-agent/Touch-Pass.git
-   cd Touch-Pass
-   ```
-2. Double-click **`TouchPass.exe`** or run **`start_touchpass.bat`**:
-   ```cmd
-   .\start_touchpass.bat
-   ```
-3. Open `http://127.0.0.1:8787/` in your browser to launch the Web Portal.
+![TouchPass Desktop App Interface (macOS, Windows, Linux)](assets/demo/screenshot_app.png)
 
-### macOS / Linux
-1. Run the one-line POSIX installer:
-   ```bash
-   curl -fsSL https://raw.githubusercontent.com/tody-agent/Touch-Pass/main/packaging/install.sh | bash
-   ```
-2. Open `http://127.0.0.1:8787/` in your browser.
+*Unified Native Desktop App UI: Real-time Serial Port Discovery, 10 Biometric Fingerprint Slots, AI Quick Shortcuts & Hardware Status.*
+
+</div>
+
+#### 🪟 Windows (x64)
+- **Installer (.exe)**: Download `TouchPass_0.1.0_x64-setup.exe` from [GitHub Releases](https://github.com/tody-agent/Touch-Pass/releases) and follow setup.
+- **Enterprise (.msi)**: Download `TouchPass_0.1.0_x64_en-US.msi`.
+- **Portable (.zip)**: Download `TouchPass_windows_x64_portable.zip`, extract, and run `TouchPass.exe` directly or via `start_touchpass.bat`.
+
+#### 🍎 macOS (Universal: Apple Silicon & Intel)
+1. Download `TouchPass_0.1.0_universal.dmg` from [GitHub Releases](https://github.com/tody-agent/Touch-Pass/releases).
+2. Open the `.dmg` disk image and drag **TouchPass.app** into your `/Applications` folder.
+
+#### 🐧 Ubuntu / Debian Linux (x64)
+- **Debian Package (.deb)**:
+  ```bash
+  sudo dpkg -i touchpass_0.1.0_amd64.deb
+  sudo apt-get install -f
+  ```
+- **AppImage**:
+  ```bash
+  chmod +x touchpass_0.1.0_amd64.AppImage
+  ./touchpass_0.1.0_amd64.AppImage
+  ```
+
+---
+
+### 🌐 Legacy Web Portal & Browser Web Flasher
+- **Web Serial Flasher**: Flash ESP32-S3 firmware in 1 click at [🌐 **tody-agent.github.io/Touch-Pass/web/flasher/**](https://tody-agent.github.io/Touch-Pass/web/flasher/).
+- **AI Agent 1-Prompt Setup**: See [🤖 **1-Prompt AI Agent Integration Guide**](docs/AI_AGENT_PROMPT.md) | [🇻🇳 **Bản Tiếng Việt**](docs/AI_AGENT_PROMPT.vi.md).
+- **Run Portal locally**: Launch `start_touchpass.bat` or `python run_portal_win.py` to open `http://127.0.0.1:8787/`.
 
 ---
 

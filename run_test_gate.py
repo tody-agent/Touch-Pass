@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import importlib.util
 import py_compile
 import subprocess
 import sys
@@ -42,20 +43,15 @@ def check_syntax() -> bool:
     return True
 
 
+def unit_test_command() -> list[str]:
+    if importlib.util.find_spec("pytest") is not None:
+        return [sys.executable, "-m", "pytest", str(TESTS_DIR)]
+    return [sys.executable, "-m", "unittest", "discover", "-s", str(TESTS_DIR)]
+
+
 def run_unit_tests() -> bool:
     log_stage(2, "Unit Test Suite Gate")
-    import shutil
-    pytest_exe = shutil.which("pytest")
-    if not pytest_exe:
-        possible = Path(r"C:\Users\block\AppData\Local\Programs\Python\Python311\Scripts\pytest.exe")
-        if possible.exists():
-            pytest_exe = str(possible)
-
-    if pytest_exe:
-        cmd = [pytest_exe, str(TESTS_DIR)]
-    else:
-        cmd = [sys.executable, "-m", "unittest", "discover", "-s", str(TESTS_DIR)]
-
+    cmd = unit_test_command()
     print(f"Running unit test command: {' '.join(cmd)}")
     result = subprocess.run(cmd, cwd=str(ROOT))
     if result.returncode != 0:

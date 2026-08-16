@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TouchPass — Thiết Kế Chuẩn Apple HIG</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          },
+          colors: {
+            apple: {
+              bg: '#0A0C10',
+              sidebar: '#12151D',
+              card: 'rgba(24, 28, 40, 0.7)',
+              border: 'rgba(255, 255, 255, 0.08)',
+              accent: '#0A84FF',
+              success: '#30D158',
+              warning: '#FF9F0A',
+              danger: '#FF453A',
+              purple: '#BF5AF2'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25); }
+
+    /* Apple Glassmorphism & Liquid Metal */
+    .apple-window {
+      background: rgba(16, 19, 28, 0.88);
+      backdrop-filter: blur(40px) saturate(200%);
+      -webkit-backdrop-filter: blur(40px) saturate(200%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 40px 120px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+    .apple-sidebar {
+      background: rgba(12, 14, 22, 0.7);
+      backdrop-filter: blur(30px);
+      border-right: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .apple-card {
+      background: rgba(25, 30, 44, 0.6);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .apple-card-interactive:hover {
+      background: rgba(36, 43, 64, 0.85);
+      border-color: rgba(10, 132, 255, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35), 0 0 20px rgba(10, 132, 255, 0.15);
+    }
+
+    /* Soft Finger Pill */
+    .finger-pill {
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .finger-pill:hover {
+      transform: translateY(-3px);
+    }
+
+    /* Pulse Glow */
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); opacity: 0.8; }
+      50% { transform: scale(1.08); opacity: 0.3; }
+      100% { transform: scale(0.95); opacity: 0.8; }
+    }
+    .pulse-glow { animation: pulse-ring 2.5s infinite ease-in-out; }
+
+    /* Scan fingerprint laser */
+    @keyframes scanline {
+      0% { transform: translateY(-100%); opacity: 0; }
+      50% { opacity: 1; }
+      100% { transform: translateY(220%); opacity: 0; }
+    }
+    .scanning-line { animation: scanline 1.8s infinite linear; }
+  </style>
+</head>
+<body class="bg-[#07090E] text-slate-100 min-h-screen flex flex-col items-center justify-center p-4 md:p-6 font-sans antialiased select-none">
+
+  <!-- TOP CONCEPT CONTROLS -->
+  <header class="w-full max-w-5xl mb-4 flex flex-wrap items-center justify-between gap-3 text-xs bg-slate-900/60 border border-white/10 px-4 py-2.5 rounded-2xl backdrop-blur-xl shadow-xl">
+    <div class="flex items-center gap-2.5 font-medium">
+      <span class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse"></span>
+      <span class="text-white font-semibold">TouchPass Concept (Apple HIG Redesign)</span>
+      <span class="text-slate-600">•</span>
+      <span class="text-slate-400">Tối giản tuyệt đối • Wording thân thiện • Trải nghiệm kỳ diệu</span>
+    </div>
+    <div class="flex items-center gap-2 flex-wrap">
+      <button onclick="openFirstTimeWizard()" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-3 py-1.5 rounded-xl transition shadow-lg shadow-blue-500/20 flex items-center gap-1.5 active:scale-95">
+        <span>✨</span> Hướng Dẫn Nhanh 30s
+      </button>
+      <button onclick="simulateTouchEvent()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-3 py-1.5 rounded-xl transition shadow-lg shadow-emerald-500/20 flex items-center gap-1.5 active:scale-95">
+        <span>👆</span> Chạm Thử Vân Tay
+      </button>
+      <button onclick="toggleTrayPopover()" class="bg-white/10 hover:bg-white/15 text-slate-200 border border-white/10 font-medium px-3 py-1.5 rounded-xl transition active:scale-95 flex items-center gap-1.5">
+        <span>📌</span> Menu Bar
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN MACOS APP WINDOW -->
+  <div class="apple-window w-full max-w-5xl h-[700px] rounded-3xl flex flex-col overflow-hidden relative">
+
+    <!-- MACOS TITLEBAR (CLEAN APPLE TRAFFIC LIGHTS) -->
+    <div class="h-12 px-5 flex items-center justify-between border-b border-white/[0.07] select-none bg-white/[0.01]">
+      <!-- Traffic lights -->
+      <div class="flex items-center gap-2 w-28">
+        <div class="w-3 h-3 rounded-full bg-[#FF5F56] border border-[#E0443E] hover:opacity-80 transition cursor-pointer shadow-sm" title="Ẩn ứng dụng" onclick="showHUD('TouchPass đang chạy ngầm trong Menu Bar ✨')"></div>
+        <div class="w-3 h-3 rounded-full bg-[#FFBD2E] border border-[#DEA123] hover:opacity-80 transition cursor-pointer shadow-sm"></div>
+        <div class="w-3 h-3 rounded-full bg-[#27C93F] border border-[#1AAB29] hover:opacity-80 transition cursor-pointer shadow-sm"></div>
+      </div>
+
+      <!-- App Title & Hardware Status Pill -->
+      <div class="flex items-center gap-2 font-medium text-xs text-slate-200">
+        <span class="text-sm">🖐️</span>
+        <span class="font-bold tracking-tight text-white">TouchPass</span>
+        <span class="text-slate-600">•</span>
+        <div class="flex items-center gap-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-[11px] font-medium">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          <span>Thiết bị sẵn sàng</span>
+        </div>
+      </div>
+
+      <!-- Right Action -->
+      <div class="w-28 flex justify-end items-center gap-2">
+        <button onclick="switchTab('settings')" class="text-slate-400 hover:text-white transition p-1.5 hover:bg-white/5 rounded-lg" title="Cài đặt">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- MAIN BODY: APPLE SIDEBAR + CONTENT -->
+    <div class="flex-1 flex overflow-hidden">
+
+      <!-- APPLE SIDEBAR -->
+      <aside class="apple-sidebar w-48 flex flex-col justify-between p-3 select-none">
+        <div class="space-y-1">
+          <button onclick="switchTab('fingers')" id="nav-fingers" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold bg-blue-600/20 text-blue-400 border border-blue-500/30 transition shadow-sm">
+            <span class="text-sm">🖐️</span>
+            <span>Ngón Tay</span>
+            <span id="sidebar-installed-pill" class="ml-auto bg-blue-500/20 text-blue-300 text-[10px] px-1.5 py-0.5 rounded-full font-mono font-semibold">2/10</span>
+          </button>
+
+          <button onclick="switchTab('settings')" id="nav-settings" class="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-white/5 transition">
+            <span class="text-sm">⚙️</span>
+            <span>Cài Đặt</span>
+          </button>
+        </div>
+
+        <!-- TouchPass Magic Card -->
+        <div class="p-3 rounded-2xl bg-gradient-to-b from-blue-500/10 to-purple-500/10 border border-white/5 text-[11px] text-slate-300 space-y-1">
+          <div class="font-bold text-white flex items-center gap-1.5">
+            <span>✨</span> Chạm là chạy
+          </div>
+          <p class="text-[10px] text-slate-400 leading-relaxed">Chạm nhẹ ngón tay bất kỳ để tự động gõ lệnh hoặc mật khẩu.</p>
+        </div>
+      </aside>
+
+      <!-- CONTENT PANES -->
+      <main class="flex-1 bg-slate-950/40 p-6 overflow-y-auto relative">
+
+        <!-- VIEW 1: NGÓN TAY (MAIN SCREEN) -->
+        <div id="tab-fingers" class="space-y-5">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-base font-bold text-white flex items-center gap-2">
+                <span>🖐️</span> Chọn Ngón Tay Để Gán Chức Năng
+              </h2>
+              <p class="text-xs text-slate-400 mt-0.5">Mỗi ngón tay đại diện cho một siêu năng lực phím tắt riêng biệt</p>
+            </div>
+            <button onclick="applyMagicPreset()" class="bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-xs font-semibold px-3 py-1.5 rounded-xl transition active:scale-95 flex items-center gap-1.5">
+              <span>⚡</span> Gán Tự Động (AI Developer)
+            </button>
+          </div>
+
+          <!-- HAND MAP (APPLE STYLE PILLS) -->
+          <div class="apple-card rounded-3xl p-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              
+              <!-- LEFT HAND -->
+              <div class="space-y-2">
+                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between px-1">
+                  <span>👈 Bàn Tay Trái</span>
+                  <span class="text-[10px] text-slate-500">5 ngón</span>
+                </div>
+                <div class="grid grid-cols-5 gap-2">
+                  
+                  <!-- Finger 1 (Út) -->
+                  <div onclick="selectFinger(1)" id="finger-btn-1" class="finger-pill apple-card p-2.5 rounded-2xl text-center cursor-pointer border border-dashed border-white/10 opacity-70">
+                    <div class="text-xl mb-1">➕</div>
+                    <div class="text-[11px] font-bold text-slate-300">Út</div>
+                    <div class="text-[9px] text-slate-500 mt-0.5">Trống</div>
+                  </div>
+
+                  <!-- Finger 2 (Áp) -->
+                  <div onclick="selectFinger(2)" id="finger-btn-2" class="finger-pill apple-card p-2.5 rounded-2xl text-center cursor-pointer border border-dashed border-white/10 opacity-70">
+                    <div class="text-xl mb-1">➕</div>
+                    <div class="text-[11px] font-bold text-slate-300">Áp Út</div>
+                    <div class="text-[9px] text-slate-500 mt-0.5">Trống</div>
+                  </div>
+
+                  <!-- Finger 3 (Giữa - Điền Mật Khẩu) -->
+                  <div onclick="selectFinger(3)" id="finger-btn-3" class="finger-pill apple-card p-2.5 rounded-2xl text-center cursor-pointer border border-purple-500/40 bg-purple-500/10">
+                    <div class="text-xl mb-1">🔑</div>
+                    <div class="text-[11px] font-bold text-purple-300">Giữa</div>
+                    <div class="text-[9px] text-purple-400 font-medium mt-0.5">Mật Khẩu</div>
+                  </div>
+
+                  <!-- Finger 4 (Trỏ - Đồng Ý AI - ACTIVE) -->
+                  <div onclick="selectFinger(4)" id="finger-btn-4" class="finger-pill apple-card p-2.5 rounded-2xl text-center cursor-pointer border-2 border-blue-500 bg-blue-500/20 shadow-lg shadow-blue-500/25">
+                    <div class="text-xl mb-1">⚡</div>
+                    <div class="text-[11px] font-bold text-blue-200">Trỏ</div>
+                    <div class="text-[9px] text-blue-300 font-semibold mt-0.5">Đồng Ý AI</div>
+                  </div>
+
+                  <!-- Finger 5 (Cái) -->
+                  <div onclick="selectFinger(5)" id="finger-btn-5" class="finger-pill apple-card p-2.5 rounded-2xl text-center cursor-pointer border border-dashed border-white/10 opacity-70">
+                    <div class="text-xl mb-1">➕</div>
+                    <div class="text-[11px] font-bold text-slate-300">Cái</div>
+                    <div class="text-[9px] text-slate-500 mt-0.5">Trống</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- RIGHT HAND -->
+              <div class="space-y-2">
+                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between px-1">
+                  <span>👉 Bàn Tay Phải</span>
+                  <span class="text-[10px] text-slate-500">5 ngón</span>
+                </div>
+                <div class="grid grid-cols-5 gap-2">
+                  
+                  <!-- Finger 6 (Cái) -->
+                  <div onclick="selectFinger(6)" id="finger-btn-6" class="finger-pill apple-card p-2.5 rounded-2xl text-center cursor-pointer border border-dashed border-white/10 opacity-70">
+                    <div class="text-xl mb-1">➕</div>
+                    <div class="text-[11px] font-bold text-slate-300">Cái</div>
+                    <div class="text-[9px] text-slate-500 mt-0.5">Trống</div>
+                  </div>
+
+                  <!-- Finger 7 (Trỏ) -->
+                  <div onclick="selectFinger(7)" id="finger-btn-7" class="finger-pill apple-card p-2.5 rounded-2xl text-center cursor-pointer border border-dashed border-white/10 opacity-70">
+                    <div class="text-xl mb-1">➕</div>
+                    <div class="text-[11px] font-bold text-slate-300">Trỏ</div>
+                    <div class="text-[9px] text-slate-500 mt-0.5">Trống</div>
+                  </div>
+
+                  <!-- Finger 8 (Giữa) -->
+                  <div onclick="selectFinger(8)" id="finger-btn-8" class="finger-pill apple-card p-2.5 rounded-2xl text-center cursor-pointer border border-dashed border-white/10 opacity-70">
+                    <div class="text-xl mb-1">➕</div>
+                    <div class="text-[11px] font-bold text-slate-300">Giữa</div>
+                    <div class="text-[9px] text-slate-500 mt-0.5">Trống</div>
+                  </div>
+
+                  <!-- Finger 9 (Áp) -->
+                  <div onclick="selectFinger(9)" id="finger-btn-9" class="finger-pill apple-card p-2.5 rounded-2xl text-center cursor-pointer border border-dashed border-white/10 opacity-70">
+                    <div class="text-xl mb-1">➕</div>
+                    <div class="text-[11px] font-bold text-slate-300">Áp Út</div>
+                    <div class="text-[9px] text-slate-500 mt-0.5">Trống</div>
+                  </div>
+
+                  <!-- Finger 10 (Út) -->
+                  <div onclick="selectFinger(10)" id="finger-btn-10" class="finger-pill apple-card p-2.5 rounded-2xl text-center cursor-pointer border border-dashed border-white/10 opacity-70">
+                    <div class="text-xl mb-1">➕</div>
+                    <div class="text-[11px] font-bold text-slate-300">Út</div>
+                    <div class="text-[9px] text-slate-500 mt-0.5">Trống</div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- DYNAMIC ACTION PANE (TỐI GIẢN & RÕ RÀNG) -->
+          <div id="action-pane" class="apple-card rounded-3xl p-5 border border-white/10 relative">
+
+            <!-- STATE A: NGÓN ĐÃ CÀI ĐẶT -->
+            <div id="pane-configured" class="space-y-4">
+              <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                <div class="flex items-center gap-3">
+                  <div id="conf-icon" class="w-10 h-10 rounded-2xl bg-blue-500/20 text-blue-400 border border-blue-500/30 flex items-center justify-center text-xl">
+                    ⚡
+                  </div>
+                  <div>
+                    <h3 id="conf-title" class="text-sm font-bold text-white">Ngón Trỏ Trái: Đồng Ý AI</h3>
+                    <span class="inline-flex items-center gap-1.5 text-xs text-emerald-400 font-semibold mt-0.5">
+                      <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Đã nạp vân tay & Sẵn sàng
+                    </span>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <button onclick="openTouchIDModal()" class="text-xs bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10 px-3 py-1.5 rounded-xl transition active:scale-95">
+                    Quét Lại Vân Tay
+                  </button>
+                  <button onclick="removeCurrentFinger()" class="text-xs bg-red-600/10 hover:bg-red-600/20 text-red-400 border border-red-500/20 px-3 py-1.5 rounded-xl transition active:scale-95">
+                    Xóa
+                  </button>
+                </div>
+              </div>
+
+              <!-- Action Card Description -->
+              <div class="p-3.5 rounded-2xl bg-white/[0.02] border border-white/5 flex items-center justify-between">
+                <div>
+                  <div class="text-xs font-bold text-slate-200" id="conf-desc-title">Tự động gõ 'y' và ấn phím Enter</div>
+                  <div class="text-[11px] text-slate-400 mt-0.5">Hỗ trợ xác nhận tức thì trong Claude Code, Cursor, Antigravity và Terminal</div>
+                </div>
+                <div class="text-right">
+                  <span class="text-[10px] text-slate-500 block">Bảo vệ:</span>
+                  <span class="text-xs font-bold text-blue-400">Chạm 2 lần</span>
+                </div>
+              </div>
+
+              <!-- Live Test Sandbox -->
+              <div class="p-3 rounded-2xl bg-slate-950/80 border border-white/10 flex items-center gap-3">
+                <span class="text-xs text-slate-400 font-medium">🧪 Thử nghiệm:</span>
+                <input type="text" placeholder="Click chuột vào đây rồi chạm ngón tay để test..." class="flex-1 bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none focus:border-blue-500 font-mono">
+                <button onclick="showHUD('Đã gửi phím thành công! ✨')" class="bg-blue-600 hover:bg-blue-500 text-xs px-3.5 py-2 rounded-xl text-white font-semibold shadow transition active:scale-95">
+                  Thử Gõ
+                </button>
+              </div>
+            </div>
+
+            <!-- STATE B: NGÓN CHƯA CÀI ĐẶT (FRICTIONLESS 4-CARD PICKER) -->
+            <div id="pane-unconfigured" class="hidden space-y-4">
+              <div class="flex items-center justify-between border-b border-white/10 pb-3">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-2xl bg-white/5 text-slate-400 border border-white/10 flex items-center justify-center text-lg font-bold">
+                    ➕
+                  </div>
+                  <div>
+                    <h3 id="unconf-title" class="text-sm font-bold text-white">Ngón Út Trái</h3>
+                    <span class="text-xs text-slate-400">Chưa được gán chức năng</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="text-xs font-bold text-slate-300">Chọn 1 chức năng bạn muốn gán cho ngón này:</div>
+
+              <!-- 4 Frictionless Cards -->
+              <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <!-- Card 1: AI Accept -->
+                <div onclick="pickCard('ai_accept', this)" class="magic-card p-3.5 rounded-2xl bg-slate-950/80 border-2 border-blue-500 cursor-pointer hover:border-blue-400 transition space-y-1.5 shadow">
+                  <div class="text-2xl">⚡</div>
+                  <div class="text-xs font-bold text-white">Đồng Ý AI</div>
+                  <div class="text-[11px] text-slate-400 leading-tight">Tự động gõ 'y' + Enter cho Claude/Cursor</div>
+                </div>
+
+                <!-- Card 2: Password -->
+                <div onclick="pickCard('password', this)" class="magic-card p-3.5 rounded-2xl bg-slate-950/80 border border-white/10 cursor-pointer hover:border-blue-400 transition space-y-1.5">
+                  <div class="text-2xl">🔑</div>
+                  <div class="text-xs font-bold text-white">Điền Mật Khẩu</div>
+                  <div class="text-[11px] text-slate-400 leading-tight">Mở khóa máy hoặc cấp quyền Sudo an toàn</div>
+                </div>
+
+                <!-- Card 3: Single Key -->
+                <div onclick="pickCard('enter', this)" class="magic-card p-3.5 rounded-2xl bg-slate-950/80 border border-white/10 cursor-pointer hover:border-blue-400 transition space-y-1.5">
+                  <div class="text-2xl">↵</div>
+                  <div class="text-xs font-bold text-white">Phím Enter</div>
+                  <div class="text-[11px] text-slate-400 leading-tight">Bấm phím Enter vật lý chỉ bằng 1 chạm</div>
+                </div>
+
+                <!-- Card 4: Custom Key -->
+                <div onclick="pickCard('custom', this)" class="magic-card p-3.5 rounded-2xl bg-slate-950/80 border border-white/10 cursor-pointer hover:border-blue-400 transition space-y-1.5">
+                  <div class="text-2xl">🪄</div>
+                  <div class="text-xs font-bold text-white">Phím Tắt Tự Chọn</div>
+                  <div class="text-[11px] text-slate-400 leading-tight">Gõ phím bất kỳ (Git push, Clear screen...)</div>
+                </div>
+              </div>
+
+              <!-- Action button -->
+              <div class="pt-2 flex justify-end">
+                <button onclick="openTouchIDModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-5 py-2.5 rounded-2xl shadow-lg shadow-blue-500/25 transition active:scale-95 flex items-center gap-2">
+                  <span>🧬</span> Quét Vân Tay Để Kích Hoạt ➔
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- VIEW 2: CÀI ĐẶT (CLEAN SETTINGS) -->
+        <div id="tab-settings" class="space-y-6 hidden">
+          <div>
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <span>⚙️</span> Cài Đặt Ứng Dụng
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">Tùy biến trải nghiệm chạm và quản lý thiết bị</p>
+          </div>
+
+          <div class="apple-card rounded-3xl p-5 space-y-4">
+            <!-- Setting Row 1 -->
+            <div class="flex items-center justify-between py-1">
+              <div>
+                <div class="text-xs font-bold text-white">Chạm 2 lần để xác nhận (An toàn)</div>
+                <div class="text-[11px] text-slate-400">Yêu cầu chạm ngón tay 2 lần trong 3 giây để tránh gõ nhầm lệnh</div>
+              </div>
+              <input type="checkbox" checked class="w-5 h-5 accent-blue-600 rounded-lg cursor-pointer">
+            </div>
+
+            <div class="border-t border-white/5"></div>
+
+            <!-- Setting Row 2 -->
+            <div class="flex items-center justify-between py-1">
+              <div>
+                <div class="text-xs font-bold text-white">Âm thanh phản hồi khi chạm</div>
+                <div class="text-[11px] text-slate-400">Phát âm thanh click nhẹ giống Touch ID trên MacBook</div>
+              </div>
+              <input type="checkbox" checked class="w-5 h-5 accent-blue-600 rounded-lg cursor-pointer">
+            </div>
+
+            <div class="border-t border-white/5"></div>
+
+            <!-- Setting Row 3 -->
+            <div class="flex items-center justify-between py-1">
+              <div>
+                <div class="text-xs font-bold text-white">Khởi động cùng máy tính</div>
+                <div class="text-[11px] text-slate-400">Tự động chạy ngầm trong Menu Bar khi mở máy</div>
+              </div>
+              <input type="checkbox" checked class="w-5 h-5 accent-blue-600 rounded-lg cursor-pointer">
+            </div>
+          </div>
+
+          <!-- Hidden Advanced Diagnostic (Dev) Accordion -->
+          <div class="apple-card rounded-3xl p-4 space-y-3">
+            <div onclick="toggleDevAccordion()" class="flex items-center justify-between cursor-pointer">
+              <span class="text-xs font-bold text-slate-400 flex items-center gap-1.5">
+                <span>🛠️</span> Công Cụ Chẩn Đoán Kỹ Thuật
+              </span>
+              <span id="dev-arrow" class="text-xs text-slate-500">▼</span>
+            </div>
+
+            <div id="dev-panel" class="hidden space-y-3 pt-2 border-t border-white/5">
+              <div class="flex justify-between items-center text-xs text-slate-300">
+                <span>Cổng kết nối: COM4 (ESP32-S3)</span>
+                <button onclick="showHUD('Đã sao chép log chẩn đoán!')" class="bg-white/5 hover:bg-white/10 text-xs px-3 py-1 rounded-lg border border-white/10">
+                  Sao chép Log
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+
+    <!-- TOUCH ID ENROLLMENT MODAL (CUPERTINO STYLE) -->
+    <div id="touchid-modal" class="hidden absolute inset-0 bg-black/75 backdrop-blur-2xl z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+      <div class="apple-window w-full max-w-sm rounded-3xl p-6 space-y-5 border border-white/20 text-center relative shadow-2xl">
+        <button onclick="closeTouchIDModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition">✕</button>
+
+        <div>
+          <h3 class="text-base font-bold text-white flex items-center justify-center gap-2">
+            <span>🧬</span> Quét Dấu Vân Tay
+          </h3>
+          <p id="touchid-subtitle" class="text-xs text-slate-400 mt-1">Đang liên kết với Ngón Trỏ Trái</p>
+        </div>
+
+        <!-- Fingerprint Scanning Glow Graphic -->
+        <div class="relative w-28 h-28 mx-auto flex items-center justify-center rounded-full bg-slate-950 border border-white/10 p-4 shadow-2xl overflow-hidden">
+          <svg id="touchid-svg" class="w-16 h-16 text-blue-400 transition-all duration-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 10a2 2 0 0 0-2 2c0 1.02-.1 2.51-.26 4"/>
+            <path d="M14 13.12c0 2.38 0 6.38-1 8.88"/>
+            <path d="M17.29 21.02c.12-.6.43-2.3.5-3.02"/>
+            <path d="M2 12a10 10 0 0 1 18-6"/>
+            <path d="M2 16h.01"/>
+            <path d="M21.8 16c.2-2 .131-5.354 0-6"/>
+            <path d="M5 19.5C5.5 18 6 15 6 12a6 6 0 0 1 .34-2"/>
+            <path d="M8.65 22c.21-.66.45-1.32.57-2"/>
+            <path d="M9 6.8a6 6 0 0 1 9 5.2v2"/>
+          </svg>
+          <div id="touchid-scanbar" class="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent scanning-line"></div>
+        </div>
+
+        <!-- Step instruction & Progress bar -->
+        <div class="space-y-2">
+          <div class="text-xs font-semibold text-blue-400" id="touchid-step-text">Đặt ngón tay lên cảm biến...</div>
+          <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div id="touchid-progress" class="h-full bg-gradient-to-r from-blue-500 to-emerald-400 transition-all duration-300" style="width: 25%"></div>
+          </div>
+        </div>
+
+        <div class="pt-1">
+          <button onclick="advanceTouchIDStep()" class="w-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold py-2.5 rounded-2xl shadow-lg shadow-blue-500/25 transition active:scale-95">
+            👆 Chạm Cảm Biến
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- FIRST TIME ONBOARDING (QUICK 30S SETUP) -->
+    <div id="first-time-modal" class="hidden absolute inset-0 bg-black/80 backdrop-blur-2xl z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+      <div class="apple-window w-full max-w-md rounded-3xl p-6 space-y-5 border border-white/20 text-center relative shadow-2xl">
+        <button onclick="closeFirstTimeWizard()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition">✕</button>
+
+        <div class="w-16 h-16 rounded-3xl bg-gradient-to-tr from-blue-600 to-purple-600 text-white flex items-center justify-center text-3xl mx-auto shadow-xl">
+          🖐️
+        </div>
+
+        <div class="space-y-1">
+          <h3 class="text-base font-bold text-white">Chào Mừng Đến Với TouchPass</h3>
+          <p class="text-xs text-slate-400">Gán siêu năng lực cho các ngón tay của bạn chỉ trong 30 giây.</p>
+        </div>
+
+        <div class="p-3.5 rounded-2xl bg-white/[0.03] border border-white/5 text-left text-xs space-y-2">
+          <div class="flex items-center gap-2 text-blue-300 font-semibold">
+            <span>⚡</span> Ngón Trỏ: Xác nhận AI ('y' + Enter)
+          </div>
+          <div class="flex items-center gap-2 text-purple-300 font-semibold">
+            <span>🔑</span> Ngón Giữa: Điền mật khẩu máy tính / Sudo
+          </div>
+        </div>
+
+        <button onclick="closeFirstTimeWizard(); openTouchIDModal();" class="w-full bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold py-3 rounded-2xl shadow-lg shadow-blue-500/25 transition active:scale-95">
+          Bắt Đầu Quét Vân Tay Ngay ➔
+        </button>
+      </div>
+    </div>
+
+    <!-- TRAY POPOVER -->
+    <div id="tray-popover" class="hidden absolute top-14 right-6 w-72 apple-window rounded-3xl p-4 shadow-2xl z-50 space-y-3 border border-white/15 animate-in fade-in zoom-in-95 duration-150">
+      <div class="flex items-center justify-between border-b border-white/10 pb-2">
+        <div class="flex items-center gap-2">
+          <span class="text-base">🖐️</span>
+          <span class="font-bold text-xs text-white">TouchPass</span>
+        </div>
+        <button onclick="toggleTrayPopover()" class="text-slate-400 hover:text-white text-xs">✕</button>
+      </div>
+
+      <div class="p-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+        <span class="text-xs font-semibold text-emerald-300">Đang hoạt động ngầm</span>
+      </div>
+
+      <div class="text-[11px] text-slate-400 space-y-1 p-1">
+        <div>• <strong>Trỏ Trái:</strong> Đồng ý AI ('y' + Enter)</div>
+        <div>• <strong>Giữa Trái:</strong> Điền mật khẩu</div>
+      </div>
+
+      <button onclick="toggleTrayPopover(); switchTab('fingers');" class="w-full bg-white/10 hover:bg-white/15 text-white text-xs font-semibold py-2 rounded-xl transition">
+        Mở Bảng Điều Khiển
+      </button>
+    </div>
+
+    <!-- FLOATING APPLE HUD PILL -->
+    <div id="hud-pill" class="hidden absolute bottom-6 inset-x-0 mx-auto w-fit max-w-sm bg-black/90 text-white text-xs font-semibold px-5 py-2.5 rounded-full border border-white/20 shadow-2xl backdrop-blur-2xl flex items-center gap-2.5 z-50 animate-in slide-in-from-bottom-5 duration-200">
+      <span class="text-emerald-400 text-sm">✨</span>
+      <span id="hud-text">TouchPass: Đã gửi 'y' + Enter thành công!</span>
+    </div>
+
+  </div>
+
+  <!-- INTERACTION JAVASCRIPT -->
+  <script>
+    // Tab switching (Ngón Tay & Cài Đặt)
+    function switchTab(tabId) {
+      ['fingers', 'settings'].forEach(id => {
+        document.getElementById(`tab-${id}`).classList.add('hidden');
+        const btn = document.getElementById(`nav-${id}`);
+        btn.classList.remove('bg-blue-600/20', 'text-blue-400', 'border', 'border-blue-500/30', 'font-bold');
+        btn.classList.add('text-slate-400', 'font-medium');
+      });
+      document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`nav-${tabId}`);
+      activeBtn.classList.remove('text-slate-400', 'font-medium');
+      activeBtn.classList.add('bg-blue-600/20', 'text-blue-400', 'border', 'border-blue-500/30', 'font-bold');
+    }
+
+    const fingerNames = [
+      '', 'Ngón Út Trái', 'Ngón Áp Trái', 'Ngón Giữa Trái', 'Ngón Trỏ Trái', 'Ngón Cái Trái',
+      'Ngón Cái Phải', 'Ngón Trỏ Phải', 'Ngón Giữa Phải', 'Ngón Áp Phải', 'Ngón Út Phải'
+    ];
+
+    const fingerData = {
+      1: { configured: false },
+      2: { configured: false },
+      3: { configured: true, icon: '🔑', title: 'Ngón Giữa Trái: Điền Mật Khẩu', desc: 'Tự động điền mật khẩu máy tính hoặc cấp quyền Sudo an toàn' },
+      4: { configured: true, icon: '⚡', title: 'Ngón Trỏ Trái: Đồng Ý AI', desc: "Tự động gõ 'y' và ấn phím Enter khi có prompt xác nhận" },
+      5: { configured: false },
+      6: { configured: false },
+      7: { configured: false },
+      8: { configured: false },
+      9: { configured: false },
+      10: { configured: false }
+    };
+
+    let selectedFingerId = 4;
+
+    function selectFinger(id) {
+      selectedFingerId = id;
+      document.querySelectorAll('.finger-pill').forEach(el => {
+        el.classList.remove('border-2', 'border-blue-500', 'shadow-lg', 'shadow-blue-500/25');
+      });
+      const active = document.getElementById(`finger-btn-${id}`);
+      if (active) {
+        active.classList.add('border-2', 'border-blue-500', 'shadow-lg', 'shadow-blue-500/25');
+      }
+
+      const info = fingerData[id];
+      const confPane = document.getElementById('pane-configured');
+      const unconfPane = document.getElementById('pane-unconfigured');
+
+      if (info && info.configured) {
+        confPane.classList.remove('hidden');
+        unconfPane.classList.add('hidden');
+        document.getElementById('conf-icon').innerText = info.icon;
+        document.getElementById('conf-title').innerText = info.title;
+        document.getElementById('conf-desc-title').innerText = info.desc;
+      } else {
+        confPane.classList.add('hidden');
+        unconfPane.classList.remove('hidden');
+        document.getElementById('unconf-title').innerText = fingerNames[id];
+      }
+
+      showHUD(`Đã chọn ${fingerNames[id]}`);
+    }
+
+    function pickCard(type, cardEl) {
+      document.querySelectorAll('.magic-card').forEach(c => {
+        c.classList.remove('border-2', 'border-blue-500', 'shadow');
+        c.classList.add('border', 'border-white/10');
+      });
+      cardEl.classList.remove('border', 'border-white/10');
+      cardEl.classList.add('border-2', 'border-blue-500', 'shadow');
+    }
+
+    function removeCurrentFinger() {
+      if (fingerData[selectedFingerId]) {
+        fingerData[selectedFingerId].configured = false;
+        const btn = document.getElementById(`finger-btn-${selectedFingerId}`);
+        btn.className = 'finger-pill apple-card p-2.5 rounded-2xl text-center cursor-pointer border border-dashed border-white/10 opacity-70 border-2 border-blue-500';
+        btn.innerHTML = `
+          <div class="text-xl mb-1">➕</div>
+          <div class="text-[11px] font-bold text-slate-300">${fingerNames[selectedFingerId].split(' ')[1] || 'Ngón'}</div>
+          <div class="text-[9px] text-slate-500 mt-0.5">Trống</div>
+        `;
+        selectFinger(selectedFingerId);
+        showHUD(`Đã xóa cài đặt ${fingerNames[selectedFingerId]}`);
+      }
+    }
+
+    function applyMagicPreset() {
+      showHUD('✨ Đã áp dụng bộ phím mẫu: Ngón Trỏ (AI) + Ngón Giữa (Mật khẩu)!');
+    }
+
+    // Touch ID Modal
+    let touchIDStep = 1;
+    function openTouchIDModal() {
+      touchIDStep = 1;
+      document.getElementById('touchid-subtitle').innerText = `Đang liên kết với ${fingerNames[selectedFingerId]}`;
+      updateTouchIDUI();
+      document.getElementById('touchid-modal').classList.remove('hidden');
+    }
+    function closeTouchIDModal() {
+      document.getElementById('touchid-modal').classList.add('hidden');
+    }
+    function advanceTouchIDStep() {
+      touchIDStep++;
+      if (touchIDStep > 4) {
+        showHUD(`✨ Đã nạp thành công vân tay cho ${fingerNames[selectedFingerId]}!`);
+        
+        fingerData[selectedFingerId] = {
+          configured: true,
+          icon: '⚡',
+          title: `${fingerNames[selectedFingerId]}: Đồng Ý AI`,
+          desc: "Tự động gõ 'y' và ấn phím Enter khi có prompt xác nhận"
+        };
+        
+        const btn = document.getElementById(`finger-btn-${selectedFingerId}`);
+        btn.className = 'finger-pill apple-card p-2.5 rounded-2xl text-center cursor-pointer border-2 border-blue-500 bg-blue-500/20 shadow-lg shadow-blue-500/25';
+        btn.innerHTML = `
+          <div class="text-xl mb-1">⚡</div>
+          <div class="text-[11px] font-bold text-blue-200">${fingerNames[selectedFingerId].split(' ')[1] || 'Ngón'}</div>
+          <div class="text-[9px] text-blue-300 font-semibold mt-0.5">Đã Cài</div>
+        `;
+
+        selectFinger(selectedFingerId);
+        closeTouchIDModal();
+        return;
+      }
+      updateTouchIDUI();
+    }
+    function updateTouchIDUI() {
+      const progress = (touchIDStep / 4) * 100;
+      document.getElementById('touchid-progress').style.width = progress + '%';
+      const steps = [
+        '',
+        'Đặt ngón tay lên cảm biến ZW101...',
+        'Nhấc ngón tay ra và đặt lại nhẹ nhàng...',
+        'Quét thêm mép ngoài ngón tay...',
+        'Hoàn tất!'
+      ];
+      document.getElementById('touchid-step-text').innerText = steps[touchIDStep] || 'Hoàn tất!';
+      const svg = document.getElementById('touchid-svg');
+      if (touchIDStep === 4) {
+        svg.classList.remove('text-blue-400');
+        svg.classList.add('text-emerald-400', 'scale-110');
+      } else {
+        svg.classList.remove('text-emerald-400', 'scale-110');
+        svg.classList.add('text-blue-400');
+      }
+    }
+
+    // Onboarding
+    function openFirstTimeWizard() {
+      document.getElementById('first-time-modal').classList.remove('hidden');
+    }
+    function closeFirstTimeWizard() {
+      document.getElementById('first-time-modal').classList.add('hidden');
+    }
+
+    // Tray Popover
+    function toggleTrayPopover() {
+      document.getElementById('tray-popover').classList.toggle('hidden');
+    }
+
+    // Dev accordion
+    function toggleDevAccordion() {
+      const panel = document.getElementById('dev-panel');
+      const arrow = document.getElementById('dev-arrow');
+      panel.classList.toggle('hidden');
+      arrow.innerText = panel.classList.contains('hidden') ? '▼' : '▲';
+    }
+
+    // Apple HUD Pill
+    let hudTimer;
+    function showHUD(msg) {
+      const pill = document.getElementById('hud-pill');
+      document.getElementById('hud-text').innerText = msg;
+      pill.classList.remove('hidden');
+      clearTimeout(hudTimer);
+      hudTimer = setTimeout(() => {
+        pill.classList.add('hidden');
+      }, 2500);
+    }
+
+    function simulateTouchEvent() {
+      showHUD("✨ Đã chạm Ngón Trỏ: Gõ 'y' + Enter thành công!");
+    }
+  </script>
+</body>
+</html>

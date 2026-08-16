@@ -23,6 +23,13 @@ build/distribution/
 dist/
 target/
 software/rust-helper/target/
+software/desktop-app/node_modules/
+software/desktop-app/dist/
+software/desktop-app/src-tauri/target/
+software/desktop-app/src-tauri/gen/
+release_artifacts/
+node_modules/
+
 
 
 

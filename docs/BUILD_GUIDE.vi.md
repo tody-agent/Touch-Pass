@@ -24,14 +24,22 @@ Cảm biến ZW101 và ESP32-S3 Super Mini đều hoạt động ở **mức đi
 
 ⚠️ **TUYỆT ĐỐI KHÔNG NỐI VCC HOẶC CÁC CHÂN UART CỦA ZW101 VỚI NGUỒN 5V.**
 
+### Firmware unified ESP-IDF (khuyến nghị)
+
+Đây là mapping dùng cho ứng dụng TouchPass desktop và firmware của Web Flasher.
+
 | Chân ZW101 (6 chân) | Tên chức năng | Chân nối trên ESP32-S3 Super Mini | Hướng dẫn đấu nối |
 | :---: | :--- | :--- | :--- |
 | **1** | `V_TOUCH` | **`3V3`** | Nguồn cảm ứng vòng phát hiện ngón tay (3.3V) |
-| **2** | `TouchOut` | **`GPIO1`** | Tín hiệu ngắt báo có ngón tay chạm vào |
+| **2** | `TouchOut` | **`GPIO2`** | Tín hiệu gợi ý có ngón tay; firmware vẫn kiểm tra ảnh qua UART |
 | **3** | `VCC` | **`3V3`** | Nguồn chính cho cảm biến optical ZW101 (3.3V) |
-| **4** | `TX` (ZW101) | **`GPIO6`** | **Đấu chéo**: TX cảm biến ➔ RX của ESP32 (GPIO6) |
-| **5** | `RX` (ZW101) | **`GPIO7`** | **Đấu chéo**: RX cảm biến ➔ TX của ESP32 (GPIO7) |
+| **4** | `TX` (ZW101) | **`GPIO44`** | **Đấu chéo**: TX cảm biến ➔ RX của ESP32 (GPIO44) |
+| **5** | `RX` (ZW101) | **`GPIO43`** | **Đấu chéo**: RX cảm biến ➔ TX của ESP32 (GPIO43) |
 | **6** | `GND` | **`GND`** | Chân nối đất chung (Ground) |
+
+### Sketch Arduino legacy
+
+Chỉ dùng mapping legacy này khi chủ động nạp `firmware/tiny_touch_keyboard`: `TouchOut→GPIO1`, `TX→GPIO6`, `RX→GPIO7`; các chân nguồn và GND giữ nguyên.
 
 > 💡 **Lưu ý nối nguồn 3V3:** Cả 2 chân `V_TOUCH` (pin 1) và `VCC` (pin 3) đều cần cấp 3.3V. Bạn hãy chập chung 2 dây này lại và cắm vào duy nhất chân `3V3` trên ESP32-S3.
 
@@ -108,5 +116,5 @@ Script sẽ tự động kiểm tra 4 giai đoạn và trả về thông báo ch
 | --- | --- |
 | Helper báo không tìm thấy thiết bị ESP32-S3 | Kiểm tra dây cáp USB (phải là cáp dữ liệu Data), bật tùy chọn `USB CDC On Boot` trong Arduino IDE, hoặc dùng tham số `--port COM3`. |
 | Arduino IDE báo lỗi upload | Giữ nút **BOOT** trên board ESP32-S3, bấm thả nút **RESET**, thả nút **BOOT** rồi bấm Upload lại. |
-| ESP32 nhận diện nhưng ZW101 báo lỗi sensor | Kiểm tra TX (GPIO6) và RX (GPIO7) đã đấu chéo đúng chưa. Kiểm tra 2 chân nguồn ZW101 có nối chung vào 3V3 không. |
+| ESP32 nhận diện nhưng ZW101 báo lỗi sensor | Với unified firmware, kiểm tra TX→GPIO44 và RX→GPIO43 đã đấu chéo; GPIO6/7 chỉ dành cho sketch Arduino legacy. Kiểm tra cả hai chân nguồn ZW101 đã nối 3V3 và GND chung. |
 | Mật khẩu bị gõ sai ký tự | Chuyển bộ gõ bàn phím hệ thống sang chuẩn `ENG` / `US` / `ABC`. |

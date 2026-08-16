@@ -12,9 +12,9 @@ USBCDC USBSerial;
 #endif
 
 static const uint32_t UART_BAUD = 57600;
-static const int FP_TX_PIN = 7;
-static const int FP_RX_PIN = 6;
-static const int FP_INT_PIN = 1;
+static const int FP_TX_PIN = 43;
+static const int FP_RX_PIN = 44;
+static const int FP_INT_PIN = 2;
 static const int INT_ACTIVE_VALUE = 1;
 static const bool USE_INT_PIN = true;
 static const uint16_t START_SLOT = 1;
@@ -38,6 +38,7 @@ uint8_t lastScanStatus = 0;
 String serialCommand;
 String adminCancelInput;
 bool adminWasCancelled = false;
+uint32_t configAuthorizedUntil = 0;
 
 static int hexVal(char c) {
   if (c >= '0' && c <= '9') return c - '0';
@@ -228,21 +229,21 @@ static bool pollAdminCancel(const String &jobId) {
   return false;
 }
 
-static bool waitForFingerState(bool present, uint32_t timeoutMs, const String &jobId = "") {
+static bool waitForImageState(bool present, uint32_t timeoutMs, const String &jobId = "") {
   uint32_t start = millis();
   while (millis() - start < timeoutMs) {
     if (pollAdminCancel(jobId)) return false;
-    if (fingerPresent() == present) return true;
-    delay(50);
+    uint8_t confirm = 0xff;
+    if (!fpCommand(0x01, nullptr, 0, &confirm, nullptr, nullptr, 750)) return false;
+    if ((present && confirm == 0x00) || (!present && confirm == 0x02)) return true;
+    if (confirm != 0x00 && confirm != 0x02) return false;
+    delay(100);
   }
   return false;
 }
 
-static bool captureTemplate(uint8_t bufferId) {
+static bool convertImage(uint8_t bufferId) {
   uint8_t confirm = 0xff;
-  if (!fpCommand(0x01, nullptr, 0, &confirm, nullptr, nullptr, 1500) || confirm != 0x00) {
-    return false;
-  }
   uint8_t params[] = {bufferId};
   return fpCommand(0x02, params, sizeof(params), &confirm, nullptr, nullptr, 2000) && confirm == 0x00;
 }
@@ -254,18 +255,18 @@ static bool enrollFingerprint(uint16_t slot, const String &jobId = "") {
   if (jobId.length()) Serial.printf("ADMIN %s PLACE_FIRST\n", jobId.c_str());
   else Serial.println("PROMPT TOUCH");
   Serial.flush();
-  if (!waitForFingerState(true, 15000, jobId) || !captureTemplate(1)) return false;
+  if (!waitForImageState(true, 15000, jobId) || !convertImage(1)) return false;
 
   if (jobId.length()) Serial.printf("ADMIN %s REMOVE\n", jobId.c_str());
   else Serial.println("PROMPT LIFT");
   Serial.flush();
-  if (!waitForFingerState(false, 10000, jobId)) return false;
+  if (!waitForImageState(false, 10000, jobId)) return false;
   delay(250);
 
   if (jobId.length()) Serial.printf("ADMIN %s PLACE_SECOND\n", jobId.c_str());
   else Serial.println("PROMPT TOUCH_AGAIN");
   Serial.flush();
-  if (!waitForFingerState(true, 15000, jobId) || !captureTemplate(2)) return false;
+  if (!waitForImageState(true, 15000, jobId) || !convertImage(2)) return false;
 
   uint8_t confirm = 0xff;
   if (!fpCommand(0x05, nullptr, 0, &confirm, nullptr, nullptr, 2000) || confirm != 0x00) return false;
@@ -374,6 +375,30 @@ static bool scanMatch(uint16_t *matchId, uint16_t *score) {
   Serial.println("MATCH_LOOP_NO_HIT");
   Serial.flush();
   return false;
+}
+
+static bool configAuthorized() {
+  return configAuthorizedUntil != 0 &&
+         (int32_t)(configAuthorizedUntil - millis()) > 0;
+}
+
+static void authorizeConfig() {
+  configAuthorizedUntil = millis() + 120000UL;
+}
+
+static bool requireConfigAuthorization() {
+  if (configAuthorized()) return true;
+  Serial.println("ERR CONFIG_LOCKED run=CONFIG_UNLOCK");
+  return false;
+}
+
+static bool authorizeWithFingerprint() {
+  if (!waitForImageState(true, 15000)) return false;
+  uint16_t matchId = 0;
+  uint16_t score = 0;
+  if (!scanMatch(&matchId, &score)) return false;
+  Serial.println("PROMPT LIFT");
+  return waitForImageState(false, 10000);
 }
 
 static bool parseToken(const String &line, int index, String *token) {
@@ -496,8 +521,27 @@ static void handleSerialCommands() {
         Serial.println("PONG");
       } else if (command == "STATUS") {
         int count = fingerprintCount();
-        if (count >= 0) Serial.printf("OK STATUS mode=hid sensor=ok fingerprints=%d\n", count);
+        if (count >= 0) {
+          Serial.printf("OK STATUS firmware=unified mode=hid sensor=ok fingerprints=%d "
+                        "keys=compiled hid_key=configured\n", count);
+        }
         else Serial.println("ERR STATUS sensor");
+      } else if (command == "CONFIG_UNLOCK") {
+        int count = fingerprintCount();
+        if (count < 0) {
+          Serial.println("ERR CONFIG_UNLOCK sensor");
+        } else if (count == 0) {
+          authorizeConfig();
+          Serial.println("OK CONFIG_UNLOCK first_setup seconds=120");
+        } else {
+          Serial.println("PROMPT TOUCH");
+          if (authorizeWithFingerprint()) {
+            authorizeConfig();
+            Serial.println("OK CONFIG_UNLOCK fingerprint seconds=120");
+          } else {
+            Serial.println("ERR CONFIG_UNLOCK fingerprint");
+          }
+        }
       } else if (command.startsWith("ADMIN ENROLL ")) {
         String jobId, slotText;
         if (!parseToken(command, 2, &jobId) || !parseToken(command, 3, &slotText)) {
@@ -524,16 +568,22 @@ static void handleSerialCommands() {
         Serial.printf("ADMIN %s CANCELLED\n", jobId.c_str());
       } else if (command.startsWith("ENROLL ")) {
         uint16_t slot = (uint16_t)command.substring(7).toInt();
-        bool ok = enrollFingerprint(slot);
-        Serial.printf(ok ? "OK ENROLL slot=%u\n" : "ERR ENROLL slot=%u\n", slot);
-        setAura(ok ? FP_LED_GREEN : FP_LED_RED);
+        if (requireConfigAuthorization()) {
+          bool ok = enrollFingerprint(slot);
+          Serial.printf(ok ? "OK ENROLL slot=%u\n" : "ERR ENROLL slot=%u\n", slot);
+          setAura(ok ? FP_LED_GREEN : FP_LED_RED);
+        }
       } else if (command.startsWith("DELETE ")) {
         uint16_t slot = (uint16_t)command.substring(7).toInt();
-        bool ok = deleteFingerprint(slot);
-        Serial.printf(ok ? "OK DELETE slot=%u\n" : "ERR DELETE slot=%u\n", slot);
+        if (requireConfigAuthorization()) {
+          bool ok = deleteFingerprint(slot);
+          Serial.printf(ok ? "OK DELETE slot=%u\n" : "ERR DELETE slot=%u\n", slot);
+        }
       } else if (command == "DELETE_ALL") {
-        bool ok = deleteAllFingerprints();
-        Serial.println(ok ? "OK DELETE_ALL" : "ERR DELETE_ALL");
+        if (requireConfigAuthorization()) {
+          bool ok = deleteAllFingerprints();
+          Serial.println(ok ? "OK DELETE_ALL" : "ERR DELETE_ALL");
+        }
       } else if (ENABLE_TEST_COMMANDS && command == "TYPE_TEST") {
         const uint8_t test[] = "HID_TEST_OK";
         actionText(nullptr, test, sizeof(test) - 1);
@@ -603,6 +653,10 @@ static uint8_t requestAndExecuteAction(uint16_t matchId, uint16_t score) {
 
 void setup() {
   pinMode(FP_INT_PIN, INPUT);
+  USB.VID(0x303A);
+  USB.PID(0x4001);
+  USB.manufacturerName("TouchPass");
+  USB.productName("TouchPass Fingerprint HID");
   Serial.begin(115200);
   Keyboard.begin();
   USB.begin();

@@ -11,7 +11,7 @@ sensor connection is an unauthenticated UART link.
 ## What you are building
 
 You will connect a ZW101 fingerprint sensor to an ESP32-S3 Super Mini, flash
-the [Touch Pass firmware](../firmware/tiny_touch_keyboard/tiny_touch_keyboard.ino),
+the recommended [unified ESP-IDF firmware](../firmware/tiny_touch_smartcard/),
 then run a local helper service and Web Portal (`http://127.0.0.1:8787/`). The portal manages fingerprint slots
 1 through 10 and assigns actions to enrolled fingers. Password actions are
 stored cross-platform by the helper in the native OS Credential Store (Windows Credential Manager / macOS Keychain); the firmware and helper share a pairing
@@ -58,6 +58,23 @@ either UART signal to 5 V.** TX and RX cross over: the sensor sends on TX to
 the ESP32 receive pin, and the sensor receives on RX from the ESP32 transmit
 pin.
 
+### Unified ESP-IDF firmware (recommended)
+
+This mapping is used by the native TouchPass desktop app and the Web Flasher firmware.
+
+| ZW101 | ESP32-S3 Super Mini |
+| --- | --- |
+| V_TOUCH (pin 1) | 3V3 |
+| TouchOut (pin 2) | GPIO2 (optional scan hint) |
+| VCC (pin 3) | 3V3 |
+| TX (pin 4) | GPIO44 / ESP RX |
+| RX (pin 5) | GPIO43 / ESP TX |
+| GND (pin 6) | GND |
+
+### Legacy Arduino sketch
+
+Only use this mapping when you intentionally flash `firmware/tiny_touch_keyboard`:
+
 | ZW101 | ESP32-S3 Super Mini |
 | --- | --- |
 | V_TOUCH (pin 1) | 3V3 |
@@ -79,7 +96,7 @@ disconnected, use continuity mode to confirm both sensor supply leads reach
 `3V3` and that `3V3` is not shorted to `GND`.
 
 Do not substitute ESP32-S3 strapping pins GPIO0, GPIO3, GPIO45, or GPIO46 for
-these connections. The firmware uses the mapping above and talks to the sensor
+these connections. Use the table for the firmware you actually flashed; both talk to the sensor
 at 57,600 baud.
 
 ## Assemble
@@ -364,7 +381,7 @@ the focused-window behavior with a harmless action in a text editor.
 | --- | --- |
 | Helper says no ESP32-S3 USB CDC device was found | Use a USB data cable, reconnect the board, confirm `USB CDC On Boot` is enabled, then retry with `--port` if needed. |
 | Arduino cannot upload | Confirm the selected port and board settings. For the Waveshare ESP32-S3-Zero, use the BOOT/RESET sequence in **Configure Arduino**. |
-| ESP32-S3 connects but the sensor is unavailable | Recheck that sensor TX goes to GPIO6, RX goes to GPIO7, both supply pins are 3V3, GND is common, and no ZW101 UART pin sees 5 V. |
+| ESP32-S3 connects but the sensor is unavailable | For unified firmware, recheck sensor TX→GPIO44, RX→GPIO43, both supply pins→3V3, and common GND. GPIO6/7 applies only to the legacy Arduino sketch. |
 | A recognized finger does not perform the configured action | Confirm that `secrets.h` and the macOS Keychain use the exact same pairing key, then reflash after changing `secrets.h`. |
 | Text appears in the wrong place | This is expected HID behavior when the wrong app or field is focused. Focus a harmless target before touching the sensor. |
 | Password characters are incorrect | Switch the macOS input source to `ABC` or `US`; password actions type ASCII keyboard input. |

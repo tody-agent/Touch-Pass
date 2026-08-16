@@ -1,0 +1,31 @@
+[package]
+name = "touchpass-desktop"
+version = "0.1.0"
+description = "TouchPass desktop application"
+authors = ["TouchPass"]
+edition = "2021"
+
+[lib]
+name = "touchpass_desktop_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.4.0", features = [] }
+
+[dependencies]
+tauri = { version = "2.8.0", features = ["tray-icon"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serialport = "4.6"
+hmac = "0.12"
+sha2 = "0.10"
+aes = "0.8"
+ctr = "0.9"
+hex = "0.4"
+keyring = "2.3"
+rand = "0.8"
+time = { version = "0.3", features = ["formatting"] }
+tauri-plugin-autostart = "2.5.1"
+tempfile = "3.10"
+
+[dev-dependencies]
