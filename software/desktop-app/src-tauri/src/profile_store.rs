@@ -1,7 +1,12 @@
 use crate::secret_store::SecretStore;
-use crate::types::{default_profile, ActionType, FingerProfile, MAX_FINGERS};
+use crate::types::{
+    default_profile, ActionType, CommandError, ErrorCode, FingerProfile, MAX_FINGERS,
+};
 use serde::{Deserialize, Serialize};
+use std::io::Write;
 use std::path::PathBuf;
+
+const PROFILE_VERSION: u8 = 2;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct ProfileDocument {
@@ -19,8 +24,145 @@ impl ProfileStore {
         Self { path, secret_store }
     }
 
-    pub fn list_profiles(&self) -> Vec<FingerProfile> {
-        let stored = self.read_document().unwrap_or_else(default_profiles);
+    pub fn list_profiles(&self) -> Result<Vec<FingerProfile>, CommandError> {
+        let document = self.read_document()?;
+        let (stored, needs_migration) = match document {
+            Some(document) if document.version <= PROFILE_VERSION => {
+                let needs_migration = document.version < PROFILE_VERSION;
+                (document.profiles, needs_migration)
+            }
+            Some(document) => {
+                return Err(CommandError::persistence(format!(
+                    "unsupported profile version {}",
+                    document.version
+                )))
+            }
+            None => (default_profiles(), false),
+        };
+
+        let profiles = self.normalize_profiles(&stored);
+        if needs_migration {
+            self.backup_v1()?;
+            self.save(&profiles)?;
+        }
+        Ok(profiles)
+    }
+
+    pub fn get_profile(&self, id: usize) -> Result<FingerProfile, CommandError> {
+        Self::validate_id(id)?;
+        Ok(self.list_profiles()?[id - 1].clone())
+    }
+
+    pub fn save_profile(
+        &self,
+        mut profile: FingerProfile,
+        secret: Option<String>,
+    ) -> Result<FingerProfile, CommandError> {
+        Self::validate_profile(&profile, secret.as_deref())?;
+        let mut profiles = self.list_profiles()?;
+        let reference = format!("slot-{}", profile.id);
+        let previous_secret = self
+            .secret_store
+            .get_optional(&reference)
+            .map_err(CommandError::persistence)?;
+        let secret_changed;
+        if profile.action_type == ActionType::Password {
+            if secret.is_none() && previous_secret.is_none() {
+                return Err(CommandError::new(ErrorCode::SecretRequired));
+            }
+            secret_changed = secret.is_some();
+            if let Some(secret) = secret.as_ref() {
+                self.secret_store
+                    .set(&reference, secret.as_bytes())
+                    .map_err(CommandError::persistence)?;
+            }
+            profile.secret_ref = Some(reference.clone());
+            profile.secret_configured = profile
+                .secret_ref
+                .as_deref()
+                .map(|reference| self.secret_store.exists(reference))
+                .unwrap_or(false);
+        } else {
+            secret_changed = previous_secret.is_some();
+            self.secret_store
+                .delete(&reference)
+                .map_err(CommandError::persistence)?;
+            profile.secret_ref = None;
+            profile.secret_configured = false;
+        }
+
+        profiles[profile.id - 1] = profile.clone();
+        if let Err(error) = self.save(&profiles) {
+            if secret_changed {
+                self.restore_secret(&reference, previous_secret.as_deref());
+            }
+            return Err(error);
+        }
+        Ok(profile)
+    }
+
+    pub fn reset_profile(&self, id: usize) -> Result<FingerProfile, CommandError> {
+        Self::validate_id(id)?;
+        let mut profiles = self.list_profiles()?;
+        let reference = format!("slot-{}", id);
+        let previous_secret = self
+            .secret_store
+            .get_optional(&reference)
+            .map_err(CommandError::persistence)?;
+        self.secret_store
+            .delete(&reference)
+            .map_err(CommandError::persistence)?;
+        profiles[id - 1] = default_profile(id);
+        if let Err(error) = self.save(&profiles) {
+            self.restore_secret(&reference, previous_secret.as_deref());
+            return Err(error);
+        }
+        Ok(profiles[id - 1].clone())
+    }
+
+    pub fn mark_enrolled(&self, id: usize) -> Result<FingerProfile, CommandError> {
+        Self::validate_id(id)?;
+        let mut profiles = self.list_profiles()?;
+        profiles[id - 1].configured = true;
+        self.save(&profiles)?;
+        Ok(profiles[id - 1].clone())
+    }
+
+    pub fn validate_id(id: usize) -> Result<(), CommandError> {
+        if (1..=MAX_FINGERS).contains(&id) {
+            Ok(())
+        } else {
+            Err(CommandError::new(ErrorCode::InvalidFinger))
+        }
+    }
+
+    fn validate_profile(profile: &FingerProfile, secret: Option<&str>) -> Result<(), CommandError> {
+        Self::validate_id(profile.id)?;
+        if let Some(secret) = secret {
+            if secret.is_empty() || secret.len() > 128 || !secret.is_ascii() {
+                return Err(CommandError::new(ErrorCode::InvalidPassword));
+            }
+        }
+        if profile.action_type == ActionType::Custom {
+            let payload = profile.custom_payload.as_deref().unwrap_or("").trim();
+            if payload.is_empty() || payload.len() > 128 || !payload.is_ascii() {
+                return Err(CommandError::new(ErrorCode::InvalidCustomPayload));
+            }
+        }
+        Ok(())
+    }
+
+    fn read_document(&self) -> Result<Option<ProfileDocument>, CommandError> {
+        if !self.path.exists() {
+            return Ok(None);
+        }
+        let content = std::fs::read_to_string(&self.path).map_err(CommandError::persistence)?;
+        serde_json::from_str::<ProfileDocument>(&content)
+            .map(Some)
+            .map_err(CommandError::persistence)
+    }
+
+    fn normalize_profiles(&self, stored: &[FingerProfile]) -> Vec<FingerProfile> {
         (1..=MAX_FINGERS)
             .map(|id| {
                 let mut profile = stored
@@ -28,124 +170,67 @@ impl ProfileStore {
                     .find(|profile| profile.id == id)
                     .cloned()
                     .unwrap_or_else(|| default_profile(id));
+                profile.hand = if id <= 5 {
+                    crate::types::Hand::Left
+                } else {
+                    crate::types::Hand::Right
+                };
                 profile.secret_configured = profile
                     .secret_ref
                     .as_deref()
                     .map(|reference| self.secret_store.exists(reference))
                     .unwrap_or(false);
-                if profile.action_type == ActionType::Password {
-                    profile.configured = profile.secret_configured;
-                }
                 profile
             })
             .collect()
     }
 
-    pub fn get_profile(&self, id: usize) -> Result<FingerProfile, String> {
-        Self::validate_id(id)?;
-        Ok(self.list_profiles()[id - 1].clone())
-    }
-
-    pub fn save_profile(
-        &self,
-        mut profile: FingerProfile,
-        secret: Option<String>,
-    ) -> Result<FingerProfile, String> {
-        Self::validate_profile(&profile, secret.as_deref())?;
-        if profile.action_type == ActionType::Password {
-            let reference = format!("slot-{}", profile.id);
-            if secret.is_none() && !self.secret_store.exists(&reference) {
-                return Err("password action requires a stored password".to_string());
-            }
-            if let Some(secret) = secret {
-                self.secret_store.set(&reference, secret.as_bytes())?;
-            }
-            profile.secret_ref = Some(reference);
-            profile.secret_configured = profile
-                .secret_ref
-                .as_deref()
-                .map(|reference| self.secret_store.exists(reference))
-                .unwrap_or(false);
-            profile.configured = profile.secret_configured;
-        } else {
-            self.secret_store.delete(&format!("slot-{}", profile.id))?;
-            profile.secret_ref = None;
-            profile.secret_configured = false;
-            profile.configured = profile.action_type != ActionType::Disabled;
-        }
-
-        let mut profiles = self.list_profiles();
-        profiles[profile.id - 1] = profile.clone();
-        self.save(&profiles)?;
-        Ok(profile)
-    }
-
-    pub fn reset_profile(&self, id: usize) -> Result<FingerProfile, String> {
-        Self::validate_id(id)?;
-        self.secret_store.delete(&format!("slot-{}", id))?;
-        let mut profiles = self.list_profiles();
-        profiles[id - 1] = default_profile(id);
-        self.save(&profiles)?;
-        Ok(profiles[id - 1].clone())
-    }
-
-    pub fn mark_enrolled(&self, id: usize) -> Result<FingerProfile, String> {
-        Self::validate_id(id)?;
-        let mut profiles = self.list_profiles();
-        profiles[id - 1].configured = true;
-        self.save(&profiles)?;
-        Ok(profiles[id - 1].clone())
-    }
-
-    pub fn validate_id(id: usize) -> Result<(), String> {
-        if (1..=MAX_FINGERS).contains(&id) {
-            Ok(())
-        } else {
-            Err("finger id must be between 1 and 10".to_string())
-        }
-    }
-
-    fn validate_profile(profile: &FingerProfile, secret: Option<&str>) -> Result<(), String> {
-        Self::validate_id(profile.id)?;
-        let label = profile.label.trim();
-        if label.is_empty() || label.chars().count() > 64 {
-            return Err("label must contain between 1 and 64 characters".to_string());
-        }
-        if let Some(secret) = secret {
-            if secret.is_empty() || secret.len() > 128 || !secret.is_ascii() {
-                return Err("password must contain 1..128 ASCII bytes".to_string());
-            }
-        }
-        if profile.action_type == ActionType::Custom {
-            let payload = profile.custom_payload.as_deref().unwrap_or("").trim();
-            if payload.is_empty() || payload.len() > 128 || !payload.is_ascii() {
-                return Err("customPayload must contain 1..128 ASCII bytes".to_string());
-            }
+    fn backup_v1(&self) -> Result<(), CommandError> {
+        let backup = self.path.with_file_name("profiles.v1.backup.json");
+        if !backup.exists() {
+            std::fs::copy(&self.path, backup).map_err(CommandError::persistence)?;
         }
         Ok(())
     }
 
-    fn read_document(&self) -> Option<Vec<FingerProfile>> {
-        let content = std::fs::read_to_string(&self.path).ok()?;
-        let document = serde_json::from_str::<ProfileDocument>(&content).ok()?;
-        Some(document.profiles)
+    fn restore_secret(&self, reference: &str, previous: Option<&[u8]>) {
+        match previous {
+            Some(secret) => {
+                let _ = self.secret_store.set(reference, secret);
+            }
+            None => {
+                let _ = self.secret_store.delete(reference);
+            }
+        }
     }
 
-    fn save(&self, profiles: &[FingerProfile]) -> Result<(), String> {
+    fn save(&self, profiles: &[FingerProfile]) -> Result<(), CommandError> {
         if let Some(parent) = self.path.parent() {
-            std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+            std::fs::create_dir_all(parent).map_err(CommandError::persistence)?;
         }
         let document = ProfileDocument {
-            version: 1,
+            version: PROFILE_VERSION,
             profiles: profiles.to_vec(),
         };
-        let content = serde_json::to_string_pretty(&document).map_err(|e| e.to_string())?;
-        let temporary = self.path.with_extension("tmp");
-        std::fs::write(&temporary, content).map_err(|e| e.to_string())?;
-        if self.path.exists() {
-            std::fs::remove_file(&self.path).map_err(|e| e.to_string())?;
-        }
-        std::fs::rename(&temporary, &self.path).map_err(|e| e.to_string())
+        let content = serde_json::to_string_pretty(&document).map_err(CommandError::persistence)?;
+        let parent = self
+            .path
+            .parent()
+            .filter(|path| !path.as_os_str().is_empty())
+            .unwrap_or_else(|| std::path::Path::new("."));
+        let mut temporary =
+            tempfile::NamedTempFile::new_in(parent).map_err(CommandError::persistence)?;
+        temporary
+            .write_all(content.as_bytes())
+            .map_err(CommandError::persistence)?;
+        temporary
+            .as_file()
+            .sync_all()
+            .map_err(CommandError::persistence)?;
+        temporary
+            .persist(&self.path)
+            .map(|_| ())
+            .map_err(|error| CommandError::persistence(error.error))
     }
 }
 
@@ -165,7 +250,7 @@ mod tests {
             dir.path().join("profiles.json"),
             SecretStore::new("touchpass-test-list"),
         );
-        let profiles = store.list_profiles();
+        let profiles = store.list_profiles().unwrap();
         assert_eq!(profiles.len(), 10);
         assert!(profiles.iter().all(|profile| profile.secret_ref.is_none()));
     }
@@ -212,5 +297,109 @@ mod tests {
         let stored = store.get_profile(1).unwrap();
         assert_eq!(stored.action_type, ActionType::Enter);
         assert!(!stored.secret_configured);
+    }
+
+    #[test]
+    fn new_action_is_not_configured_until_enrollment_finishes() {
+        let dir = tempdir().unwrap();
+        let store = ProfileStore::new(
+            dir.path().join("profiles.json"),
+            SecretStore::new("touchpass-test-enrollment-state"),
+        );
+        let profile = default_profile(1);
+
+        let saved = store.save_profile(profile, None).unwrap();
+        assert!(!saved.configured);
+
+        let enrolled = store.mark_enrolled(1).unwrap();
+        assert!(enrolled.configured);
+    }
+
+    #[test]
+    fn disabling_an_action_keeps_the_fingerprint_enrolled() {
+        let dir = tempdir().unwrap();
+        let store = ProfileStore::new(
+            dir.path().join("profiles.json"),
+            SecretStore::new("touchpass-test-disable-action"),
+        );
+        let mut profile = default_profile(1);
+        profile.configured = true;
+        profile.action_type = ActionType::Disabled;
+
+        let saved = store.save_profile(profile, None).unwrap();
+
+        assert!(saved.configured);
+        assert_eq!(saved.action_type, ActionType::Disabled);
+    }
+
+    #[test]
+    fn migrates_v1_profiles_without_localized_copy_and_creates_backup() {
+        let dir = tempdir().unwrap();
+        let path = dir.path().join("profiles.json");
+        std::fs::write(
+            &path,
+            r#"{
+              "version": 1,
+              "profiles": [{
+                "id": 1,
+                "name": "Ngon Cai Trai",
+                "hand": "left",
+                "configured": true,
+                "actionType": "custom",
+                "label": "Phim Tat",
+                "description": "Mo ung dung",
+                "icon": "wand",
+                "requireConfirm": false,
+                "secretConfigured": false,
+                "customPayload": "/approve"
+              }, {
+                "id": 2,
+                "name": "Ngon Tro Trai",
+                "hand": "left",
+                "configured": true,
+                "actionType": "password",
+                "label": "Mat Khau",
+                "description": "Dien mat khau",
+                "icon": "key",
+                "requireConfirm": true,
+                "secretConfigured": true,
+                "secretRef": "legacy-vault-key"
+              }]
+            }"#,
+        )
+        .unwrap();
+        let store = ProfileStore::new(path.clone(), SecretStore::new("touchpass-test-migrate"));
+
+        let profiles = store.list_profiles().unwrap();
+
+        assert!(profiles[0].configured);
+        assert_eq!(profiles[0].action_type, ActionType::Custom);
+        assert_eq!(profiles[0].custom_payload.as_deref(), Some("/approve"));
+        assert_eq!(profiles[1].secret_ref.as_deref(), Some("legacy-vault-key"));
+        assert!(profiles[1].configured);
+        assert_eq!(profiles.len(), MAX_FINGERS);
+        assert_eq!(profiles[9], default_profile(10));
+        assert!(path.with_file_name("profiles.v1.backup.json").exists());
+        let migrated = std::fs::read_to_string(path).unwrap();
+        assert!(migrated.contains("\"version\": 2"));
+        assert!(!migrated.contains("\"name\""));
+        assert!(!migrated.contains("\"label\""));
+    }
+
+    #[test]
+    fn malformed_profile_file_is_reported_without_overwriting_user_data() {
+        let dir = tempdir().unwrap();
+        let path = dir.path().join("profiles.json");
+        let malformed = r#"{"version": 1, "profiles": ["#;
+        std::fs::write(&path, malformed).unwrap();
+        let store = ProfileStore::new(
+            path.clone(),
+            SecretStore::new("touchpass-test-malformed-profile"),
+        );
+
+        let error = store.list_profiles().unwrap_err();
+
+        assert_eq!(error.code, ErrorCode::PersistenceFailed);
+        assert_eq!(std::fs::read_to_string(path).unwrap(), malformed);
     }
 }

@@ -1,4 +1,5 @@
 #include "fingerprint.h"
+#include "fingerprint_protocol.h"
 
 #include <string.h>
 
@@ -17,7 +18,7 @@ static const int FP_RX_PIN = 44;
 static const int FP_INT_PIN = 2;
 static const int INT_ACTIVE_VALUE = 1;
 static const uint16_t START_SLOT = 1;
-static const uint16_t END_SLOT = 5;
+static const uint16_t END_SLOT = 10;
 static const uint32_t FINGER_WAIT_MS = 7000;
 static const uint8_t FP_LED_BLUE = 0x01;
 static const uint8_t FP_LED_GREEN = 0x02;
@@ -27,13 +28,6 @@ static const uint8_t FP_LED_FUNC_STEADY = 3;
 
 static uint8_t current_led = 0xff;
 static SemaphoreHandle_t fp_mutex;
-
-static uint16_t fp_checksum(uint8_t packet_id, const uint8_t *payload, size_t payload_len) {
-  uint16_t length = payload_len + 2;
-  uint32_t total = packet_id + (length >> 8) + (length & 0xff);
-  for (size_t i = 0; i < payload_len; i++) total += payload[i];
-  return (uint16_t)total;
-}
 
 static bool fp_command(uint8_t instruction, const uint8_t *params, size_t param_len,
                        uint8_t *confirm, uint8_t *data, size_t *data_len,
@@ -48,7 +42,8 @@ static bool fp_command(uint8_t instruction, const uint8_t *params, size_t param_
 
   const size_t payload_len = param_len + 1;
   const uint16_t length = payload_len + 2;
-  const uint16_t sum = fp_checksum(0x01, payload, payload_len);
+  const uint16_t sum = fp_protocol_checksum(0x01, (uint8_t)(length >> 8),
+                                             (uint8_t)length, payload, payload_len);
   const uint8_t header[] = {
     0xef, 0x01, 0xff, 0xff, 0xff, 0xff, 0x01,
     (uint8_t)(length >> 8), (uint8_t)(length & 0xff)
@@ -62,9 +57,6 @@ static bool fp_command(uint8_t instruction, const uint8_t *params, size_t param_
   uint8_t response[96];
   size_t pos = 0;
   const size_t data_cap = (data && data_len) ? *data_len : 0;
-  size_t out_len = 0;
-  bool saw_ack = false;
-  TickType_t post_ack_until = 0;
   TickType_t start = xTaskGetTickCount();
   TickType_t deadline = pdMS_TO_TICKS(timeout_ms);
   if (data && data_len) *data_len = 0;
@@ -79,45 +71,23 @@ static bool fp_command(uint8_t instruction, const uint8_t *params, size_t param_
     }
     if (pos < 9) continue;
 
-    uint8_t packet_id = response[6];
     uint16_t resp_len = ((uint16_t)response[7] << 8) | response[8];
     size_t expected = 9 + resp_len;
-    if (expected > sizeof(response)) return false;
+    if (resp_len < 3 || expected > sizeof(response)) return false;
     if (pos < expected) continue;
 
-    if (packet_id == 0x07) {
-      *confirm = response[9];
-      saw_ack = true;
-      size_t actual_len = resp_len > 3 ? resp_len - 3 : 0;
-      if (data && data_len && actual_len) {
-        size_t copy_len = actual_len;
-        if (copy_len > data_cap - out_len) copy_len = data_cap - out_len;
-        memcpy(data + out_len, response + 10, copy_len);
-        out_len += copy_len;
-        *data_len = out_len;
-      }
-      if (*confirm != 0x00 || !data || !data_len || out_len >= data_cap) return true;
-      post_ack_until = xTaskGetTickCount() + pdMS_TO_TICKS(120);
-    } else if (packet_id == 0x02 && data && data_len) {
-      size_t actual_len = resp_len > 2 ? resp_len - 2 : 0;
-      if (actual_len) {
-        size_t copy_len = actual_len;
-        if (copy_len > data_cap - out_len) copy_len = data_cap - out_len;
-        memcpy(data + out_len, response + 9, copy_len);
-        out_len += copy_len;
-        *data_len = out_len;
-      }
-      if (saw_ack && out_len >= data_cap) return true;
+    fp_ack_t ack;
+    if (!fp_protocol_parse_ack(response, expected, &ack)) return false;
+    *confirm = ack.confirm;
+    if (data && data_len) {
+      size_t copy_len = ack.data_length < data_cap ? ack.data_length : data_cap;
+      if (copy_len) memcpy(data, ack.data, copy_len);
+      *data_len = copy_len;
     }
-
-    size_t remaining = pos - expected;
-    if (remaining) memmove(response, response + expected, remaining);
-    pos = remaining;
-
-    if (saw_ack && post_ack_until && xTaskGetTickCount() > post_ack_until) return true;
+    return true;
   }
 
-  return saw_ack;
+  return false;
 }
 
 static bool fp_take(uint32_t timeout_ms) {
@@ -163,7 +133,8 @@ bool fingerprint_present_hint(void) {
   return finger_present();
 }
 
-static bool fingerprint_match_captured(bool quiet) {
+static bool fingerprint_match_captured(fingerprint_match_t *match, bool quiet) {
+  if (match) memset(match, 0, sizeof(*match));
   uint8_t confirm = 0xff;
   uint8_t img2tz[] = {0x01};
   if (!fp_command(0x02, img2tz, sizeof(img2tz), &confirm, NULL, NULL, 2000) || confirm != 0x00) {
@@ -186,8 +157,14 @@ static bool fingerprint_match_captured(bool quiet) {
     if (!quiet) ESP_LOGW(TAG, "search command failed");
   } else if (confirm == 0x00 && search_len == sizeof(search_data)) {
     uint16_t score = ((uint16_t)search_data[2] << 8) | search_data[3];
-    bool ok = score > 0;
-    ESP_LOGI(TAG, "fingerprint search: %s score=%u", ok ? "ok" : "failed", score);
+    uint16_t slot = ((uint16_t)search_data[0] << 8) | search_data[1];
+    bool ok = score > 0 && slot >= START_SLOT && slot <= END_SLOT;
+    ESP_LOGI(TAG, "fingerprint search: %s slot=%u score=%u",
+             ok ? "ok" : "failed", slot, score);
+    if (ok && match) {
+      match->slot = slot;
+      match->score = score;
+    }
     if (!quiet || ok) show_result(ok);
     return ok;
   } else if (!quiet) {
@@ -214,6 +191,10 @@ static bool fingerprint_match_captured(bool quiet) {
       uint16_t score = ((uint16_t)match_data[0] << 8) | match_data[1];
       if (score > 0) {
         ESP_LOGI(TAG, "fingerprint match: ok slot=%u score=%u", slot, score);
+        if (match) {
+          match->slot = slot;
+          match->score = score;
+        }
         show_result(true);
         return true;
       }
@@ -227,14 +208,14 @@ static bool fingerprint_match_captured(bool quiet) {
   return false;
 }
 
-bool fingerprint_authorize_poll_once(void) {
+bool fingerprint_authorize_poll_once(fingerprint_match_t *match) {
   if (!fp_take(0)) return false;
   uint8_t confirm = 0xff;
   if (!fp_command(0x01, NULL, 0, &confirm, NULL, NULL, 350) || confirm != 0x00) {
     fp_give();
     return false;
   }
-  bool ok = fingerprint_match_captured(true);
+  bool ok = fingerprint_match_captured(match, true);
   fp_give();
   return ok;
 }
@@ -294,7 +275,7 @@ bool fingerprint_authorize_once(void) {
     return false;
   }
 
-  bool ok = fingerprint_match_captured(false);
+  bool ok = fingerprint_match_captured(NULL, false);
   fp_give();
   return ok;
 }
@@ -310,39 +291,102 @@ int fingerprint_count(void) {
   return ok ? ((int)data[0] << 8) | data[1] : -1;
 }
 
-static bool wait_finger_state(bool present, uint32_t timeout_ms) {
+static bool wait_for_image_state(bool present, uint32_t timeout_ms,
+                                 uint8_t *last_confirm) {
   TickType_t start = xTaskGetTickCount();
   TickType_t deadline = pdMS_TO_TICKS(timeout_ms);
   while ((xTaskGetTickCount() - start) < deadline) {
-    if (finger_present() == present) return true;
+    uint8_t confirm = 0xff;
+    bool command_ok = fp_command(0x01, NULL, 0, &confirm, NULL, NULL, 1000);
+    if (last_confirm) *last_confirm = confirm;
+    fp_image_state_t state = fp_protocol_image_state(command_ok, confirm);
+    if ((present && state == FP_IMAGE_PRESENT) ||
+        (!present && state == FP_IMAGE_ABSENT)) {
+      return true;
+    }
+    if (state == FP_IMAGE_ERROR || state == FP_IMAGE_TRANSPORT_ERROR) return false;
     vTaskDelay(pdMS_TO_TICKS(50));
   }
   return false;
 }
 
-static bool capture_template(uint8_t buffer_id) {
+static bool capture_template(uint8_t buffer_id, uint8_t *last_confirm) {
   uint8_t confirm = 0xff;
-  if (!fp_command(0x01, NULL, 0, &confirm, NULL, NULL, 1500) || confirm != 0x00) return false;
   uint8_t params[] = {buffer_id};
-  return fp_command(0x02, params, sizeof(params), &confirm, NULL, NULL, 2000) && confirm == 0x00;
+  bool ok = fp_command(0x02, params, sizeof(params), &confirm, NULL, NULL, 2000);
+  if (last_confirm) *last_confirm = confirm;
+  return ok && confirm == 0x00;
 }
 
-bool fingerprint_enroll(uint16_t slot, void (*prompt)(const char *message)) {
-  if (slot < START_SLOT || slot > END_SLOT || !fp_take(1000)) return false;
+static void set_enroll_error(fingerprint_enroll_error_t *error,
+                             fingerprint_enroll_stage_t stage, uint8_t confirm) {
+  if (!error) return;
+  error->stage = stage;
+  error->confirm = confirm;
+}
+
+const char *fingerprint_enroll_stage_name(fingerprint_enroll_stage_t stage) {
+  switch (stage) {
+    case FP_ENROLL_STAGE_INVALID_SLOT: return "invalid_slot";
+    case FP_ENROLL_STAGE_BUSY: return "busy";
+    case FP_ENROLL_STAGE_GET_IMAGE_FIRST: return "get_image_first";
+    case FP_ENROLL_STAGE_IMAGE2TZ_FIRST: return "image2tz_first";
+    case FP_ENROLL_STAGE_WAIT_LIFT: return "wait_lift";
+    case FP_ENROLL_STAGE_GET_IMAGE_SECOND: return "get_image_second";
+    case FP_ENROLL_STAGE_IMAGE2TZ_SECOND: return "image2tz_second";
+    case FP_ENROLL_STAGE_REG_MODEL: return "reg_model";
+    case FP_ENROLL_STAGE_STORE: return "store";
+    case FP_ENROLL_STAGE_NONE:
+    default: return "none";
+  }
+}
+
+bool fingerprint_enroll(uint16_t slot, void (*prompt)(const char *message),
+                        fingerprint_enroll_error_t *error) {
+  set_enroll_error(error, FP_ENROLL_STAGE_NONE, 0x00);
+  if (slot < START_SLOT || slot > END_SLOT) {
+    set_enroll_error(error, FP_ENROLL_STAGE_INVALID_SLOT, 0xff);
+    return false;
+  }
+  if (!fp_take(1000)) {
+    set_enroll_error(error, FP_ENROLL_STAGE_BUSY, 0xff);
+    return false;
+  }
   bool ok = false;
+  uint8_t confirm = 0xff;
   set_aura(FP_LED_BLUE);
   if (prompt) prompt("TOUCH");
-  if (!wait_finger_state(true, 15000) || !capture_template(1)) goto done;
+  if (!wait_for_image_state(true, 15000, &confirm)) {
+    set_enroll_error(error, FP_ENROLL_STAGE_GET_IMAGE_FIRST, confirm);
+    goto done;
+  }
+  if (!capture_template(1, &confirm)) {
+    set_enroll_error(error, FP_ENROLL_STAGE_IMAGE2TZ_FIRST, confirm);
+    goto done;
+  }
   if (prompt) prompt("LIFT");
-  if (!wait_finger_state(false, 10000)) goto done;
+  if (!wait_for_image_state(false, 10000, &confirm)) {
+    set_enroll_error(error, FP_ENROLL_STAGE_WAIT_LIFT, confirm);
+    goto done;
+  }
   vTaskDelay(pdMS_TO_TICKS(250));
   if (prompt) prompt("TOUCH_AGAIN");
-  if (!wait_finger_state(true, 15000) || !capture_template(2)) goto done;
+  if (!wait_for_image_state(true, 15000, &confirm)) {
+    set_enroll_error(error, FP_ENROLL_STAGE_GET_IMAGE_SECOND, confirm);
+    goto done;
+  }
+  if (!capture_template(2, &confirm)) {
+    set_enroll_error(error, FP_ENROLL_STAGE_IMAGE2TZ_SECOND, confirm);
+    goto done;
+  }
 
-  uint8_t confirm = 0xff;
-  if (!fp_command(0x05, NULL, 0, &confirm, NULL, NULL, 2000) || confirm != 0x00) goto done;
+  if (!fp_command(0x05, NULL, 0, &confirm, NULL, NULL, 2000) || confirm != 0x00) {
+    set_enroll_error(error, FP_ENROLL_STAGE_REG_MODEL, confirm);
+    goto done;
+  }
   uint8_t store[] = {0x01, (uint8_t)(slot >> 8), (uint8_t)slot};
   ok = fp_command(0x06, store, sizeof(store), &confirm, NULL, NULL, 2000) && confirm == 0x00;
+  if (!ok) set_enroll_error(error, FP_ENROLL_STAGE_STORE, confirm);
 
 done:
   show_result(ok);

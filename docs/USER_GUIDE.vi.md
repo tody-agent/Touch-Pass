@@ -55,9 +55,37 @@ Serial │           │ (HID Keystrokes gõ phím trực tiếp)
 
 ---
 
-## 2. Tổng Quan Nền Tảng TouchPass
+---
 
-Web Portal cung cấp bảng điều khiển trung tâm giúp quản lý tối đa 10 slot vân tay sinh trắc.
+## 2. Trải Nghiệm Ứng Dụng Native Desktop App (macOS, Windows, Linux)
+
+TouchPass trang bị ứng dụng Desktop native hoàn chỉnh, hiện đại được xây dựng trên nền tảng **Rust + Tauri v2 + Svelte 5**.
+
+<div align="center">
+
+![Giao diện Ứng dụng TouchPass Desktop Native](../assets/demo/screenshot_app.png)
+
+*Giao diện TouchPass Desktop Native: Sơ đồ 10 ngón tay sinh trắc học trực quan, trạng thái kết nối phần cứng thời gian thực và cấu hình phím tắt AI nhanh chóng.*
+
+</div>
+
+### Các Tính Năng Nổi Bật Trên Giao Diện:
+1. **Sơ Đồ Bàn Tay Sinh Trắc Học Tương Tác (Biometric Hand Map)**:
+   - Hiển thị trực quan toàn bộ 10 ngón tay cho Bàn tay Trái (Út ➔ Cái) và Bàn tay Phải (Cái ➔ Út).
+   - Đổi màu trạng thái theo thời gian thực (đã đăng ký vân tay, đã gán phím tắt, hoặc đang chờ thao tác).
+2. **Dò Cổng Tự Động & Bảng Giám Sát Phần Cứng**:
+   - Tự động quét và kết nối cổng COM / tty với vi điều khiển ESP32-S3.
+   - Hiển thị tình trạng bắt tay mã khóa bảo mật HMAC và tốc độ baud rate.
+3. **Gán Phím Tắt & Mật Khẩu 1-Click**:
+   - **Chấp nhận Prompt AI**: Tự động gõ `y` + `Enter` để duyệt lệnh nhanh chóng trong terminal của Claude Code, Cursor, Antigravity.
+   - **Tự động điền Mật khẩu**: Truy xuất an toàn mật khẩu sudo/SSH từ kho khóa OS Keyring.
+   - **Ghi Macro Phím tắt Tùy chỉnh**: Ghi lại chuỗi tổ hợp phím và độ trễ theo nhu cầu cá nhân.
+4. **Trải Nghiệm Nhất Quán Đa Nền Tảng**:
+   - Hoạt động mượt mà với đầy đủ tính năng trên **macOS**, **Windows (10/11)**, và **Ubuntu/Debian Linux**.
+
+---
+
+## 3. Quy Tắc & Giới Hạn Hành Động
 
 ### Giới hạn & Quy tắc Hành động
 - **Độ dài hành động tối đa**: Mỗi slot hỗ trợ tối đa **16 bước (16 steps)** hoặc tối đa **256 encoded bytes**. Nếu chuỗi phím vượt quá 256 bytes, hệ thống sẽ báo lỗi và từ chối lưu.

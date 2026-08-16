@@ -3,6 +3,7 @@
     Bot,
     Check,
     CornerDownLeft,
+    Ellipsis,
     Fingerprint,
     KeyRound,
     Keyboard,
@@ -12,33 +13,49 @@
     WandSparkles,
     X
   } from 'lucide-svelte';
-  import { actionLabels, validateActionDraft, type ActionType, type FingerProfile } from '../lib/types';
+  import {
+    actionDescription,
+    actionLabel,
+    fingerName,
+    translate,
+    validationMessage,
+    type Locale
+  } from '../lib/i18n';
+  import { saveProfileWithEnrollment } from '../lib/profileActions';
+  import { focusFirstInDialog, handleDialogKeydown } from '../lib/focusTrap';
+  import { validateActionDraft, type ActionType, type FingerProfile } from '../lib/types';
 
   interface Props {
+    locale: Locale;
     profile: FingerProfile;
     saving: boolean;
-    onSave: (profile: FingerProfile, secret?: string) => Promise<void>;
+    deviceConnected: boolean;
+    onSave: (profile: FingerProfile, secret?: string) => Promise<FingerProfile>;
     onEnroll: (id: number) => Promise<void>;
     onReset: (id: number) => Promise<void>;
     onTest: (id: number) => Promise<void>;
-    onHud: (message: string) => void;
   }
 
-  let { profile, saving, onSave, onEnroll, onReset, onTest, onHud }: Props = $props();
-  let selectedType = $state<ActionType>('disabled');
+  let { locale, profile, saving, deviceConnected, onSave, onEnroll, onReset, onTest }: Props = $props();
+  let selectedType = $state<ActionType>('enter');
   let customPayload = $state('');
   let secret = $state('');
-  let requireConfirm = $state(false);
+  let requireConfirm = $state(true);
+  let moreOpen = $state(false);
+  let deleteOpen = $state(false);
+  let deleteDialogElement: HTMLDivElement | undefined = $state();
+  let moreButtonElement: HTMLButtonElement | undefined = $state();
+  let moreMenuElement: HTMLDivElement | undefined = $state();
 
   const presets: Array<{ type: ActionType; icon: typeof Bot; accent: string }> = [
     { type: 'ai_accept', icon: Bot, accent: 'text-blue-300' },
     { type: 'password', icon: KeyRound, accent: 'text-purple-300' },
     { type: 'enter', icon: CornerDownLeft, accent: 'text-emerald-300' },
+    { type: 'escape', icon: Keyboard, accent: 'text-cyan-300' },
     { type: 'custom', icon: WandSparkles, accent: 'text-amber-300' }
   ];
 
-  const selectedMeta = $derived(actionLabels[selectedType]);
-  const validationMessage = $derived(
+  const validationCode = $derived(
     validateActionDraft({
       actionType: selectedType,
       customPayload,
@@ -46,142 +63,208 @@
       secretConfigured: profile.secretConfigured
     })
   );
-  const canSave = $derived(!validationMessage);
+  const validationText = $derived(validationMessage(locale, validationCode));
+  const canSave = $derived(!validationCode && (profile.configured || deviceConnected));
 
   $effect(() => {
-    selectedType = profile.actionType;
+    selectedType = profile.actionType === 'disabled' ? 'enter' : profile.actionType;
     customPayload = profile.customPayload ?? '';
     secret = '';
     requireConfirm = profile.requireConfirm;
+    moreOpen = false;
+  });
+
+  $effect(() => {
+    if (moreOpen) queueMicrotask(() => moreMenuElement?.querySelector<HTMLButtonElement>('button:not([disabled])')?.focus());
+  });
+
+  function handleMenuKeydown(event: KeyboardEvent) {
+    if (!moreMenuElement) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      moreOpen = false;
+      queueMicrotask(() => moreButtonElement?.focus());
+      return;
+    }
+    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+    event.preventDefault();
+    const items = Array.from(moreMenuElement.querySelectorAll<HTMLButtonElement>('button:not([disabled])'));
+    const current = items.indexOf(document.activeElement as HTMLButtonElement);
+    const direction = event.key === 'ArrowDown' ? 1 : -1;
+    const next = current < 0 ? 0 : (current + direction + items.length) % items.length;
+    items[next]?.focus();
+  }
+
+  $effect(() => {
+    if (!deleteOpen || typeof document === 'undefined') return;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    queueMicrotask(() => focusFirstInDialog(deleteDialogElement));
+    return () => previousFocus?.focus();
   });
 
   async function save() {
-    if (!canSave) {
-      onHud(validationMessage ?? 'Không thể lưu năng lực này');
-      return;
-    }
-    const nextProfile: FingerProfile = {
+    if (!canSave) return;
+    const draft: FingerProfile = {
       ...profile,
-      configured: selectedType !== 'disabled',
       actionType: selectedType,
-      label: selectedMeta.label,
-      description: selectedMeta.description,
-      icon: selectedMeta.icon,
       requireConfirm,
       customPayload: selectedType === 'custom' ? customPayload.trim() : undefined
     };
-    await onSave(nextProfile, selectedType === 'password' && secret ? secret : undefined);
+    try {
+      await saveProfileWithEnrollment(
+        draft,
+        selectedType === 'password' && secret ? secret : undefined,
+        onSave,
+        onEnroll
+      );
+    } catch {
+      // App-level callbacks localize and surface command errors.
+    }
+  }
+
+  async function disableAction() {
+    moreOpen = false;
+    try {
+      await onSave({ ...profile, actionType: 'disabled' });
+    } catch {
+      // App-level callbacks surface the error.
+    }
+  }
+
+  async function deleteFingerprint() {
+    deleteOpen = false;
+    moreOpen = false;
+    try {
+      await onReset(profile.id);
+    } catch {
+      // App-level callbacks surface the error.
+    }
   }
 </script>
 
-<section class="glass-card flex min-h-[382px] flex-col rounded-3xl p-5">
-  <div class="mb-4 flex items-start justify-between gap-4">
-    <div>
-      <div class="mono mb-1 text-[11px] font-bold text-blue-300">NGÓN {String(profile.id).padStart(2, '0')}</div>
-      <h2 class="text-2xl font-extrabold text-white">{profile.name}</h2>
-      <p class="mt-1 text-sm font-medium text-slate-400">
-        {profile.configured ? profile.description : 'Chọn năng lực, quét vân tay, dùng ngay.'}
+<section class="glass-card rounded-3xl p-5" aria-labelledby="selected-finger-title">
+  <div class="mb-5 flex items-start justify-between gap-4">
+    <div class="min-w-0">
+      <div class="mono mb-1 text-[11px] font-bold text-blue-300">#{String(profile.id).padStart(2, '0')}</div>
+      <h2 id="selected-finger-title" class="text-2xl font-extrabold text-white">{fingerName(locale, profile.id)}</h2>
+      <p class="mt-1 text-sm font-medium leading-relaxed text-slate-300">
+        {profile.configured ? actionDescription(locale, profile.actionType) : translate(locale, 'finger.selectedDescription')}
       </p>
     </div>
 
-    <div
-      class={`rounded-full border px-3 py-1.5 text-xs font-extrabold ${
-        profile.configured
-          ? 'border-emerald-400/[0.24] bg-emerald-400/10 text-emerald-300'
-          : 'border-slate-500/20 bg-white/[0.05] text-slate-400'
-      }`}
-    >
-      {profile.configured ? 'ĐÃ CÀI' : 'CHƯA CÀI'}
+    <div class={`status-badge ${profile.configured ? 'status-badge-ready' : 'status-badge-idle'}`}>
+      {translate(locale, profile.configured ? 'finger.configured' : 'finger.unconfigured')}
     </div>
   </div>
 
-  <div class="grid gap-3 md:grid-cols-2">
+  <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
     {#each presets as preset}
-      {@const meta = actionLabels[preset.type]}
       {@const Icon = preset.icon}
       <button
-        class={`interactive-card rounded-2xl border p-3.5 text-left ${
-          selectedType === preset.type ? 'border-blue-400/60 bg-blue-500/[0.12]' : 'border-white/[0.08] bg-slate-950/55'
-        }`}
+        class={`interactive-card action-card ${selectedType === preset.type ? 'action-card-selected' : ''}`}
         onclick={() => (selectedType = preset.type)}
+        aria-pressed={selectedType === preset.type}
       >
-        <div class="mb-3 flex items-center justify-between">
-          <div class={`grid h-9 w-9 place-items-center rounded-xl bg-white/[0.07] ${preset.accent}`}>
-            <Icon size={19} />
-          </div>
+        <span class="mb-3 flex items-center justify-between">
+          <span class={`grid h-10 w-10 place-items-center rounded-xl bg-white/[0.07] ${preset.accent}`}>
+            <Icon size={20} aria-hidden="true" />
+          </span>
           {#if selectedType === preset.type}
-            <Check size={17} class="text-blue-300" strokeWidth={3} />
+            <Check size={18} class="text-blue-300" strokeWidth={3} aria-hidden="true" />
           {/if}
-        </div>
-        <div class="text-sm font-extrabold text-white">{meta.label}</div>
-        <div class="mt-1 min-h-9 text-xs font-medium leading-relaxed text-slate-400">{meta.description}</div>
+        </span>
+        <span class="block text-sm font-extrabold text-white">{actionLabel(locale, preset.type)}</span>
+        <span class="mt-1 block text-xs font-medium leading-relaxed text-slate-300">{actionDescription(locale, preset.type)}</span>
       </button>
     {/each}
   </div>
 
   {#if selectedType === 'password'}
     <label class="mt-4 block">
-      <span class="mb-2 block text-xs font-extrabold text-slate-400">Mật khẩu máy tính</span>
+      <span class="mb-2 block text-xs font-extrabold text-slate-300">{translate(locale, 'field.password')}</span>
       <input
-        class="h-11 w-full rounded-2xl border border-white/[0.08] bg-black/25 px-4 text-sm font-semibold text-white outline-none transition placeholder:text-slate-600 focus:border-blue-400/60"
+        class="text-input"
         type="password"
         bind:value={secret}
-        placeholder={profile.secretConfigured ? 'Đã có trong kho bảo mật, nhập để thay đổi' : 'Nhập mật khẩu ASCII'}
+        autocomplete="current-password"
+        placeholder={profile.secretConfigured ? translate(locale, 'field.passwordStored') : translate(locale, 'field.passwordPlaceholder')}
+        aria-invalid={validationCode === 'secret_required' || validationCode === 'password_ascii'}
       />
     </label>
   {/if}
 
   {#if selectedType === 'custom'}
     <label class="mt-4 block">
-      <span class="mb-2 block text-xs font-extrabold text-slate-400">Chuỗi phím tắt</span>
+      <span class="mb-2 block text-xs font-extrabold text-slate-300">{translate(locale, 'field.custom')}</span>
       <input
-        class="h-11 w-full rounded-2xl border border-white/[0.08] bg-black/25 px-4 text-sm font-semibold text-white outline-none transition placeholder:text-slate-600 focus:border-blue-400/60"
+        class="text-input"
         bind:value={customPayload}
         maxlength="128"
-        placeholder="Ví dụ: /approve"
+        placeholder={translate(locale, 'field.customPlaceholder')}
+        aria-invalid={validationCode === 'custom_required' || validationCode === 'custom_ascii'}
       />
     </label>
   {/if}
 
-  <label class="mt-4 flex items-center justify-between rounded-2xl border border-white/[0.07] bg-black/20 px-4 py-3">
+  {#if validationText}
+    <p class="mt-2 text-xs font-semibold text-amber-300" role="alert">{validationText}</p>
+  {/if}
+
+  <label class="setting-row mt-4">
     <span>
-      <span class="block text-sm font-extrabold text-white">Chạm 2 lần để xác nhận</span>
-      <span class="block text-xs font-medium text-slate-500">Giảm rủi ro kích hoạt nhầm khi đang làm việc.</span>
+      <span class="block text-sm font-extrabold text-white">{translate(locale, 'field.confirm')}</span>
+      <span class="block text-xs font-medium leading-relaxed text-slate-400">{translate(locale, 'field.confirmDescription')}</span>
     </span>
-    <input class="h-5 w-5 accent-blue-500" type="checkbox" bind:checked={requireConfirm} />
+    <input class="h-5 w-5 shrink-0 accent-blue-500" type="checkbox" bind:checked={requireConfirm} />
   </label>
 
-  <div class="mt-auto flex flex-wrap items-center gap-2 pt-4">
+  <div class="mt-5 flex flex-wrap items-center gap-2 border-t border-white/[0.07] pt-4">
     <button class="primary-button" disabled={saving || !canSave} onclick={save}>
-      <Check size={15} />
-      <span>Lưu Năng Lực</span>
+      {#if profile.configured}<Check size={16} />{:else}<Fingerprint size={16} />{/if}
+      <span>{translate(locale, profile.configured ? 'button.saveChanges' : 'button.saveAndEnroll')}</span>
     </button>
-    <button class="secondary-button" onclick={() => onEnroll(profile.id)}>
-      <Fingerprint size={15} />
-      <span>Quét Vân Tay</span>
-    </button>
-    <button class="secondary-button" onclick={() => onTest(profile.id)}>
-      <Play size={15} />
-      <span>Thử gõ test</span>
-    </button>
-    <button class="secondary-button" onclick={() => onSave({ ...profile, actionType: 'escape', label: actionLabels.escape.label, description: actionLabels.escape.description, icon: actionLabels.escape.icon }, undefined)}>
-      <Keyboard size={15} />
-      <span>Escape</span>
-    </button>
-    {#if profile.configured}
-      <button class="secondary-button" onclick={() => onEnroll(profile.id)}>
-        <RotateCw size={15} />
-        <span>Quét lại</span>
+
+    <div class="relative">
+      <button bind:this={moreButtonElement} class="secondary-button" aria-haspopup="menu" aria-expanded={moreOpen} onclick={() => (moreOpen = !moreOpen)}>
+        <Ellipsis size={17} />
+        <span>{translate(locale, 'button.more')}</span>
       </button>
-      <button class="danger-button" onclick={() => onReset(profile.id)}>
-        <Trash2 size={15} />
-        <span>Xóa</span>
-      </button>
-    {:else}
-      <button class="danger-button" onclick={() => onSave({ ...profile, actionType: 'disabled', configured: false, label: actionLabels.disabled.label, description: actionLabels.disabled.description, icon: actionLabels.disabled.icon }, undefined)}>
-        <X size={15} />
-        <span>Tắt</span>
-      </button>
+      {#if moreOpen}
+        <div bind:this={moreMenuElement} class="action-menu" role="menu" tabindex="-1" onkeydown={handleMenuKeydown}>
+          <button role="menuitem" disabled={!profile.configured || !deviceConnected} onclick={() => { moreOpen = false; void onTest(profile.id); }}>
+            <Play size={16} /><span>{translate(locale, 'button.test')}</span>
+          </button>
+          <button role="menuitem" disabled={!deviceConnected} onclick={() => { moreOpen = false; void onEnroll(profile.id); }}>
+            <RotateCw size={16} /><span>{translate(locale, 'button.rescan')}</span>
+          </button>
+          <button role="menuitem" onclick={disableAction}>
+            <X size={16} /><span>{translate(locale, 'button.disable')}</span>
+          </button>
+          {#if profile.configured}
+            <div class="my-1 border-t border-white/10"></div>
+            <button class="danger-menu-item" role="menuitem" onclick={() => { moreOpen = false; deleteOpen = true; }}>
+              <Trash2 size={16} /><span>{translate(locale, 'button.delete')}</span>
+            </button>
+          {/if}
+        </div>
+      {/if}
+    </div>
+
+    {#if !deviceConnected && !profile.configured}
+      <span class="text-xs font-semibold text-amber-300">{translate(locale, 'device.disconnectedTitle')}</span>
     {/if}
   </div>
 </section>
+
+{#if deleteOpen}
+  <div class="dialog-backdrop" role="presentation">
+    <div bind:this={deleteDialogElement} class="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-title" aria-describedby="delete-description" tabindex="-1" onkeydown={(event) => handleDialogKeydown(event, deleteDialogElement, () => (deleteOpen = false))}>
+      <h3 id="delete-title" class="text-lg font-extrabold text-white">{translate(locale, 'delete.title')}</h3>
+      <p id="delete-description" class="mt-2 text-sm leading-relaxed text-slate-300">{translate(locale, 'delete.description')}</p>
+      <div class="mt-5 flex justify-end gap-2">
+        <button class="secondary-button" onclick={() => (deleteOpen = false)}>{translate(locale, 'button.cancel')}</button>
+        <button class="danger-button" onclick={deleteFingerprint}><Trash2 size={16} />{translate(locale, 'button.confirmDelete')}</button>
+      </div>
+    </div>
+  </div>
+{/if}

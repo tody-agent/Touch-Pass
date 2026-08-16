@@ -81,7 +81,15 @@ Swapping context, repositioning your hands, typing `y` + `Enter`, or mistyping a
 
 ### 🖥️ Native Rust Desktop App (Tauri v2 + Svelte 5) - Recommended
 
-TouchPass includes a high-performance native desktop application written in **Rust** and **Tauri v2** with **Svelte 5 UI**, featuring real-time serial hardware monitoring, interactive fingerprint mapping, and OS Keyring integration.
+TouchPass includes a high-performance native desktop application written in **Rust** and **Tauri v2** with **Svelte 5 UI**, featuring real-time serial hardware monitoring, interactive fingerprint mapping, and OS Keyring integration across **macOS**, **Windows**, and **Linux**.
+
+<div align="center">
+
+![TouchPass Desktop App Interface (macOS, Windows, Linux)](assets/demo/screenshot_app.png)
+
+*Unified Native Desktop App UI: Real-time Serial Port Discovery, 10 Biometric Fingerprint Slots, AI Quick Shortcuts & Hardware Status.*
+
+</div>
 
 #### 🪟 Windows (x64)
 - **Installer (.exe)**: Download `TouchPass_0.1.0_x64-setup.exe` from [GitHub Releases](https://github.com/tody-agent/Touch-Pass/releases) and follow setup.

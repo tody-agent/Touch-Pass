@@ -88,7 +88,46 @@ Bạn lo lắng việc lỡ tay chạm vào cảm biến sẽ vô tình thực t
 
 ---
 
-## 🎬 Trải Nghiệm Giao Diện Web Portal
+---
+
+## 🖥️ Trải Nghiệm Ứng Dụng Desktop Native (Rust + Tauri v2 + Svelte 5) - Khuyên Dùng
+
+TouchPass tích hợp ứng dụng Desktop native hiệu năng cao được phát triển bằng **Rust** và **Tauri v2** kết hợp giao diện **Svelte 5**, hỗ trợ tự động nhận diện phần cứng Serial UART thời gian thực, sơ đồ gán vân tay trực quan và tích hợp sâu với OS Keyring bảo mật trên **macOS**, **Windows**, và **Ubuntu/Debian Linux**.
+
+<div align="center">
+
+![Giao diện TouchPass Desktop App (macOS, Windows, Linux)](../../assets/demo/screenshot_app.png)
+
+*Giao diện TouchPass Desktop App: Tự động dò cổng Serial, 10 slot vân tay sinh trắc trực quan 2 bàn tay, AI Quick Shortcuts và bảng giám sát phần cứng.*
+
+</div>
+
+### 📥 Tải Về & Cài Đặt Bản Release:
+
+#### 🪟 Windows (x64)
+- **Bộ cài đặt chuẩn (.exe)**: Tải `TouchPass_0.1.0_x64-setup.exe` từ [GitHub Releases](https://github.com/tody-agent/Touch-Pass/releases) và thực hiện cài đặt.
+- **Bản doanh nghiệp (.msi)**: Tải `TouchPass_0.1.0_x64_en-US.msi`.
+- **Bản Portable (.zip)**: Tải `TouchPass_windows_x64_portable.zip`, giải nén và mở trực tiếp `TouchPass.exe` (hoặc chạy `start_touchpass.bat`).
+
+#### 🍎 macOS (Universal: Tương thích cả Apple Silicon M-series & Intel)
+1. Tải `TouchPass_0.1.0_universal.dmg` từ [GitHub Releases](https://github.com/tody-agent/Touch-Pass/releases).
+2. Mở file `.dmg` và kéo thả ứng dụng **TouchPass.app** vào thư mục `/Applications`.
+
+#### 🐧 Ubuntu / Debian Linux (x64)
+- **Gói cài đặt (.deb)**:
+  ```bash
+  sudo dpkg -i touchpass_0.1.0_amd64.deb
+  sudo apt-get install -f
+  ```
+- **AppImage (Chạy trực tiếp)**:
+  ```bash
+  chmod +x touchpass_0.1.0_amd64.AppImage
+  ./touchpass_0.1.0_amd64.AppImage
+  ```
+
+---
+
+## 🎬 Trải Nghiệm Giao Diện Web Portal & Tính Năng Nổi Bật
 
 ![TouchPass Feature Overview](../../assets/demo/04-features.png)
 

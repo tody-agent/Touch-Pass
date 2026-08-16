@@ -32,8 +32,15 @@ pub struct SensorEvent {
 pub enum FirmwareLine {
     Status(StatusLine),
     Prompt(String),
+    ConfigUnlockOk,
+    ConfigUnlockErr(String),
+    ConfigLocked,
     EnrollOk(usize),
-    EnrollErr(usize),
+    EnrollErr {
+        slot: usize,
+        stage: Option<String>,
+        confirm: Option<u8>,
+    },
     DeleteOk(usize),
     DeleteErr(usize),
     Event(SensorEvent),
@@ -57,11 +64,24 @@ pub fn parse_firmware_line(line: &str) -> FirmwareLine {
     if let Some(message) = line.strip_prefix("PROMPT ") {
         return FirmwareLine::Prompt(message.to_string());
     }
+    if line.starts_with("OK CONFIG_UNLOCK") {
+        return FirmwareLine::ConfigUnlockOk;
+    }
+    if let Some(reason) = line.strip_prefix("ERR CONFIG_UNLOCK ") {
+        return FirmwareLine::ConfigUnlockErr(reason.to_string());
+    }
+    if line.starts_with("ERR CONFIG_LOCKED") {
+        return FirmwareLine::ConfigLocked;
+    }
     if line.starts_with("OK ENROLL") {
         return FirmwareLine::EnrollOk(slot_from_line(line));
     }
     if line.starts_with("ERR ENROLL") {
-        return FirmwareLine::EnrollErr(slot_from_line(line));
+        return FirmwareLine::EnrollErr {
+            slot: slot_from_line(line),
+            stage: token_value(line, "stage").map(str::to_string),
+            confirm: token_value(line, "confirm").and_then(parse_hex_byte),
+        };
     }
     if line.starts_with("OK DELETE") {
         return FirmwareLine::DeleteOk(slot_from_line(line));
@@ -134,7 +154,7 @@ pub fn handle_sensor_event<F>(
     secret_resolver: impl Fn(&str) -> Result<Vec<u8>, String>,
     gate: &mut TriggerGate,
     now_seconds: f64,
-) -> Result<Option<(String, bool, String)>, String>
+) -> Result<Option<(String, bool, ActionType)>, String>
 where
     F: Fn(usize) -> Option<FingerProfile>,
 {
@@ -163,7 +183,7 @@ where
                     event.nonce, event.slot, expires_ms, reply_mac
                 ),
                 false,
-                profile.label,
+                profile.action_type,
             )))
         }
         GateDecision::Execute => {
@@ -179,7 +199,7 @@ where
                     event.nonce, iv_hex, ciphertext_hex, reply_mac
                 ),
                 true,
-                profile.label,
+                profile.action_type,
             )))
         }
     }
@@ -220,6 +240,14 @@ fn slot_from_line(line: &str) -> usize {
         .unwrap_or(0)
 }
 
+fn parse_hex_byte(value: &str) -> Option<u8> {
+    let value = value
+        .strip_prefix("0x")
+        .or_else(|| value.strip_prefix("0X"))
+        .unwrap_or(value);
+    u8::from_str_radix(value, 16).ok()
+}
+
 fn text_step(value: &[u8]) -> Result<Vec<u8>, String> {
     if value.len() > 128 {
         return Err("text action step exceeds 128 bytes".to_string());
@@ -256,6 +284,39 @@ mod tests {
                 assert!(status.hid_key_configured);
             }
             _ => panic!("expected status"),
+        }
+    }
+
+    #[test]
+    fn parses_config_unlock_outcomes() {
+        assert!(matches!(
+            parse_firmware_line("OK CONFIG_UNLOCK first_setup seconds=120"),
+            FirmwareLine::ConfigUnlockOk
+        ));
+        assert!(matches!(
+            parse_firmware_line("ERR CONFIG_UNLOCK fingerprint"),
+            FirmwareLine::ConfigUnlockErr(_)
+        ));
+        assert!(matches!(
+            parse_firmware_line("ERR CONFIG_LOCKED run=CONFIG_UNLOCK"),
+            FirmwareLine::ConfigLocked
+        ));
+    }
+
+    #[test]
+    fn parses_enrollment_failure_details() {
+        let parsed = parse_firmware_line("ERR ENROLL slot=6 stage=reg_model confirm=0x0a");
+        match parsed {
+            FirmwareLine::EnrollErr {
+                slot,
+                stage,
+                confirm,
+            } => {
+                assert_eq!(slot, 6);
+                assert_eq!(stage.as_deref(), Some("reg_model"));
+                assert_eq!(confirm, Some(0x0a));
+            }
+            _ => panic!("expected detailed enrollment error"),
         }
     }
 

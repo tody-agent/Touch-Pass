@@ -147,7 +147,7 @@ static bool decrypt_password(const uint8_t pairing_key[32], const char *expected
   return true;
 }
 
-static bool request_and_type_password(void) {
+static bool request_and_type_password(const fingerprint_match_t *match) {
   uint8_t pairing_key[32];
   uint8_t nonce_bytes[16];
   uint8_t event_mac[32];
@@ -164,12 +164,12 @@ static bool request_and_type_password(void) {
   esp_fill_random(nonce_bytes, sizeof(nonce_bytes));
   bytes_to_hex(nonce_bytes, sizeof(nonce_bytes), nonce);
   event_counter++;
-  snprintf(material, sizeof(material), "EV|%s|%lu|1|1", nonce,
-           (unsigned long)event_counter);
+  snprintf(material, sizeof(material), "EV|%s|%lu|%u|%u", nonce,
+           (unsigned long)event_counter, match->slot, match->score);
   if (!hmac_sha256(pairing_key, material, event_mac)) goto done;
   bytes_to_hex(event_mac, sizeof(event_mac), mac_hex);
-  snprintf(event, sizeof(event), "EV %s %lu 1 1 %s", nonce,
-           (unsigned long)event_counter, mac_hex);
+  snprintf(event, sizeof(event), "EV %s %lu %u %u %s", nonce,
+           (unsigned long)event_counter, match->slot, match->score, mac_hex);
 
   xQueueReset(password_responses);
   config_console_send_line(event);
@@ -190,12 +190,14 @@ static void touch_hid_task(void *arg) {
   TickType_t last_success = 0;
 
   while (true) {
+    fingerprint_match_t match;
     if (tud_hid_ready() &&
         (xTaskGetTickCount() - last_success) > pdMS_TO_TICKS(3000) &&
-        fingerprint_authorize_poll_once()) {
+        fingerprint_authorize_poll_once(&match)) {
       if (device_config_mode() == DEVICE_MODE_HID) {
-        ESP_LOGI(TAG, "finger matched; requesting HID password");
-        if (!request_and_type_password()) ESP_LOGW(TAG, "HID helper request failed");
+        ESP_LOGI(TAG, "finger matched slot=%u score=%u; requesting HID action",
+                 match.slot, match.score);
+        if (!request_and_type_password(&match)) ESP_LOGW(TAG, "HID helper request failed");
       } else {
         ESP_LOGI(TAG, "finger matched; authorizing PIV and typing PIN");
         piv_note_user_presence();

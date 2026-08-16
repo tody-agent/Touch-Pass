@@ -13,11 +13,17 @@ impl SecretStore {
     }
 
     pub fn get(&self, account: &str) -> Result<Vec<u8>, String> {
+        self.get_optional(account)?
+            .ok_or_else(|| "No matching entry found in secure storage".to_string())
+    }
+
+    pub fn get_optional(&self, account: &str) -> Result<Option<Vec<u8>>, String> {
         let entry = Entry::new(&self.service, account).map_err(|e| e.to_string())?;
-        entry
-            .get_password()
-            .map(|p| p.into_bytes())
-            .map_err(|e| e.to_string())
+        match entry.get_password() {
+            Ok(password) => Ok(Some(password.into_bytes())),
+            Err(keyring::Error::NoEntry) => Ok(None),
+            Err(error) => Err(error.to_string()),
+        }
     }
 
     pub fn set(&self, account: &str, secret: &[u8]) -> Result<(), String> {
@@ -31,7 +37,8 @@ impl SecretStore {
         let entry = Entry::new(&self.service, account).map_err(|e| e.to_string())?;
         match entry.delete_password() {
             Ok(()) => Ok(()),
-            Err(_) => Ok(()),
+            Err(keyring::Error::NoEntry) => Ok(()),
+            Err(error) => Err(error.to_string()),
         }
     }
 

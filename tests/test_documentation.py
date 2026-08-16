@@ -47,6 +47,7 @@ APPROVED_IMAGES = {
     "03-login-success.png",
     "04-features.png",
     "05-exploded-view-v3.png",
+    "screenshot_app.png",
 }
 
 

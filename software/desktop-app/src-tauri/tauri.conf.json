@@ -17,25 +17,22 @@
         "title": "TouchPass",
         "width": 960,
         "height": 680,
-        "minWidth": 900,
-        "minHeight": 640,
-        "resizable": false,
-        "decorations": false,
-        "transparent": true,
+        "minWidth": 760,
+        "minHeight": 600,
+        "resizable": true,
+        "decorations": true,
+        "transparent": false,
         "shadow": true,
         "center": true,
-        "titleBarStyle": "Overlay",
-        "hiddenTitle": true,
         "visible": true
       }
     ],
     "security": {
-      "csp": "default-src 'self'; img-src 'self' data:; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src 'self' https://fonts.gstatic.com; connect-src 'self' ipc: http://ipc.localhost"
+      "csp": "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self' ipc: http://ipc.localhost"
     }
   },
   "bundle": {
     "active": true,
-    "targets": ["app", "dmg", "msi", "nsis", "deb", "appimage"],
     "icon": ["icons/icon.png", "icons/icon.ico", "icons/icon.icns"],
     "publisher": "TouchPass",
     "category": "DeveloperTool",

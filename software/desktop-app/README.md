@@ -4,14 +4,19 @@ Native cross-platform TouchPass desktop application built with Tauri v2, Svelte 
 
 ## Current Surface
 
-- App shell with frameless macOS-style titlebar, two-tab sidebar, 10-finger map, action picker, Touch ID enrollment modal, HUD pill, tray popover, and settings pane.
+- Focus-first, resizable native window with a full-width 10-finger map and action editor.
+- Settings and help are accessible modal sheets; settings includes live locale switching, device diagnostics, and Tauri autostart.
+- Vietnamese, English, and Simplified Chinese UI with operating-system locale detection and Vietnamese fallback.
+- Closing the main window hides TouchPass to the system tray; only the localized tray Quit action ends the process.
+- Profile persistence uses semantic schema v2 and migrates/backups legacy v1 profiles without persisting translated labels.
 - Rust backend commands:
   - `get_app_status`
   - `list_finger_profiles`
   - `save_finger_profile`
   - `reset_finger_profile`
   - `start_enrollment`
-  - `test_dispatch_action`
+  - `get_app_preferences`
+  - `set_app_locale`
 - Rust events:
   - `device_status_change`
   - `enroll_step_progress`
@@ -35,6 +40,17 @@ npm run check
 npm test
 npm run build
 npm run tauri:build
+```
+
+Release bundles use platform-specific Tauri configuration: NSIS on Windows,
+app/DMG on macOS, and deb/AppImage on Linux. MSI is intentionally not part of the
+local Windows target because it requires the optional Windows VBScript/Installer
+validation components; CI can add MSI explicitly on a prepared runner if needed.
+
+Run the complete frontend gate with:
+
+```powershell
+npm run test:gate
 ```
 
 ## Firmware Smoke Test

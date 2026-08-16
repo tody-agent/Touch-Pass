@@ -4,9 +4,9 @@ with the local macOS portal in `software/macos-helper`.
 
 Pin mapping:
 
-- ZW101 TouchOut -> GPIO1
-- ZW101 TX -> GPIO6 (ESP RX)
-- ZW101 RX -> GPIO7 (ESP TX)
+- ZW101 TouchOut (blue) -> GPIO2
+- ZW101 TX (yellow) -> GPIO44 (ESP RX)
+- ZW101 RX (black) -> GPIO43 (ESP TX)
 - ZW101 V_TOUCH and VCC -> 3.3V
 - ZW101 GND -> GND
 

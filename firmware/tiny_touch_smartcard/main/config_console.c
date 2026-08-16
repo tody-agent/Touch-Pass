@@ -219,8 +219,14 @@ static void handle_command(void) {
   } else if (strncmp(command, "ENROLL ", 7) == 0) {
     if (!require_config_authorization()) return;
     unsigned long slot = strtoul(command + 7, NULL, 10);
-    bool ok = fingerprint_enroll((uint16_t)slot, enrollment_prompt);
-    snprintf(line, sizeof(line), ok ? "OK ENROLL slot=%lu" : "ERR ENROLL slot=%lu", slot);
+    fingerprint_enroll_error_t error;
+    bool ok = fingerprint_enroll((uint16_t)slot, enrollment_prompt, &error);
+    if (ok) {
+      snprintf(line, sizeof(line), "OK ENROLL slot=%lu", slot);
+    } else {
+      snprintf(line, sizeof(line), "ERR ENROLL slot=%lu stage=%s confirm=0x%02x",
+               slot, fingerprint_enroll_stage_name(error.stage), error.confirm);
+    }
     send_line(line);
   } else if (strncmp(command, "DELETE ", 7) == 0) {
     if (!require_config_authorization()) return;

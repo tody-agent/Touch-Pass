@@ -1,0 +1,41 @@
+name: Unified ESP-IDF Firmware
+
+on:
+  push:
+    paths:
+      - "firmware/tiny_touch_smartcard/**"
+      - ".github/workflows/firmware.yml"
+  pull_request:
+    paths:
+      - "firmware/tiny_touch_smartcard/**"
+      - ".github/workflows/firmware.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    container: espressif/idf:v5.3.3
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build ESP32-S3 unified firmware
+        run: idf.py -C firmware/tiny_touch_smartcard build
+
+      - name: Stage flash artifacts and checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p firmware-artifacts
+          cp firmware/tiny_touch_smartcard/build/bootloader/bootloader.bin firmware-artifacts/bootloader.bin
+          cp firmware/tiny_touch_smartcard/build/partition_table/partition-table.bin firmware-artifacts/partition-table.bin
+          cp firmware/tiny_touch_smartcard/build/tiny_touch_smartcard.bin firmware-artifacts/tiny_touch_smartcard.bin
+          cp firmware/tiny_touch_smartcard/build/flasher_args.json firmware-artifacts/flasher_args.json
+          cd firmware-artifacts
+          sha256sum bootloader.bin partition-table.bin tiny_touch_smartcard.bin flasher_args.json > SHA256SUMS
+
+      - name: Upload flash bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: touchpass-unified-esp32s3
+          path: firmware-artifacts/
+          if-no-files-found: error

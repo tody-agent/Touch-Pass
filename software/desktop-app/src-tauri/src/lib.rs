@@ -1,7 +1,9 @@
+mod admin_flow;
 mod commands;
 mod crypto;
 mod event_loop;
 mod gate;
+pub mod preferences;
 mod profile_store;
 mod protocol;
 mod secret_store;
@@ -10,40 +12,63 @@ mod state;
 pub mod types;
 
 use commands::{
-    get_app_status, list_finger_profiles, reset_finger_profile, save_finger_profile,
-    start_enrollment, test_dispatch_action,
+    get_app_preferences, get_app_status, list_finger_profiles, reset_finger_profile,
+    save_finger_profile, set_app_locale, start_enrollment,
 };
+use preferences::tray_labels;
 use state::AppState;
 use tauri::menu::MenuBuilder;
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::Manager;
+use types::Locale;
 
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_autostart::init(
+            tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+            None,
+        ))
+        .on_window_event(|window, event| {
+            if window.label() == "main" {
+                if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                    api.prevent_close();
+                    let _ = window.hide();
+                }
+            }
+        })
         .setup(|app| {
-            install_tray(app)?;
             let state = AppState::new(app.handle().clone())?;
+            let locale = state
+                .preferences
+                .lock()
+                .ok()
+                .and_then(|preferences| preferences.load().ok())
+                .and_then(|preferences| preferences.locale)
+                .unwrap_or(Locale::Vi);
+            install_tray(app, locale)?;
             let state = event_loop::spawn_serial_worker(app.handle().clone(), state);
             app.manage(state);
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             get_app_status,
+            get_app_preferences,
+            set_app_locale,
             list_finger_profiles,
             save_finger_profile,
             reset_finger_profile,
-            start_enrollment,
-            test_dispatch_action
+            start_enrollment
         ])
         .run(tauri::generate_context!())
         .expect("error while running TouchPass");
 }
 
-fn install_tray(app: &mut tauri::App) -> tauri::Result<()> {
+fn install_tray(app: &mut tauri::App, locale: Locale) -> tauri::Result<()> {
+    let (show_label, quit_label) = tray_labels(locale);
     let menu = MenuBuilder::new(app)
-        .text("show", "Show TouchPass")
+        .text("show", show_label)
         .separator()
-        .text("quit", "Quit")
+        .text("quit", quit_label)
         .build()?;
 
     let mut builder = TrayIconBuilder::with_id("touchpass")
@@ -72,6 +97,19 @@ fn install_tray(app: &mut tauri::App) -> tauri::Result<()> {
         builder = builder.icon(icon);
     }
     builder.build(app)?;
+    Ok(())
+}
+
+pub fn update_tray_menu(app: &tauri::AppHandle, locale: Locale) -> tauri::Result<()> {
+    let (show_label, quit_label) = tray_labels(locale);
+    let menu = MenuBuilder::new(app)
+        .text("show", show_label)
+        .separator()
+        .text("quit", quit_label)
+        .build()?;
+    if let Some(tray) = app.tray_by_id("touchpass") {
+        tray.set_menu(Some(menu))?;
+    }
     Ok(())
 }
 
