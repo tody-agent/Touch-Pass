@@ -33,9 +33,14 @@ Cảm biến ZW101 và ESP32-S3 Super Mini đều hoạt động ở **mức đi
 | **1** | `V_TOUCH` | **`3V3`** | Nguồn cảm ứng vòng phát hiện ngón tay (3.3V) |
 | **2** | `TouchOut` | **`GPIO2`** | Tín hiệu gợi ý có ngón tay; firmware vẫn kiểm tra ảnh qua UART |
 | **3** | `VCC` | **`3V3`** | Nguồn chính cho cảm biến optical ZW101 (3.3V) |
-| **4** | `TX` (ZW101) | **`GPIO44`** | **Đấu chéo**: TX cảm biến ➔ RX của ESP32 (GPIO44) |
-| **5** | `RX` (ZW101) | **`GPIO43`** | **Đấu chéo**: RX cảm biến ➔ TX của ESP32 (GPIO43) |
+| **4** | `TX` (ZW101) | **chân in `RX` trên board** | **Đấu chéo**: TX cảm biến ➔ RX của ESP32 |
+| **5** | `RX` (ZW101) | **chân in `TX` trên board** | **Đấu chéo**: RX cảm biến ➔ TX của ESP32 |
 | **6** | `GND` | **`GND`** | Chân nối đất chung (Ground) |
+
+Hãy đấu theo chữ `TX` và `RX` in trực tiếp trên board. Một số biến thể
+ESP32-S3 Mini 18 chân dùng chung hình dáng nhưng ánh xạ các nhãn này thành
+GPIO43/44, GPIO42/41 hoặc GPIO1/3. Unified firmware tự dò mapping bằng phản hồi
+EF-01 có checksum hợp lệ; không cần chuyển dây sang các chân đánh số để chọn mapping.
 
 ### Sketch Arduino legacy
 
@@ -116,5 +121,5 @@ Script sẽ tự động kiểm tra 4 giai đoạn và trả về thông báo ch
 | --- | --- |
 | Helper báo không tìm thấy thiết bị ESP32-S3 | Kiểm tra dây cáp USB (phải là cáp dữ liệu Data), bật tùy chọn `USB CDC On Boot` trong Arduino IDE, hoặc dùng tham số `--port COM3`. |
 | Arduino IDE báo lỗi upload | Giữ nút **BOOT** trên board ESP32-S3, bấm thả nút **RESET**, thả nút **BOOT** rồi bấm Upload lại. |
-| ESP32 nhận diện nhưng ZW101 báo lỗi sensor | Với unified firmware, kiểm tra TX→GPIO44 và RX→GPIO43 đã đấu chéo; GPIO6/7 chỉ dành cho sketch Arduino legacy. Kiểm tra cả hai chân nguồn ZW101 đã nối 3V3 và GND chung. |
+| ESP32 nhận diện nhưng ZW101 báo lỗi sensor | Với board ESP32-S3 Super Mini 18 chân, kiểm tra TX cảm biến→chân in `RX` và RX cảm biến→chân in `TX` đã đấu chéo. Unified firmware tự dò GPIO43/44, GPIO42/41 và GPIO1/3; GPIO6/7 chỉ dành cho sketch Arduino legacy. Kiểm tra cả hai chân nguồn ZW101 đã nối 3V3 và GND chung. |
 | Mật khẩu bị gõ sai ký tự | Chuyển bộ gõ bàn phím hệ thống sang chuẩn `ENG` / `US` / `ABC`. |

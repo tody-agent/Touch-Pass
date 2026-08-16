@@ -174,14 +174,28 @@ static void handle_command(void) {
     send_line("PONG");
   } else if (strcmp(command, "STATUS") == 0) {
     int count = fingerprint_count();
-    if (count < 0) send_line("ERR STATUS sensor");
+    if (count < 0) {
+      snprintf(line, sizeof(line),
+               "ERR STATUS sensor uart_tx=%d uart_rx=%d baud=%d touch=%d "
+               "verify_confirm=0x%02x count_transport=%d "
+               "count_confirm=0x%02x count_len=%d",
+               fingerprint_uart_tx_pin(), fingerprint_uart_rx_pin(),
+               fingerprint_uart_baud(), fingerprint_present_hint() ? 1 : 0,
+               fingerprint_last_verify_confirm(),
+               fingerprint_last_count_transport_ok() ? 1 : 0,
+               fingerprint_last_count_confirm(),
+               fingerprint_last_count_data_length());
+      send_line(line);
+    }
     else {
       snprintf(line, sizeof(line),
                "OK STATUS firmware=unified mode=%s sensor=ok fingerprints=%d "
-               "keys=%s hid_key=%s",
+               "keys=%s hid_key=%s uart_tx=%d uart_rx=%d baud=%d touch=%d",
                device_config_mode_name(), count,
                piv_uses_provisioned_keys() ? "nvs" : "unconfigured",
-               device_config_hid_key_configured() ? "configured" : "unconfigured");
+               device_config_hid_key_configured() ? "configured" : "unconfigured",
+               fingerprint_uart_tx_pin(), fingerprint_uart_rx_pin(),
+               fingerprint_uart_baud(), fingerprint_present_hint() ? 1 : 0);
       send_line(line);
     }
   } else if (strcmp(command, "CONFIG_UNLOCK") == 0) {

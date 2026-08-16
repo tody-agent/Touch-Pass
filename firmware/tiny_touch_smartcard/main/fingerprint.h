@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 typedef struct {
@@ -32,6 +33,13 @@ void fingerprint_led_idle(void);
 bool fingerprint_authorize_poll_once(fingerprint_match_t *match);
 bool fingerprint_authorize_once(void);
 int fingerprint_count(void);
+int fingerprint_uart_tx_pin(void);
+int fingerprint_uart_rx_pin(void);
+int fingerprint_uart_baud(void);
+int fingerprint_last_verify_confirm(void);
+bool fingerprint_last_count_transport_ok(void);
+int fingerprint_last_count_confirm(void);
+int fingerprint_last_count_data_length(void);
 bool fingerprint_enroll(uint16_t slot, void (*prompt)(const char *message),
                         fingerprint_enroll_error_t *error);
 const char *fingerprint_enroll_stage_name(fingerprint_enroll_stage_t stage);
