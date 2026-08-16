@@ -50,4 +50,3 @@ green, failures flash red, and the idle color remains blue.
 - Build the unified firmware with ESP-IDF 5.3.3.
 - On hardware with `mode=piv keys=unconfigured`, touch an enrolled finger and
   verify no `000000`, one `EV UNCONFIGURED`, and a yellow flash returning blue.
-

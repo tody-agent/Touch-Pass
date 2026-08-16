@@ -57,4 +57,3 @@ OK: ZW101 da chup duoc anh ngon tay (ACK=0x00).
   chung, sau đó kiểm tra TX/RX đã đấu chéo.
 - Có phản hồi nhưng báo mật khẩu không phải `00000000`: module đã giao tiếp
   được nhưng đã bị đổi mật khẩu UART; sketch test không tự thay đổi mật khẩu.
-

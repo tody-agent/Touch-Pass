@@ -35,4 +35,3 @@ firmware TouchPass xac nhan: TX/RX 43/44, 42/41 va 1/3.
 - Chay GPIO safety audit.
 - Bien dich sketch bang `arduino-cli` cho `ESP32S3 Dev Module` voi USB CDC.
 - Viec xac minh cam bien vat ly can nguoi dung nap sketch va quan sat Serial Monitor.
-
