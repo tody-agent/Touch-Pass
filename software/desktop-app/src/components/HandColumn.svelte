@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Check, Fingerprint } from 'lucide-svelte';
+  import { Check, Fingerprint, Pause } from 'lucide-svelte';
   import { fingerName, type Locale } from '../lib/i18n';
   import type { FingerProfile } from '../lib/types';
 
@@ -15,15 +15,18 @@
 </script>
 
 <div class="hand-group">
-  <div class="mb-3 text-xs font-extrabold uppercase tracking-wide text-slate-400">{title}</div>
+  <div class="mb-3 text-xs font-semibold uppercase tracking-wider text-slate-400">{title}</div>
   <div class="grid grid-cols-5 gap-2">
     {#each profiles as profile}
+      {@const isDisabled = profile.actionType === 'disabled'}
       <button
         class={`finger-button ${
           selectedId === profile.id
             ? 'finger-button-selected'
             : profile.configured
-              ? 'finger-button-configured'
+              ? isDisabled
+                ? 'finger-button-disabled'
+                : 'finger-button-configured'
               : 'finger-button-idle'
         }`}
         onclick={() => onSelect(profile.id)}
@@ -35,11 +38,15 @@
         <Fingerprint
           size={24}
           aria-hidden="true"
-          class={profile.configured ? 'text-emerald-300' : selectedId === profile.id ? 'text-blue-300' : 'text-slate-400'}
+          class={profile.configured ? (isDisabled ? 'text-amber-300' : 'text-emerald-300') : selectedId === profile.id ? 'text-blue-300' : 'text-slate-400'}
         />
-        <span class={`finger-state ${profile.configured ? 'finger-state-ready' : 'finger-state-empty'}`}>
+        <span class={`finger-state ${profile.configured ? (isDisabled ? 'finger-state-disabled' : 'finger-state-ready') : 'finger-state-empty'}`}>
           {#if profile.configured}
-            <Check size={13} strokeWidth={3} aria-hidden="true" />
+            {#if isDisabled}
+              <Pause size={11} strokeWidth={3} aria-hidden="true" />
+            {:else}
+              <Check size={13} strokeWidth={3} aria-hidden="true" />
+            {/if}
           {:else}
             <span class="text-sm leading-none" aria-hidden="true">+</span>
           {/if}
