@@ -1,6 +1,10 @@
-[🌐 **English**](../../README.md) | 🇻🇳 **Tiếng Việt** | [🌐 **1-Click Web Flasher**](https://tody-agent.github.io/Touch-Pass/web/flasher/) | [🤖 **Cài đặt AI Agent (VI)**](../AI_AGENT_PROMPT.vi.md) | [🌐 **(EN)**](../AI_AGENT_PROMPT.md)
+<div align="center">
 
-> **Cho mỗi ngón tay một siêu năng lực.**
+<img src="../../assets/logo/touchpass-icon-1024.png" width="128" height="128" alt="TouchPass App Icon" />
+
+# TouchPass
+
+### *Cho mỗi ngón tay một siêu năng lực.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](../../LICENSE)
 [![Hardware](https://img.shields.io/badge/Hardware-ESP32--S3-orange.svg)](../BUILD_GUIDE.md)
@@ -8,7 +12,13 @@
 [![Web Flasher](https://img.shields.io/badge/🌐_1--Click-Web_Flasher-success.svg)](https://tody-agent.github.io/Touch-Pass/web/flasher/)
 [![AI Setup](https://img.shields.io/badge/🤖_1--Prompt-AI_Agent_Setup-purple.svg)](../AI_AGENT_PROMPT.vi.md)
 
+[🌐 **English**](../../README.md) | 🇻🇳 **Tiếng Việt** | [🌐 **1-Click Web Flasher**](https://tody-agent.github.io/Touch-Pass/web/flasher/) | [🤖 **Cài đặt AI Agent (VI)**](../AI_AGENT_PROMPT.vi.md) | [🌐 **(EN)**](../AI_AGENT_PROMPT.md)
+
+<br />
+
 ![TouchPass Hero Showcase](../../assets/demo/03-login-success.png)
+
+</div>
 
 ---
 

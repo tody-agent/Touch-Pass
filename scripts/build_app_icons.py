@@ -65,10 +65,52 @@ def generate_app_icons(source_path: Path = None, output_dir: Path = None) -> lis
     return generated_files
 
 
+def generate_web_icons(source_path: Path = None, web_dirs: list[Path] = None) -> list[Path]:
+    repo_root = Path(__file__).resolve().parents[1]
+    if source_path is None:
+        source_path = repo_root / "assets" / "logo" / "touchpass-icon-1024.png"
+    if web_dirs is None:
+        web_dirs = [
+            repo_root / "web",
+            repo_root / "web" / "flasher",
+        ]
+
+    if not source_path.exists():
+        raise FileNotFoundError(f"Master logo not found: {source_path}")
+
+    generated_files = []
+
+    with Image.open(source_path) as master_img:
+        master_img = master_img.convert("RGBA")
+
+        for web_dir in web_dirs:
+            web_dir.mkdir(parents=True, exist_ok=True)
+
+            # 1. Web favicon.png (64x64)
+            png_dest = web_dir / "favicon.png"
+            resized = master_img.resize((64, 64), Image.Resampling.LANCZOS)
+            resized.save(png_dest, format="PNG", optimize=True)
+            generated_files.append(png_dest)
+            print(f"Generated Web Favicon PNG: {png_dest.relative_to(repo_root)} (64x64)")
+
+            # 2. Multi-layer favicon.ico (16, 32, 48)
+            ico_dest = web_dir / "favicon.ico"
+            ico_sizes = [(16, 16), (32, 32), (48, 48)]
+            master_img.save(ico_dest, format="ICO", sizes=ico_sizes)
+            generated_files.append(ico_dest)
+            print(f"Generated Web Favicon ICO: {ico_dest.relative_to(repo_root)} with sizes: {ico_sizes}")
+
+    return generated_files
+
+
 def main():
     print("Building TouchPass Tauri desktop application icon set...")
-    files = generate_app_icons()
-    print(f"Successfully generated {len(files)} icon assets.")
+    desktop_files = generate_app_icons()
+    print(f"Successfully generated {len(desktop_files)} desktop icon assets.\n")
+
+    print("Building TouchPass Web favicons...")
+    web_files = generate_web_icons()
+    print(f"Successfully generated {len(web_files)} web icon assets.")
 
 
 if __name__ == "__main__":

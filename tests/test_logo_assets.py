@@ -14,6 +14,8 @@ class LogoAssetsTests(unittest.TestCase):
         self.tray_32_path = self.logo_dir / "touchpass-tray-32.png"
         self.tray_16_path = self.logo_dir / "touchpass-tray-16.png"
         self.tauri_icons_dir = self.repo_root / "software" / "desktop-app" / "src-tauri" / "icons"
+        self.web_dir = self.repo_root / "web"
+        self.web_flasher_dir = self.repo_root / "web" / "flasher"
 
     def test_master_icon_exists_and_valid(self):
         self.assertTrue(self.master_icon_path.exists(), f"Missing master icon at {self.master_icon_path}")
@@ -122,6 +124,30 @@ class LogoAssetsTests(unittest.TestCase):
 
         with Image.open(icns_file) as img:
             self.assertEqual(img.format, "ICNS", "Expected ICNS format for icon.icns")
+
+    def test_web_favicons_png(self):
+        for parent_dir in (self.web_dir, self.web_flasher_dir):
+            favicon_png = parent_dir / "favicon.png"
+            self.assertTrue(favicon_png.exists(), f"Missing favicon.png at {favicon_png}")
+            self.assertGreater(favicon_png.stat().st_size, 100, f"Favicon PNG too small at {favicon_png}")
+
+            with Image.open(favicon_png) as img:
+                self.assertEqual(img.format, "PNG", f"Expected PNG format for {favicon_png}")
+                self.assertEqual(img.size, (64, 64), f"Expected 64x64 dimensions for {favicon_png}")
+                self.assertEqual(img.mode, "RGBA", f"Expected RGBA mode for {favicon_png}")
+
+    def test_web_favicons_ico(self):
+        for parent_dir in (self.web_dir, self.web_flasher_dir):
+            favicon_ico = parent_dir / "favicon.ico"
+            self.assertTrue(favicon_ico.exists(), f"Missing favicon.ico at {favicon_ico}")
+            self.assertGreater(favicon_ico.stat().st_size, 1000, f"Favicon ICO too small at {favicon_ico}")
+
+            with Image.open(favicon_ico) as img:
+                self.assertEqual(img.format, "ICO", f"Expected ICO format for {favicon_ico}")
+                self.assertTrue(hasattr(img, "ico"), f"Expected ICO metadata for {favicon_ico}")
+                sizes = img.ico.sizes()
+                for req in [(16, 16), (32, 32), (48, 48)]:
+                    self.assertIn(req, sizes, f"Favicon ICO missing required size layer {req} in {favicon_ico}")
 
 
 if __name__ == "__main__":

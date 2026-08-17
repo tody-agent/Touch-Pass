@@ -1,6 +1,8 @@
 <div align="center">
 
-# 🖐️ TouchPass
+<img src="../../assets/logo/touchpass-icon-1024.png" width="128" height="128" alt="TouchPass App Icon" />
+
+# TouchPass
 
 ### *Дайте каждому пальцу суперспособность.*
 
