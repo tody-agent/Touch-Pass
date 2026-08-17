@@ -30,6 +30,13 @@ The macOS builds are not notarized. If macOS blocks the first launch, Control-cl
 - Password actions remain in the operating system credential store. TouchPass does not synchronize fingerprints, passwords, or profiles to a cloud service.
 - Change Vietnamese, English, or Simplified Chinese in **Settings → General**. The menu bar and system tray update immediately.
 
+## PIV Smart Card OS Login
+
+For operating system cold boot and pre-login authentication (FileVault on macOS Apple Silicon, Login Window / Sudo on macOS Apple T2/Intel, or Active Directory / Microsoft Entra CBA on Windows):
+- **macOS Pairing**: Run `bash software/scripts/macos_pair_smartcard.sh` (or `tinytouch pair`).
+- **Windows Pairing**: Run `powershell -ExecutionPolicy Bypass -File software/scripts/windows_cert_enroll.ps1`.
+- For full details, see the **[macOS PIV & FileVault Guide](macos-piv-filevault-guide.md)** and **[Windows Smart Card Guide](windows-piv-cba-guide.md)**.
+
 ## Troubleshooting
 
 | Symptom | What to do |

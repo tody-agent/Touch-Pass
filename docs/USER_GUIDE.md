@@ -137,8 +137,9 @@ The Web Portal contains a real-time event log monitor with color-coded badges:
 ## 7. Security & Safety Checklist
 
 - **Focused Window Safety**: TouchPass operates as a standard USB HID keyboard. Keystrokes type directly into whichever application window currently has focus. Always verify your cursor location before touching the sensor.
-- **Credential Storage**: Passwords are saved per-user helper in the OS Credential Manager (Windows Credential Manager / macOS Keychain).
-- **Session Unlock Limits**: TouchPass supports session unlock while the user is logged in. It does NOT support FileVault cold boot unlock or unlock after logout, as the per-user helper and Keychain services are locked prior to user session login.
+- **Operating System Logon Modes**:
+  - **PIV Native Smart Card Mode (Recommended)**: Enables native pre-boot and login authentication. macOS Apple Silicon supports FileVault cold boot unlock directly; macOS Apple T2/Intel supports Login Window authentication and sudo; Windows supports Active Directory domain and Microsoft Entra CBA logon. Zero OS passwords are stored in firmware. See **[macOS PIV & FileVault Guide](macos-piv-filevault-guide.md)** and **[Windows Smart Card Guide](windows-piv-cba-guide.md)**.
+  - **HID Keystroke Mode**: Provides session unlock and password/macro typing while the user session is already active and the local helper is running.
 
 ---
 

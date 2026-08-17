@@ -139,9 +139,9 @@ Giao diện Web Portal hiển thị nhật ký sự kiện real-time với các 
 
 ## 7. Danh Mục Kiểm Tra An Toàn & Bảo Mật
 
-- **Safety con trỏ focus**: TouchPass đóng vai trò là bàn phím USB HID tiêu chuẩn. Phím gõ sẽ xuất hiện tại vị trí con trỏ đang mở trên màn hình. Hãy luôn chú ý cửa sổ ứng dụng đang focus trước khi chạm vân tay.
-- **Lưu trữ Mật khẩu**: Mật khẩu được lưu per-user helper trong kho bảo mật của hệ điều hành (Windows Credential Manager / macOS Keychain).
-- **Giới hạn Unlock Session**: TouchPass hỗ trợ mở khóa màn hình khi người dùng đã đăng nhập (session unlock). TouchPass KHÔNG hỗ trợ mở khóa khởi động lạnh FileVault cold boot hoặc mở khóa sau khi logout hoàn toàn, vì dịch vụ helper cục bộ chưa chạy trước khi login session.
+- **Chế độ Đăng nhập Hệ điều hành**:
+  - **Chế độ Thẻ Thông Minh PIV Native (Khuyến nghị)**: Cho phép đăng nhập và mở khóa khởi động lạnh trực tiếp. macOS Apple Silicon hỗ trợ mở khóa FileVault cold boot; macOS Apple T2/Intel hỗ trợ Login Window và lệnh sudo; Windows hỗ trợ đăng nhập Domain Active Directory và Microsoft Entra ID CBA. Hoàn toàn không lưu mật khẩu hệ điều hành trong firmware. Chi tiết xem **[Hướng dẫn macOS PIV & FileVault](macos-piv-filevault-guide.md)** và **[Hướng dẫn Windows Smart Card](windows-piv-cba-guide.md)**.
+  - **Chế độ Gõ Phím USB HID**: Hỗ trợ mở khóa session và tự động gõ mật khẩu/macro khi phiên làm việc của người dùng đã hoạt động và ứng dụng helper đang chạy.
 
 ---
 

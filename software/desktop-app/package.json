@@ -9,7 +9,7 @@
     "preview": "vite preview --host 127.0.0.1",
     "check": "svelte-check --tsconfig ./tsconfig.json --config ./vite.config.ts --fail-on-warnings",
     "test": "vitest run",
-    "test:gate": "npm run check && npm test && npm run build",
+    "test:gate": "pnpm run check && pnpm test && pnpm run build",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build"

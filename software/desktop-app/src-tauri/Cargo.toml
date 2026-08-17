@@ -29,3 +29,18 @@ tauri-plugin-autostart = "2.5.1"
 tempfile = "3.10"
 
 [dev-dependencies]
+
+[profile.dev]
+opt-level = 0
+debug = 1
+incremental = true
+
+# Tối ưu hóa dependencies để app dev chạy nhanh nhưng code của dự án vẫn build siêu tốc
+[profile.dev.package."*"]
+opt-level = 2
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+strip = true

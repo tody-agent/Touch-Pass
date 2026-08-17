@@ -45,6 +45,7 @@ Swapping context, repositioning your hands, typing `y` + `Enter`, or mistyping a
 
 | Feature | Capabilities & Architecture | Benefit for AI Workflows |
 | :--- | :--- | :--- |
+| 🔐 **PIV Native Smart Card** | NIST SP 800-73-4 CCID Smart Card with Match-on-Device biometric gating | Native OS login, macOS Apple Silicon FileVault pre-boot unlock & Windows AD/Entra CBA with zero OS passwords in firmware |
 | 🌐 **Web Serial Flasher** | Browser-native flashing via Web Serial API (`esptool-js`) on Chrome/Edge | Zero-installation firmware flashing directly from browser with SHA-256 validation |
 | 🤖 **1-Prompt AI Agent Setup** | Copyable setup prompt template for **Claude Code**, **Cursor**, **Antigravity**, **OpenCode** | Automated 1-prompt OS detection, venv creation, daemon launch, and hardware verification |
 | 🔌 **Native USB HID** | Emulates a standard USB physical keyboard hardware via ESP32-S3 stack | Driverless plug-and-play across Windows, macOS & Linux; sends keystrokes into whichever window is currently **focused** |

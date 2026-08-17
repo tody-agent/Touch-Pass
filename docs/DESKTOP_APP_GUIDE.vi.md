@@ -30,6 +30,13 @@ Bản macOS hiện chưa notarize. Nếu macOS chặn lần mở đầu, giữ C
 - Mật khẩu ở Windows Credential Manager, macOS Keychain hoặc Linux Secret Service; TouchPass không đồng bộ vân tay/mật khẩu/profile lên cloud.
 - Đổi Việt/Anh/Trung giản thể ở **Cài đặt → Chung**. Giao diện và tray cập nhật ngay.
 
+## Đăng nhập Hệ điều hành qua Thẻ thông minh PIV
+
+Để mở khóa khởi động lạnh và đăng nhập hệ điều hành (FileVault trên macOS Apple Silicon, Login Window / Sudo trên macOS Apple T2/Intel, hoặc Active Directory / Microsoft Entra CBA trên Windows):
+- **Ghép nối macOS**: Chạy `bash software/scripts/macos_pair_smartcard.sh` (hoặc `tinytouch pair`).
+- **Ghép nối Windows**: Chạy `powershell -ExecutionPolicy Bypass -File software/scripts/windows_cert_enroll.ps1`.
+- Xem hướng dẫn chi tiết tại **[Hướng dẫn macOS PIV & FileVault](macos-piv-filevault-guide.md)** và **[Hướng dẫn Windows Smart Card](windows-piv-cba-guide.md)**.
+
 ## Khắc phục sự cố
 
 | Hiện tượng | Cách xử lý |
