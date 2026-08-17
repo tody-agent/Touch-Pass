@@ -105,3 +105,41 @@ powershell -ExecutionPolicy Bypass -File software\desktop-app\scripts\diagnose-e
 `BOOT_MODE_DOWNLOAD strap=0x00000023 low_nibble=0x3` means the ESP32-S3 is
 sampling its strap pins as download mode after reset, so the next action is physical:
 release BOOT/IO0 and reset/replug until the low nibble is `0x4` or `0x8..0xf`.
+
+## Tối Ưu Tốc Độ Build & Dung Lượng (Windows)
+
+### 1. Tăng tốc Biên Dịch với LLD Linker & Profiles
+Dự án đã được cấu hình sẵn LLD Linker trong `.cargo/config.toml` và tối ưu `[profile.dev]` trong `Cargo.toml`.
+- Incremental linking giảm từ vài phút xuống còn **< 20 giây**.
+- Cài đặt `sccache` (tùy chọn) để tăng tốc caching:
+  ```powershell
+  winget install Mozilla.sccache
+  # hoặc: cargo install sccache
+  ```
+
+### 2. Tiết Kiệm Dung Lượng với pnpm
+Khuyên dùng `pnpm` để quản lý dependencies Frontend thông qua Content-Addressable Storage (tiết kiệm đến 80% dung lượng `node_modules`):
+```powershell
+cd software/desktop-app
+pnpm install
+pnpm run test:gate
+```
+
+### 3. Tự Động Thêm Windows Defender Exclusion
+Loại trừ quét tệp tạm của Antivirus để tránh nghẽn I/O (Chạy PowerShell dưới quyền Administrator):
+```powershell
+powershell -ExecutionPolicy Bypass -File software\desktop-app\scripts\add-defender-exclusion.ps1
+```
+
+### 4. Dọn Dẹp Không Gian Đĩa Tự Động
+Chạy script dọn dẹp để giải phóng các bản build và incremental cache cũ:
+```powershell
+# Dọn dẹp tệp build cũ hơn 7 ngày (an toàn, giữ lại cache hiện tại)
+powershell -ExecutionPolicy Bypass -File software\desktop-app\scripts\clean-workspace.ps1 -Days 7
+
+# Dọn dẹp cả cache registry trong ~/.cargo
+powershell -ExecutionPolicy Bypass -File software\desktop-app\scripts\clean-workspace.ps1 -Days 7 -CleanCargoRegistry
+
+# Xóa sạch toàn bộ target và node_modules để giải phóng triệt để
+powershell -ExecutionPolicy Bypass -File software\desktop-app\scripts\clean-workspace.ps1 -FullClean
+```
