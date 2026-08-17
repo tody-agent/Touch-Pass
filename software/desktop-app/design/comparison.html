@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TouchPass Vault Workspace — Design QA</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; padding: 24px; color: #e2e8f0; background: #050912; font: 600 14px/1.4 system-ui, sans-serif; }
+      h1 { margin: 0 0 18px; font-size: 20px; }
+      .board { display: grid; grid-template-columns: repeat(2, 1180px); gap: 24px; }
+      figure { margin: 0; }
+      figcaption { margin-bottom: 10px; color: #94a3b8; }
+      .frame { width: 1180px; height: 760px; overflow: hidden; border: 1px solid #334155; border-radius: 12px; background: #0c1422; }
+      img { width: 100%; height: 100%; display: block; object-fit: cover; object-position: center; }
+    </style>
+  </head>
+  <body>
+    <h1>Vault Workspace — full-view comparison</h1>
+    <div class="board">
+      <figure>
+        <figcaption>Reference target · normalized to 1180×760</figcaption>
+        <div class="frame"><img src="./references/vault-workspace.png" alt="Reference Vault Workspace" /></div>
+      </figure>
+      <figure>
+        <figcaption>Implemented TouchPass · 1180×760 · Vietnamese</figcaption>
+        <div class="frame"><img src="./implementation-1180x760-final.png" alt="Implemented TouchPass workspace" /></div>
+      </figure>
+    </div>
+  </body>
+</html>
