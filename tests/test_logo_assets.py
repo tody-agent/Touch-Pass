@@ -13,6 +13,7 @@ class LogoAssetsTests(unittest.TestCase):
         self.svg_mono_path = self.logo_dir / "touchpass-monochrome.svg"
         self.tray_32_path = self.logo_dir / "touchpass-tray-32.png"
         self.tray_16_path = self.logo_dir / "touchpass-tray-16.png"
+        self.tauri_icons_dir = self.repo_root / "software" / "desktop-app" / "src-tauri" / "icons"
 
     def test_master_icon_exists_and_valid(self):
         self.assertTrue(self.master_icon_path.exists(), f"Missing master icon at {self.master_icon_path}")
@@ -73,6 +74,54 @@ class LogoAssetsTests(unittest.TestCase):
             # Check transparency / non-empty alpha
             alpha_extrema = img.getextrema()[3]
             self.assertGreater(alpha_extrema[1], 0, "Tray icon 16 must have non-transparent pixels")
+
+    def test_tauri_desktop_png_icons(self):
+        png_expected_sizes = {
+            "icon.png": (512, 512),
+            "32x32.png": (32, 32),
+            "128x128.png": (128, 128),
+            "128x128@2x.png": (256, 256),
+            "Square30x30Logo.png": (30, 30),
+            "Square44x44Logo.png": (44, 44),
+            "Square71x71Logo.png": (71, 71),
+            "Square89x89Logo.png": (89, 89),
+            "Square107x107Logo.png": (107, 107),
+            "Square142x142Logo.png": (142, 142),
+            "Square150x150Logo.png": (150, 150),
+            "Square310x310Logo.png": (310, 310),
+            "StoreLogo.png": (50, 50),
+        }
+
+        for filename, expected_dim in png_expected_sizes.items():
+            icon_file = self.tauri_icons_dir / filename
+            self.assertTrue(icon_file.exists(), f"Missing desktop icon: {filename}")
+            self.assertGreater(icon_file.stat().st_size, 100, f"File too small: {filename}")
+
+            with Image.open(icon_file) as img:
+                self.assertEqual(img.format, "PNG", f"Expected PNG format for {filename}")
+                self.assertEqual(img.size, expected_dim, f"Incorrect dimensions for {filename}")
+                self.assertEqual(img.mode, "RGBA", f"Expected RGBA mode for {filename}")
+
+    def test_tauri_desktop_ico_icon(self):
+        ico_file = self.tauri_icons_dir / "icon.ico"
+        self.assertTrue(ico_file.exists(), "Missing icon.ico in src-tauri/icons")
+        self.assertGreater(ico_file.stat().st_size, 10000, "icon.ico size is too small")
+
+        with Image.open(ico_file) as img:
+            self.assertEqual(img.format, "ICO", "Expected ICO format for icon.ico")
+            self.assertTrue(hasattr(img, "ico"), "Expected ICO image plugin metadata")
+            sizes = img.ico.sizes()
+            required_sizes = {(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)}
+            for req in required_sizes:
+                self.assertIn(req, sizes, f"ICO missing required size layer {req}")
+
+    def test_tauri_desktop_icns_icon(self):
+        icns_file = self.tauri_icons_dir / "icon.icns"
+        self.assertTrue(icns_file.exists(), "Missing icon.icns in src-tauri/icons")
+        self.assertGreater(icns_file.stat().st_size, 50000, "icon.icns size is too small")
+
+        with Image.open(icns_file) as img:
+            self.assertEqual(img.format, "ICNS", "Expected ICNS format for icon.icns")
 
 
 if __name__ == "__main__":
