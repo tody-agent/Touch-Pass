@@ -40,3 +40,25 @@ describe('autostart bridge', () => {
     expect(calls).toEqual(['isEnabled', 'enable', 'disable']);
   });
 });
+
+describe('profile bridge mock operations', () => {
+  it('preserves configured status when disabling an action and clears on reset', async () => {
+    const { listFingerProfiles, resetFingerProfile, saveFingerProfile } = await import('./tauriBridge');
+    const profiles = await listFingerProfiles();
+    const target = profiles[1]; // id: 2 is configured in previewProfiles
+
+    expect(target.configured).toBe(true);
+
+    const disabled = await saveFingerProfile({ ...target, actionType: 'disabled' });
+    expect(disabled.configured).toBe(true);
+    expect(disabled.actionType).toBe('disabled');
+
+    const reenabled = await saveFingerProfile({ ...disabled, actionType: 'ai_accept' });
+    expect(reenabled.configured).toBe(true);
+    expect(reenabled.actionType).toBe('ai_accept');
+
+    const reset = await resetFingerProfile(2);
+    expect(reset.configured).toBe(false);
+    expect(reset.actionType).toBe('enter');
+  });
+});

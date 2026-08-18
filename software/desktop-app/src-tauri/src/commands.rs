@@ -74,9 +74,24 @@ pub async fn save_finger_profile(
 #[tauri::command]
 pub async fn reset_finger_profile(
     finger_id: usize,
+    force_local: Option<bool>,
     state: State<'_, AppState>,
 ) -> Result<FingerProfile, CommandError> {
     ProfileStore::validate_id(finger_id)?;
+    let is_connected = state
+        .status
+        .lock()
+        .map(|status| status.connected)
+        .unwrap_or(false);
+
+    if force_local.unwrap_or(false) || !is_connected {
+        let profiles = state
+            .profiles
+            .lock()
+            .map_err(|_| CommandError::internal("profile store lock poisoned"))?;
+        return profiles.reset_profile(finger_id);
+    }
+
     let (reply_tx, reply_rx) = std::sync::mpsc::channel();
     state
         .admin_tx

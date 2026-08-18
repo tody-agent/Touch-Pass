@@ -10,6 +10,9 @@
     "check": "svelte-check --tsconfig ./tsconfig.json --config ./vite.config.ts --fail-on-warnings",
     "test": "vitest run",
     "test:gate": "pnpm run check && pnpm test && pnpm run build",
+    "clean": "powershell -ExecutionPolicy Bypass -File scripts/clean-workspace.ps1 -Days 7",
+    "clean:full": "powershell -ExecutionPolicy Bypass -File scripts/clean-workspace.ps1 -FullClean",
+    "optimize:defender": "powershell -ExecutionPolicy Bypass -File scripts/add-defender-exclusion.ps1",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
     "tauri:build": "tauri build"

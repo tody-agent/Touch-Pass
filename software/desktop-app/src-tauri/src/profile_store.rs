@@ -82,6 +82,15 @@ impl ProfileStore {
                 .as_deref()
                 .map(|reference| self.secret_store.exists(reference))
                 .unwrap_or(false);
+        } else if profile.action_type == ActionType::Disabled {
+            secret_changed = false;
+            if previous_secret.is_some() {
+                profile.secret_ref = Some(reference.clone());
+                profile.secret_configured = true;
+            } else {
+                profile.secret_ref = None;
+                profile.secret_configured = false;
+            }
         } else {
             secret_changed = previous_secret.is_some();
             self.secret_store
@@ -241,15 +250,10 @@ fn default_profiles() -> Vec<FingerProfile> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::sync::Once;
     use tempfile::tempdir;
 
     fn test_secret_store(service: &str) -> SecretStore {
-        static INIT: Once = Once::new();
-        INIT.call_once(|| {
-            keyring::set_default_credential_builder(keyring::mock::default_credential_builder());
-        });
-        SecretStore::new(service)
+        SecretStore::mock(service)
     }
 
     #[test]
@@ -339,6 +343,34 @@ mod tests {
 
         assert!(saved.configured);
         assert_eq!(saved.action_type, ActionType::Disabled);
+    }
+
+    #[test]
+    fn disabling_an_action_preserves_stored_secret_in_keyring() {
+        let dir = tempdir().unwrap();
+        let store = ProfileStore::new(
+            dir.path().join("profiles.json"),
+            test_secret_store("touchpass-test-disable-secret"),
+        );
+        let mut profile = default_profile(1);
+        profile.action_type = ActionType::Password;
+        let saved = store
+            .save_profile(profile.clone(), Some("SecretP@ss123".to_string()))
+            .unwrap();
+        assert!(saved.secret_configured);
+
+        let mut disabled_profile = saved.clone();
+        disabled_profile.action_type = ActionType::Disabled;
+        let disabled_saved = store.save_profile(disabled_profile, None).unwrap();
+        assert_eq!(disabled_saved.action_type, ActionType::Disabled);
+        assert!(disabled_saved.secret_configured);
+
+        // Verify that re-enabling password without passing new secret works and retains the password
+        let mut reenabled_profile = disabled_saved.clone();
+        reenabled_profile.action_type = ActionType::Password;
+        let reenabled_saved = store.save_profile(reenabled_profile, None).unwrap();
+        assert_eq!(reenabled_saved.action_type, ActionType::Password);
+        assert!(reenabled_saved.secret_configured);
     }
 
     #[test]

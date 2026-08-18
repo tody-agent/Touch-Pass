@@ -287,7 +287,8 @@ static bool deleteFingerprint(uint16_t slot) {
   if (slot < START_SLOT || slot > END_SLOT) return false;
   uint8_t params[] = {(uint8_t)(slot >> 8), (uint8_t)slot, 0x00, 0x01};
   uint8_t confirm = 0xff;
-  return fpCommand(0x0c, params, sizeof(params), &confirm, nullptr, nullptr, 2000) && confirm == 0x00;
+  if (!fpCommand(0x0c, params, sizeof(params), &confirm, nullptr, nullptr, 2000)) return false;
+  return confirm == 0x00 || confirm == 0x07;
 }
 
 static bool deleteAllFingerprints() {

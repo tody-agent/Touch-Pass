@@ -49,6 +49,9 @@
     updateInlineEnrollment
   } from './lib/vaultWorkspaceState';
 
+  let theme = $state<'dark' | 'light'>(
+    typeof window !== 'undefined' && localStorage.getItem('touchpass_theme') === 'light' ? 'light' : 'dark'
+  );
   let locale = $state<Locale>(resolveLocale(typeof navigator === 'undefined' ? undefined : navigator.language));
   let profiles = $state<FingerProfile[]>(defaultProfiles());
   let status = $state<AppStatusResponse>(defaultStatus());
@@ -72,8 +75,25 @@
   const unavailableGuidance = $derived(deviceGuidance(locale, status.sensorStatus));
 
   $effect(() => {
-    if (typeof document !== 'undefined') document.documentElement.lang = locale;
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = locale;
+      document.documentElement.setAttribute('data-theme', theme);
+      if (theme === 'light') {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+      } else {
+        document.documentElement.classList.remove('light');
+        document.documentElement.classList.add('dark');
+      }
+      try {
+        localStorage.setItem('touchpass_theme', theme);
+      } catch {}
+    }
   });
+
+  function toggleTheme() {
+    theme = theme === 'dark' ? 'light' : 'dark';
+  }
 
   $effect(() => {
     if (!workspace.pendingNavigation || typeof document === 'undefined') return;
@@ -185,9 +205,9 @@
     }
   }
 
-  async function resetProfile(id: number) {
+  async function resetProfile(id: number, forceLocal?: boolean) {
     try {
-      const reset = await resetFingerProfile(id);
+      const reset = await resetFingerProfile(id, forceLocal);
       profiles = profiles.map((item) => (item.id === id ? reset : item));
       showHud(translate(locale, 'hud.deleted'));
     } catch (error) {
@@ -307,9 +327,9 @@
   }
 </script>
 
-<div class="app-stage">
-  <div class="apple-window relative">
-    <TitleBar {locale} {status} onSettings={requestSettings} onHelp={() => (helpOpen = true)} />
+<div class="app-stage {theme}" data-theme={theme}>
+  <div class="apple-window relative {theme}" data-theme={theme}>
+    <TitleBar {locale} {status} {theme} onThemeToggle={toggleTheme} onSettings={requestSettings} onHelp={() => (helpOpen = true)} />
 
     <div class="workspace-shell">
       {#if workspace.mode === 'settings'}
@@ -353,10 +373,10 @@
     <HelpSheet open={helpOpen} {locale} onClose={() => (helpOpen = false)} />
     {#if workspace.pendingNavigation}
       <div class="dialog-backdrop items-center justify-center p-4" role="presentation">
-        <div bind:this={discardDialogElement} class="confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby="discard-title" aria-describedby="discard-description" tabindex="-1" onkeydown={(event) => handleDialogKeydown(event, discardDialogElement, () => (workspace = { ...workspace, pendingNavigation: undefined }))}>
-          <h2 id="discard-title" class="text-lg font-extrabold text-white">{translate(locale, 'discard.title')}</h2>
+        <div bind:this={discardDialogElement} class="confirm-dialog max-w-md backdrop-blur-2xl bg-slate-900/90 border border-white/10 shadow-2xl rounded-2xl p-6" role="alertdialog" aria-modal="true" aria-labelledby="discard-title" aria-describedby="discard-description" tabindex="-1" onkeydown={(event) => handleDialogKeydown(event, discardDialogElement, () => (workspace = { ...workspace, pendingNavigation: undefined }))}>
+          <h2 id="discard-title" class="text-lg font-bold text-white">{translate(locale, 'discard.title')}</h2>
           <p id="discard-description" class="mt-2 text-sm leading-relaxed text-slate-300">{translate(locale, 'discard.description')}</p>
-          <div class="mt-5 flex justify-end gap-2"><button class="secondary-button" onclick={() => (workspace = { ...workspace, pendingNavigation: undefined })}>{translate(locale, 'button.cancel')}</button><button class="danger-button" onclick={confirmNavigation}>{translate(locale, 'button.discard')}</button></div>
+          <div class="mt-6 flex justify-end gap-2.5"><button class="secondary-button" onclick={() => (workspace = { ...workspace, pendingNavigation: undefined })}>{translate(locale, 'button.cancel')}</button><button class="danger-button" onclick={confirmNavigation}>{translate(locale, 'button.discard')}</button></div>
         </div>
       </div>
     {/if}

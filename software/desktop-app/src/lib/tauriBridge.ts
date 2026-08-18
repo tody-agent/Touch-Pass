@@ -106,10 +106,15 @@ export async function saveFingerProfile(profile: FingerProfile, secret?: string)
     const index = mockProfiles.findIndex((item) => item.id === profile.id);
     const previous = mockProfiles[index];
     const secretConfigured =
-      profile.actionType === 'password' ? Boolean(secret || previous?.secretConfigured) : false;
-    const saved = {
+      profile.actionType === 'password'
+        ? Boolean(secret || previous?.secretConfigured)
+        : profile.actionType === 'disabled'
+          ? Boolean(previous?.secretConfigured)
+          : false;
+    const configured = profile.configured || Boolean(previous?.configured) || profile.actionType !== 'disabled';
+    const saved: FingerProfile = {
       ...profile,
-      configured: profile.actionType === 'password' ? secretConfigured : profile.actionType !== 'disabled',
+      configured,
       secretConfigured
     };
     mockProfiles[index] = saved;
@@ -118,13 +123,13 @@ export async function saveFingerProfile(profile: FingerProfile, secret?: string)
   return invoke<FingerProfile>('save_finger_profile', { profile, secret });
 }
 
-export async function resetFingerProfile(fingerId: number): Promise<FingerProfile> {
+export async function resetFingerProfile(fingerId: number, forceLocal?: boolean): Promise<FingerProfile> {
   if (!isTauriRuntime()) {
     const profile = defaultProfiles()[fingerId - 1];
     mockProfiles[fingerId - 1] = profile;
     return clone(profile);
   }
-  return invoke<FingerProfile>('reset_finger_profile', { fingerId });
+  return invoke<FingerProfile>('reset_finger_profile', { fingerId, forceLocal });
 }
 
 export async function startEnrollment(fingerId: number): Promise<void> {

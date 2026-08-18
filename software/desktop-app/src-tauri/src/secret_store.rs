@@ -1,9 +1,12 @@
 use keyring::Entry;
 use rand::{rngs::OsRng, RngCore};
+use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 
 #[derive(Clone)]
 pub struct SecretStore {
     service: String,
+    mock_store: Option<Arc<Mutex<HashMap<String, Vec<u8>>>>>,
 }
 
 pub struct PreparedPairingKey {
@@ -16,6 +19,15 @@ impl SecretStore {
     pub fn new(service: &str) -> Self {
         Self {
             service: service.to_string(),
+            mock_store: None,
+        }
+    }
+
+    #[cfg(test)]
+    pub fn mock(service: &str) -> Self {
+        Self {
+            service: service.to_string(),
+            mock_store: Some(Arc::new(Mutex::new(HashMap::new()))),
         }
     }
 
@@ -25,6 +37,10 @@ impl SecretStore {
     }
 
     pub fn get_optional(&self, account: &str) -> Result<Option<Vec<u8>>, String> {
+        if let Some(mock) = &self.mock_store {
+            let map = mock.lock().map_err(|e| e.to_string())?;
+            return Ok(map.get(account).cloned());
+        }
         let entry = Entry::new(&self.service, account).map_err(|e| e.to_string())?;
         match entry.get_password() {
             Ok(password) => Ok(Some(password.into_bytes())),
@@ -36,11 +52,21 @@ impl SecretStore {
     pub fn set(&self, account: &str, secret: &[u8]) -> Result<(), String> {
         let text =
             std::str::from_utf8(secret).map_err(|_| "secret must be ASCII/UTF-8".to_string())?;
+        if let Some(mock) = &self.mock_store {
+            let mut map = mock.lock().map_err(|e| e.to_string())?;
+            map.insert(account.to_string(), text.as_bytes().to_vec());
+            return Ok(());
+        }
         let entry = Entry::new(&self.service, account).map_err(|e| e.to_string())?;
         entry.set_password(text).map_err(|e| e.to_string())
     }
 
     pub fn delete(&self, account: &str) -> Result<(), String> {
+        if let Some(mock) = &self.mock_store {
+            let mut map = mock.lock().map_err(|e| e.to_string())?;
+            map.remove(account);
+            return Ok(());
+        }
         let entry = Entry::new(&self.service, account).map_err(|e| e.to_string())?;
         match entry.delete_password() {
             Ok(()) => Ok(()),

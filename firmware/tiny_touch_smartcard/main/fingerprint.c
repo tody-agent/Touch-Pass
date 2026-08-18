@@ -567,7 +567,7 @@ bool fingerprint_delete(uint16_t slot) {
   if (slot < START_SLOT || slot > END_SLOT || !fp_take(1000)) return false;
   uint8_t params[] = {(uint8_t)(slot >> 8), (uint8_t)slot, 0x00, 0x01};
   uint8_t confirm = 0xff;
-  bool ok = fp_command(0x0c, params, sizeof(params), &confirm, NULL, NULL, 2000) && confirm == 0x00;
+  bool ok = fp_command(0x0c, params, sizeof(params), &confirm, NULL, NULL, 2000) && (confirm == 0x00 || confirm == 0x07);
   fp_give();
   return ok;
 }
