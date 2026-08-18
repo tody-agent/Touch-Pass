@@ -55,4 +55,23 @@ describe('i18n', () => {
     expect(deviceGuidance('en', 'error').description).toContain('sensor cable');
     expect(deviceGuidance('zh-CN', 'checking').title).toContain('检查');
   });
+
+  it('translates all preset categories and items in vi, en, and zh-CN', async () => {
+    const { ACTION_PRESETS, CATEGORY_GROUPS } = await import('./shortcutPresets');
+    for (const locale of ['vi', 'en', 'zh-CN'] as const) {
+      for (const group of CATEGORY_GROUPS) {
+        const text = translate(locale, group.labelKey as any);
+        expect(text).toBeTruthy();
+        expect(text).not.toBe(group.labelKey);
+      }
+      for (const preset of ACTION_PRESETS) {
+        const label = translate(locale, preset.labelKey as any);
+        const desc = translate(locale, preset.descKey as any);
+        expect(label).toBeTruthy();
+        expect(label).not.toBe(preset.labelKey);
+        expect(desc).toBeTruthy();
+        expect(desc).not.toBe(preset.descKey);
+      }
+    }
+  });
 });
