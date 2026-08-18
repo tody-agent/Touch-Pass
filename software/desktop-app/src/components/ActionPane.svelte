@@ -2,20 +2,36 @@
   import {
     AlertCircle,
     Bot,
+    Box,
     Check,
+    Clipboard,
     CornerDownLeft,
     Ellipsis,
     Eye,
     EyeOff,
     Fingerprint,
+    GitBranch,
+    GitCompare,
+    HelpCircle,
     KeyRound,
     Keyboard,
+    Layers,
+    LayoutGrid,
+    MessageSquarePlus,
+    Minimize2,
+    Monitor,
     Play,
+    PlusSquare,
+    RefreshCw,
     RotateCw,
+    Search,
     ShieldCheck,
+    Sparkles,
+    Terminal,
     Trash2,
     WandSparkles,
-    X
+    X,
+    XCircle
   } from 'lucide-svelte';
   import {
     actionDescription,
@@ -25,6 +41,13 @@
     validationMessage,
     type Locale
   } from '../lib/i18n';
+  import {
+    CATEGORY_GROUPS,
+    getAvailablePresets,
+    matchPreset,
+    type ActionCategory,
+    type ActionOptionItem
+  } from '../lib/shortcutPresets';
   import { saveProfileWithEnrollment } from '../lib/profileActions';
   import { focusFirstInDialog, handleDialogKeydown } from '../lib/focusTrap';
   import { validateActionDraft, type ActionType, type FingerProfile } from '../lib/types';
@@ -59,7 +82,41 @@
     draftDirty = false
   }: Props = $props();
 
+  const iconMap: Record<string, any> = {
+    Bot,
+    Box,
+    Clipboard,
+    CornerDownLeft,
+    GitBranch,
+    GitCompare,
+    HelpCircle,
+    KeyRound,
+    Keyboard,
+    Layers,
+    LayoutGrid,
+    MessageSquarePlus,
+    Minimize2,
+    Monitor,
+    PlusSquare,
+    RefreshCw,
+    Search,
+    ShieldCheck,
+    Sparkles,
+    Terminal,
+    WandSparkles,
+    XCircle
+  };
+
+  const availablePresets = $derived(getAvailablePresets());
+  const groupedPresets = $derived(
+    CATEGORY_GROUPS.map((group) => ({
+      group,
+      items: availablePresets.filter((item) => item.category === group.key)
+    })).filter((section) => section.items.length > 0)
+  );
+
   let selectedType = $state<ActionType>('enter');
+  let selectedPresetId = $state<string>('enter');
   let customPayload = $state('');
   let secret = $state('');
   let showPassword = $state(false);
@@ -71,14 +128,6 @@
   let moreButtonElement: HTMLButtonElement | undefined = $state();
   let moreMenuElement: HTMLDivElement | undefined = $state();
   let actionListElement: HTMLDivElement | undefined = $state();
-
-  const presets: Array<{ type: ActionType; icon: typeof Bot; accent: string }> = [
-    { type: 'ai_accept', icon: Bot, accent: 'text-blue-400' },
-    { type: 'password', icon: KeyRound, accent: 'text-purple-400' },
-    { type: 'enter', icon: CornerDownLeft, accent: 'text-emerald-400' },
-    { type: 'escape', icon: Keyboard, accent: 'text-cyan-400' },
-    { type: 'custom', icon: WandSparkles, accent: 'text-amber-400' }
-  ];
 
   const validationCode = $derived(
     validateActionDraft({
@@ -96,12 +145,25 @@
     void resetRevision;
     if (profile.actionType !== 'disabled') {
       selectedType = profile.actionType;
+    } else if (profile.secretConfigured) {
+      selectedType = 'password';
+    } else if (profile.customPayload) {
+      selectedType = 'custom';
     }
     customPayload = profile.customPayload ?? '';
     secret = '';
     showPassword = false;
     requireConfirm = profile.requireConfirm;
     moreOpen = false;
+
+    const matched = matchPreset(profile, availablePresets);
+    selectedPresetId = matched
+      ? matched.id
+      : selectedType === 'password'
+        ? 'password'
+        : selectedType === 'custom'
+          ? 'custom_input'
+          : selectedType;
   });
 
   $effect(() => {
@@ -198,24 +260,31 @@
     }
   }
 
-  function selectAction(type: ActionType) {
-    selectedType = type;
+  function selectPreset(item: ActionOptionItem) {
+    selectedPresetId = item.id;
+    selectedType = item.actionType;
+    if (item.actionType === 'custom') {
+      if (item.payload !== undefined) {
+        customPayload = item.payload;
+      }
+    }
     onDirtyChange(true);
   }
 
-  function handleActionKeydown(event: KeyboardEvent, type: ActionType) {
+  function handleActionKeydown(event: KeyboardEvent, itemId: string) {
     const keys = ['ArrowDown', 'ArrowRight', 'ArrowUp', 'ArrowLeft', 'Home', 'End'];
     if (!keys.includes(event.key) || interactionLocked) return;
     event.preventDefault();
-    const current = presets.findIndex((preset) => preset.type === type);
+    const items = availablePresets;
+    const current = items.findIndex((p) => p.id === itemId);
     const next = event.key === 'Home'
       ? 0
       : event.key === 'End'
-        ? presets.length - 1
-        : (current + (event.key === 'ArrowDown' || event.key === 'ArrowRight' ? 1 : -1) + presets.length) % presets.length;
-    const nextType = presets[next].type;
-    selectAction(nextType);
-    queueMicrotask(() => actionListElement?.querySelector<HTMLButtonElement>(`[data-action-type="${nextType}"]`)?.focus());
+        ? items.length - 1
+        : (current + (event.key === 'ArrowDown' || event.key === 'ArrowRight' ? 1 : -1) + items.length) % items.length;
+    const nextItem = items[next];
+    selectPreset(nextItem);
+    queueMicrotask(() => actionListElement?.querySelector<HTMLButtonElement>(`[data-preset-id="${nextItem.id}"]`)?.focus());
   }
 
   function updateConfirm(checked: boolean) {
@@ -226,124 +295,144 @@
 
 <section class="action-editor h-full flex flex-col min-h-0 overflow-hidden" aria-labelledby="selected-finger-title">
   <!-- Header Area (shrink-0) -->
-  <div class="action-editor-heading shrink-0 pb-4 border-b border-white/[0.06] flex items-start justify-between gap-4">
+  <div class="action-editor-heading shrink-0 pb-2.5 border-b border-[var(--border)] flex items-center justify-between gap-3">
     <div class="min-w-0">
-      <div class="mono mb-1 text-[11px] font-bold text-blue-400">#{String(profile.id).padStart(2, '0')}</div>
-      <h2 id="selected-finger-title" class="text-xl font-bold tracking-tight text-white">{fingerName(locale, profile.id)}</h2>
-      <p class="mt-0.5 text-xs font-normal leading-relaxed text-slate-400">
-        {profile.configured ? actionDescription(locale, profile.actionType) : translate(locale, 'finger.selectedDescription')}
-      </p>
+      <div class="flex items-center gap-2">
+        <span class="mono text-[11px] font-bold text-blue-600 dark:text-blue-400">#{String(profile.id).padStart(2, '0')}</span>
+        <h2 id="selected-finger-title" class="text-base font-bold tracking-tight text-[var(--fg)]">{fingerName(locale, profile.id)}</h2>
+      </div>
     </div>
 
-    <div class={`status-pill shrink-0 ${isDisabled ? 'bg-amber-500/10 text-amber-300 border-amber-500/25' : profile.configured ? 'status-pill-ready' : 'status-badge-idle'}`}>
+    <div class={`status-pill shrink-0 ${isDisabled ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/25' : profile.configured ? 'status-pill-ready' : 'status-badge-idle'}`}>
       {translate(locale, isDisabled ? 'finger.disabled' : profile.configured ? 'finger.configured' : 'finger.unconfigured')}
     </div>
   </div>
 
-  <!-- Scrollable Body (flex-1 min-h-0 overflow-y-auto) -->
-  <div class="flex-1 min-h-0 overflow-y-auto space-y-4 py-4 pr-1">
-    <!-- Preset Action Cards -->
-    <div bind:this={actionListElement} class="action-list" role="radiogroup" aria-label={translate(locale, 'field.action')}>
-      {#each presets as preset}
-        {@const Icon = preset.icon}
-        <button
-          class={`action-row ${selectedType === preset.type ? 'action-row-selected' : ''}`}
-          onclick={() => selectAction(preset.type)}
-          onkeydown={(event) => handleActionKeydown(event, preset.type)}
-          role="radio"
-          aria-checked={selectedType === preset.type}
-          tabindex={selectedType === preset.type ? 0 : -1}
-          data-action-type={preset.type}
-          disabled={interactionLocked}
-        >
-          <span class="action-row-radio" aria-hidden="true">
-            {#if selectedType === preset.type}<span></span>{/if}
-          </span>
-          <Icon size={20} aria-hidden="true" class={preset.accent} />
-          <span class="action-row-copy">
-            <span>{actionLabel(locale, preset.type)}</span>
-            <small>{actionDescription(locale, preset.type)}</small>
-          </span>
-        </button>
+  <!-- Body Area -->
+  <div class="flex-1 min-h-0 overflow-y-auto space-y-4 py-3 pr-1">
+    <!-- Grouped Preset Action List -->
+    <div bind:this={actionListElement} class="space-y-4" role="radiogroup" aria-label={translate(locale, 'field.action')}>
+      {#each groupedPresets as section}
+        {@const GroupIcon = iconMap[section.group.iconName] || Bot}
+        <div class="space-y-1.5">
+          <div class="flex items-center gap-1.5 px-1">
+            <GroupIcon size={13} class="text-[var(--fg-subtle)]" aria-hidden="true" />
+            <h3 class="text-[11px] font-bold tracking-wider uppercase text-[var(--fg-subtle)]">
+              {translate(locale, section.group.labelKey as any)}
+            </h3>
+          </div>
+
+          <div class="action-list space-y-1">
+            {#each section.items as item}
+              {@const Icon = iconMap[item.iconName] || Bot}
+              {@const isSelected = selectedPresetId === item.id}
+              <button
+                class={`action-row ${isSelected ? 'action-row-selected' : ''}`}
+                onclick={() => selectPreset(item)}
+                onkeydown={(event) => handleActionKeydown(event, item.id)}
+                role="radio"
+                aria-checked={isSelected}
+                tabindex={isSelected ? 0 : -1}
+                data-preset-id={item.id}
+                data-action-type={item.actionType}
+                disabled={interactionLocked}
+              >
+                <span class="action-row-radio" aria-hidden="true">
+                  {#if isSelected}<span></span>{/if}
+                </span>
+                <Icon size={16} aria-hidden="true" class={item.accentColor} />
+                <span class="action-row-copy">
+                  <span class="text-xs font-semibold text-[var(--fg)]">{translate(locale, item.labelKey as any)}</span>
+                  <small class="text-[10.5px] text-[var(--fg-muted)] font-normal">{translate(locale, item.descKey as any)}</small>
+                </span>
+                {#if item.badge}
+                  <span class="ml-auto shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-slate-500/10 dark:bg-slate-400/10 text-[var(--fg-muted)] border border-slate-500/20">
+                    {item.badge}
+                  </span>
+                {/if}
+              </button>
+
+              <!-- Inline Expandable Password Input -->
+              {#if isSelected && item.id === 'password'}
+                <div class="rounded-lg border border-[var(--border)] bg-[var(--card)] p-3 space-y-1.5 ml-6">
+                  <label class="block" for="password-secret-input">
+                    <span class="mb-1 block text-xs font-semibold text-[var(--fg)]">{translate(locale, 'field.password')}</span>
+                    <div class="relative flex items-center">
+                      <input
+                        id="password-secret-input"
+                        class="text-input pr-9 py-1.5 text-xs"
+                        type={showPassword ? 'text' : 'password'}
+                        bind:value={secret}
+                        oninput={() => onDirtyChange(true)}
+                        autocomplete="current-password"
+                        placeholder={profile.secretConfigured ? translate(locale, 'field.passwordStored') : translate(locale, 'field.passwordPlaceholder')}
+                        aria-invalid={validationCode === 'secret_required' || validationCode === 'password_ascii'}
+                      />
+                      <button
+                        type="button"
+                        class="absolute right-2 p-1 rounded text-[var(--fg-subtle)] hover:text-[var(--fg)] transition-colors"
+                        onclick={() => (showPassword = !showPassword)}
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        tabindex="0"
+                      >
+                        {#if showPassword}
+                          <EyeOff size={14} />
+                        {:else}
+                          <Eye size={14} />
+                        {/if}
+                      </button>
+                    </div>
+                  </label>
+                  <div class="flex items-center gap-1.5 text-[10.5px] font-medium text-[var(--fg-muted)]">
+                    <ShieldCheck size={12} class="text-emerald-500 shrink-0" />
+                    <span>{translate(locale, 'action.password.description')}</span>
+                  </div>
+                </div>
+              {/if}
+
+              <!-- Inline Expandable Custom Shortcut Input -->
+              {#if isSelected && item.id === 'custom_input'}
+                <div class="rounded-lg border border-[var(--border)] bg-[var(--card)] p-3 space-y-1.5 ml-6">
+                  <label class="block" for="custom-shortcut-input">
+                    <span class="mb-1 block text-xs font-semibold text-[var(--fg)]">{translate(locale, 'field.custom')}</span>
+                    <input
+                      id="custom-shortcut-input"
+                      class="text-input py-1.5 text-xs"
+                      bind:value={customPayload}
+                      oninput={() => onDirtyChange(true)}
+                      maxlength="128"
+                      placeholder={translate(locale, 'field.customPlaceholder')}
+                      aria-invalid={validationCode === 'custom_required' || validationCode === 'custom_ascii'}
+                    />
+                  </label>
+                  <p class="text-[10.5px] font-medium text-[var(--fg-muted)]">
+                    {translate(locale, 'action.custom.description')}
+                  </p>
+                </div>
+              {/if}
+            {/each}
+          </div>
+        </div>
       {/each}
     </div>
 
-    <!-- Password Input with show/hide toggle & OS Keyring indicator -->
-    {#if selectedType === 'password'}
-      <div class="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 space-y-2">
-        <label class="block" for="password-secret-input">
-          <span class="mb-1.5 block text-xs font-semibold text-slate-300">{translate(locale, 'field.password')}</span>
-          <div class="relative flex items-center">
-            <input
-              id="password-secret-input"
-              class="text-input pr-10"
-              type={showPassword ? 'text' : 'password'}
-              bind:value={secret}
-              oninput={() => onDirtyChange(true)}
-              autocomplete="current-password"
-              placeholder={profile.secretConfigured ? translate(locale, 'field.passwordStored') : translate(locale, 'field.passwordPlaceholder')}
-              aria-invalid={validationCode === 'secret_required' || validationCode === 'password_ascii'}
-            />
-            <button
-              type="button"
-              class="absolute right-2.5 p-1 rounded-md text-slate-400 hover:text-slate-200 transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-400"
-              onclick={() => (showPassword = !showPassword)}
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
-              tabindex="0"
-            >
-              {#if showPassword}
-                <EyeOff size={16} />
-              {:else}
-                <Eye size={16} />
-              {/if}
-            </button>
-          </div>
-        </label>
-        <div class="flex items-center gap-1.5 text-[11px] font-medium text-slate-400">
-          <ShieldCheck size={13} class="text-emerald-400 shrink-0" />
-          <span>{translate(locale, 'action.password.description')}</span>
-        </div>
-      </div>
-    {/if}
-
-    <!-- Custom Shortcut Input with helper text -->
-    {#if selectedType === 'custom'}
-      <div class="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 space-y-2">
-        <label class="block" for="custom-shortcut-input">
-          <span class="mb-1.5 block text-xs font-semibold text-slate-300">{translate(locale, 'field.custom')}</span>
-          <input
-            id="custom-shortcut-input"
-            class="text-input"
-            bind:value={customPayload}
-            oninput={() => onDirtyChange(true)}
-            maxlength="128"
-            placeholder={translate(locale, 'field.customPlaceholder')}
-            aria-invalid={validationCode === 'custom_required' || validationCode === 'custom_ascii'}
-          />
-        </label>
-        <p class="text-[11px] font-medium text-slate-400">
-          {translate(locale, 'action.custom.description')}
-        </p>
-      </div>
-    {/if}
-
     <!-- Validation Error Alert -->
     {#if validationText}
-      <div class="flex items-center gap-2 rounded-lg bg-amber-500/10 border border-amber-500/20 px-3 py-2 text-xs font-medium text-amber-300" role="alert">
-        <AlertCircle size={15} class="shrink-0 text-amber-400" />
+      <div class="flex items-center gap-2 rounded-lg bg-amber-500/10 border border-amber-500/20 px-2.5 py-1.5 text-xs font-medium text-amber-400" role="alert">
+        <AlertCircle size={14} class="shrink-0 text-amber-400" />
         <span>{validationText}</span>
       </div>
     {/if}
 
     <!-- Apple Toggle Switch for "Touch twice to confirm" -->
     <div
-      class="setting-row cursor-pointer"
+      class="setting-row cursor-pointer py-1 px-1"
       onclick={() => !interactionLocked && updateConfirm(!requireConfirm)}
       role="presentation"
     >
-      <div class="min-w-0 pr-4">
-        <span class="block text-sm font-semibold text-white">{translate(locale, 'field.confirm')}</span>
-        <span class="block text-xs font-normal leading-relaxed text-slate-400">{translate(locale, 'field.confirmDescription')}</span>
+      <div class="min-w-0 pr-3">
+        <span class="block text-xs font-semibold text-[var(--fg)]">{translate(locale, 'field.confirm')}</span>
+        <span class="block text-[10.5px] font-normal text-[var(--fg-subtle)]">{translate(locale, 'field.confirmDescription')}</span>
       </div>
       <button
         type="button"
@@ -372,11 +461,11 @@
   </div>
 
   <!-- Sticky Footer (shrink-0) -->
-  <footer class="action-footer shrink-0 pt-3 border-t border-white/[0.06] flex items-center justify-between gap-3">
+  <footer class="action-footer shrink-0 pt-2.5 border-t border-[var(--border)] flex items-center justify-between gap-2">
     <div class="flex items-center gap-2">
       <button class="primary-button" disabled={saving || !canSave || interactionLocked} onclick={save}>
-        {#if profile.configured}<Check size={16} />{:else}<Fingerprint size={16} />{/if}
-        <span>{translate(locale, profile.configured ? 'button.saveChanges' : 'button.saveAndEnroll')}</span>
+        {#if profile.configured && !isDisabled}<Check size={16} />{:else if isDisabled}<Play size={16} />{:else}<Fingerprint size={16} />{/if}
+        <span>{translate(locale, isDisabled ? 'button.enable' : profile.configured ? 'button.saveChanges' : 'button.saveAndEnroll')}</span>
       </button>
 
       <div class="relative">
@@ -393,18 +482,18 @@
         </button>
         {#if moreOpen}
           <div bind:this={moreMenuElement} class="action-menu" role="menu" tabindex="-1" onkeydown={handleMenuKeydown}>
-            <button role="menuitem" disabled={!profile.configured || !deviceConnected} onclick={() => { moreOpen = false; void onTest(profile.id); }}>
+            <button role="menuitem" disabled={!profile.configured || !deviceConnected || isDisabled} onclick={() => { moreOpen = false; void onTest(profile.id); }}>
               <Play size={16} /><span>{translate(locale, 'button.test')}</span>
             </button>
             <button role="menuitem" disabled={interactionLocked || draftDirty || !deviceConnected} onclick={() => void rescan()}>
               <RotateCw size={16} /><span>{translate(locale, 'button.rescan')}</span>
             </button>
-            {#if profile.actionType === 'disabled'}
-              <button role="menuitem" onclick={enableAction}>
+            {#if isDisabled}
+              <button role="menuitem" disabled={!profile.configured} onclick={enableAction}>
                 <Play size={16} /><span>{translate(locale, 'button.enable')}</span>
               </button>
             {:else}
-              <button role="menuitem" onclick={disableAction}>
+              <button role="menuitem" disabled={!profile.configured} onclick={disableAction}>
                 <X size={16} /><span>{translate(locale, 'button.disable')}</span>
               </button>
             {/if}

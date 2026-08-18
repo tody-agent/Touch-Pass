@@ -60,12 +60,16 @@ describe('HandMap', () => {
     const { rerender } = render(ActionPane, { props });
 
     const radios = screen.getAllByRole('radio');
-    await user.click(radios[1]);
-    expect(radios[1].getAttribute('aria-checked')).toBe('true');
+    const initialChecked = radios.find((r) => r.getAttribute('aria-checked') === 'true')!;
+    const otherRadio = radios.find((r) => r !== initialChecked)!;
+    await user.click(otherRadio);
+    expect(otherRadio.getAttribute('aria-checked')).toBe('true');
 
     await rerender({ resetRevision: 1 });
 
-    expect(screen.getAllByRole('radio')[2].getAttribute('aria-checked')).toBe('true');
+    const updatedRadios = screen.getAllByRole('radio');
+    const resetChecked = updatedRadios.find((r) => r.getAttribute('aria-checked') === 'true')!;
+    expect(resetChecked.getAttribute('data-preset-id')).toBe(initialChecked.getAttribute('data-preset-id'));
   });
 
   it('locks editor save and rescan controls during enrollment', async () => {
@@ -156,10 +160,10 @@ describe('HandMap', () => {
 
     const radios = screen.getAllByRole('radio');
     expect(radios.filter((radio) => radio.tabIndex === 0)).toHaveLength(1);
-    radios[2].focus();
+    radios[0].focus();
     await user.keyboard('{ArrowDown}');
-    expect(radios[3].getAttribute('aria-checked')).toBe('true');
-    expect(document.activeElement).toBe(radios[3]);
+    expect(radios[1].getAttribute('aria-checked')).toBe('true');
+    expect(document.activeElement).toBe(radios[1]);
   });
 
   it('disables rescan while an action draft is dirty', async () => {
