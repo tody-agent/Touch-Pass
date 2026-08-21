@@ -47,12 +47,14 @@ Swapping context, repositioning your hands, typing `y` + `Enter`, or mistyping a
 
 | Feature | Capabilities & Architecture | Benefit for AI Workflows |
 | :--- | :--- | :--- |
+| ⚡ **Categorized Preset Library** | Unified catalog with 5 categories (AI Approvals, OS Control, Workspace Switching, Git Workflows, Dev Tools) | Instant 1-click insertion of complex terminal commands, multi-step macros, and AI agent prompts |
 | 🔐 **PIV Native Smart Card** | NIST SP 800-73-4 CCID Smart Card with Match-on-Device biometric gating | Native OS login, macOS Apple Silicon FileVault pre-boot unlock & Windows AD/Entra CBA with zero OS passwords in firmware |
+| 🍏 **Apple macOS / iOS Design** | Frosted glass TitleBar, dynamic status badges, 1Password-style finger list, and tactile Apple switches | Delightful, fluid, high-productivity developer desktop experience on macOS, Windows, and Linux |
 | 🌐 **Web Serial Flasher** | Browser-native flashing via Web Serial API (`esptool-js`) on Chrome/Edge | Zero-installation firmware flashing directly from browser with SHA-256 validation |
 | 🤖 **1-Prompt AI Agent Setup** | Copyable setup prompt template for **Claude Code**, **Cursor**, **Antigravity**, **OpenCode** | Automated 1-prompt OS detection, venv creation, daemon launch, and hardware verification |
 | 🔌 **Native USB HID** | Emulates a standard USB physical keyboard hardware via ESP32-S3 stack | Driverless plug-and-play across Windows, macOS & Linux; sends keystrokes into whichever window is currently **focused** |
 | 🖐️ **10 Fingerprint Slots** | ZW101 optical biometric sensor (Slots 01–10) matched locally on-chip | Zero cloud dependency; assign unique macro/password triggers to each finger |
-| ⌨️ **Interactive Shortcut Recorder** | Web Portal UI (`http://127.0.0.1:8787/`) with live keystroke capture & action builder | Configure single `key`, `text`, `delay` (ms), `enter`, or `escape` action sequences in seconds |
+| ⌨️ **Interactive Shortcut Recorder** | Desktop & Web UI with live keystroke capture, macro builder & real-time search | Configure single `key`, `text`, `delay` (ms), `enter`, or `escape` action sequences in seconds |
 | 🚀 **1-Click Launcher** | Automatic Windows batch launcher (`start_touchpass.bat`) & POSIX script (`packaging/install.sh`) | Launch local Flask service & unauthenticated UART serial daemon seamlessly |
 
 ---

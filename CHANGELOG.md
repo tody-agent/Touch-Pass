@@ -2,6 +2,23 @@
 
 All notable TouchPass Desktop releases are documented here. Version numbers follow semantic versioning while the desktop app is pre-1.0.
 
+## [0.2.1] - 2026-08-21
+
+### Added
+
+- **Unified Categorized Shortcut Presets Library (Option A)**: Integrated structured, categorized preset selector in `ActionPane` spanning AI Agent Approvals (`y/n + Enter`, Antigravity Command Palette), OS & Window Management (Lock Screen, Task View, Show Desktop), Developer Workflows (Git Commit/Push, Dev Server, Terminal Clearing), and Security credentials.
+- **Real-Time Preset Search & Filtering**: Instant filter chips and keyword search across action presets with 1-click preview and insertion.
+- **Luminous Titan Key Visual Identity**: Master 1024x1024 high-resolution icon, scalable vector SVG, tray icons, and native application bundles (`.ico`, `.icns`, `.png`).
+- **Apple macOS / iOS Design Tokens**: Frosted glass `TitleBar` with live connection status pill badge, 1Password-style list items in `HandMap`, Apple-style toggle switch (`AppleSwitch.svelte`), and fluid micro-interactions.
+- **Scroll Containment & UI Layout Refinement**: Isolated scroll zones (`overscroll-behavior: contain`) for `HandMap` and `ActionPane` with customized slim scrollbars.
+- **Windows Developer & Workspace Optimizations**: Automated workspace cleanup script (`scripts/clean-workspace.ps1`) and Windows Defender exclusion helper (`scripts/add-defender-exclusion.ps1`) for optimized build speeds.
+- **Full Tri-Lingual Internationalization**: Complete Vietnamese, English, and Simplified Chinese localization for all shortcut categories, preset descriptions, and action types.
+
+### Changed
+
+- Replaced legacy flat radio action selector with interactive card-based categorized catalog.
+- Enhanced `ActionPane` responsive container behavior with smooth transitions and active action highlighting.
+
 ## [0.2.0] - 2026-08-17
 
 ### Added

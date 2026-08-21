@@ -8,15 +8,19 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](../../LICENSE)
 [![Hardware](https://img.shields.io/badge/Hardware-ESP32--S3-orange.svg)](../BUILD_GUIDE.md)
+[![Desktop Release](https://img.shields.io/badge/📥_Desktop-v0.2.0-blueviolet.svg)](https://github.com/tody-agent/Touch-Pass/releases/tag/v0.2.0)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB.svg)](https://python.org)
 [![Web Flasher](https://img.shields.io/badge/🌐_1--Click-Web_Flasher-success.svg)](https://tody-agent.github.io/Touch-Pass/web/flasher/)
 [![AI Setup](https://img.shields.io/badge/🤖_1--Prompt-AI_Agent_Setup-purple.svg)](../AI_AGENT_PROMPT.vi.md)
+[![Release](https://img.shields.io/badge/Release-v0.2.0-brightgreen.svg)](https://github.com/tody-agent/Touch-Pass/releases/tag/v0.2.0)
 
-[🌐 **English**](../../README.md) | 🇻🇳 **Tiếng Việt** | [🌐 **1-Click Web Flasher**](https://tody-agent.github.io/Touch-Pass/web/flasher/) | [🤖 **Cài đặt AI Agent (VI)**](../AI_AGENT_PROMPT.vi.md) | [🌐 **(EN)**](../AI_AGENT_PROMPT.md)
+[🌐 **English**](../../README.md) | 🇻🇳 **Tiếng Việt** | [🇨🇳 **简体中文**](README.zh.md) | [🇷🇺 **Русский**](README.ru.md) | [📥 **Desktop v0.2.0**](https://github.com/tody-agent/Touch-Pass/releases/tag/v0.2.0) | [🌐 **1-Click Web Flasher**](https://tody-agent.github.io/Touch-Pass/web/flasher/) | [🤖 **Cài đặt AI Agent (VI)**](../AI_AGENT_PROMPT.vi.md) | [🌐 **(EN)**](../AI_AGENT_PROMPT.md)
 
 <br />
 
 ![TouchPass Hero Showcase](../../assets/demo/03-login-success.png)
+
+> **Cách hoạt động:** Khi terminal hỏi xác nhận, bạn chỉ cần chạm nhẹ ngón tay đã đăng ký. TouchPass gửi tín hiệu bàn phím HID gõ chữ `y` tiếp nối bởi phím Enter directly vào terminal-style prompt của bạn. Lưu ý: TouchPass gửi phím gõ HID chuẩn vào cửa sổ đang focus; thiết bị không thể click hoặc bấm vào các nút giao diện đồ họa GUI.
 
 </div>
 
@@ -98,11 +102,25 @@ Bạn lo lắng việc lỡ tay chạm vào cảm biến sẽ vô tình thực t
 
 ---
 
+## 🎯 Bảng Tính Năng Tổng Quan
+
+| Tính Năng | Năng Lực & Kiến Trúc | Lợi Ích Cho AI & Developer |
+| :--- | :--- | :--- |
+| ⚡ **Thư Viện Preset Đa Dạng** | Danh mục phân loại 5 nhóm (Phê duyệt AI, Quản lý Cửa sổ OS, Chuyển Workspace, Git & Dev Tools) | 1-chạm chèn nhanh chuỗi macro phím tắt, terminal command phức tạp và prompt AI |
+| 🔐 **Thẻ Thông Minh PIV Native** | Chuẩn NIST SP 800-73-4 CCID Smart Card kết hợp xác thực sinh trắc học Match-on-Device | Đăng nhập OS, mở khóa FileVault pre-boot trên macOS Apple Silicon & Windows Entra CBA không lưu mật khẩu trong chip |
+| 🍏 **Giao Diện Chuẩn Apple macOS** | TitleBar kính mờ Frosted Glass, badge trạng thái động, danh sách 1Password-style, switch Apple | Trải nghiệm ứng dụng desktop mượt mà, trực quan, tinh tế trên macOS, Windows và Linux |
+| 🌐 **1-Click Web Serial Flasher** | Nạp firmware trực tiếp từ Chrome/Edge qua Web Serial API (`esptool-js`) | Nạp firmware tức thì không cần cài đặt công cụ phức tạp, tự động kiểm tra SHA-256 |
+| 🤖 **Cài Đặt 1-Prompt AI Agent** | Template prompt sẵn sàng cho **Claude Code**, **Cursor**, **Antigravity**, **OpenCode** | Tự động hóa nhận diện OS, tạo venv, khởi động daemon và kiểm tra phần cứng trong 1 prompt |
+| 🔌 **Giả Lập USB HID Native** | Giả lập bàn phím USB phần cứng tiêu chuẩn qua ESP32-S3 stack | Nhận diện ngay lập tức không cần driver; tự động gõ phím vào cửa sổ đang **focus** |
+| 🖐️ **10 Slot Vân Tay Sinh Trắc** | Cảm biến quang học ZW101 (Slot 01–10) đối soát vân tay cục bộ trên vi mạch | Bảo mật tuyệt đối không phụ thuộc đám mây; gán macro/mật khẩu riêng cho từng ngón |
+| ⌨️ **Trình Ghi Phím Tắt Tương Tác** | Ứng dụng Desktop & Web UI với tính năng bắt phím live, tìm kiếm preset thời gian thực | Cấu hình chuỗi hành động `key`, `text`, `delay` (ms), `enter`, hoặc `escape` chỉ trong vài giây |
+| 🚀 **Khởi Động 1-Click** | Launcher tự động Windows (`start_touchpass.bat`) & script POSIX (`packaging/install.sh`) | Chạy dịch vụ Flask & daemon serial kết nối phần cứng nhanh chóng |
+
 ---
 
 ## 🖥️ Trải Nghiệm Ứng Dụng Desktop Native (Rust + Tauri v2 + Svelte 5) - Khuyên Dùng
 
-TouchPass tích hợp ứng dụng Desktop native hiệu năng cao được phát triển bằng **Rust** và **Tauri v2** kết hợp giao diện **Svelte 5**, hỗ trợ tự động nhận diện phần cứng Serial UART thời gian thực, sơ đồ gán vân tay trực quan và tích hợp sâu với OS Keyring bảo mật trên **macOS**, **Windows**, và **Ubuntu/Debian Linux**.
+TouchPass tích hợp ứng dụng Desktop native hiệu năng cao được phát triển bằng **Rust** và **Tauri v2** kết hợp giao diện **Svelte 5**, hỗ trợ tự động nhận diện phần cứng Serial UART thời gian thực, danh mục Preset phân loại đa dạng và tích hợp sâu với OS Keyring bảo mật trên **macOS**, **Windows**, và **Ubuntu/Debian Linux**.
 
 <div align="center">
 
@@ -115,25 +133,27 @@ TouchPass tích hợp ứng dụng Desktop native hiệu năng cao được phá
 ### 📥 Tải Về & Cài Đặt Bản Release:
 
 #### 🪟 Windows (x64)
-- **Bộ cài đặt chuẩn (.exe)**: Tải `TouchPass_0.1.0_x64-setup.exe` từ [GitHub Releases](https://github.com/tody-agent/Touch-Pass/releases) và thực hiện cài đặt.
-- **Bản doanh nghiệp (.msi)**: Tải `TouchPass_0.1.0_x64_en-US.msi`.
+- **Bộ cài đặt chuẩn (.exe)**: Tải `TouchPass_0.2.0_x64-setup.exe` từ [GitHub Releases](https://github.com/tody-agent/Touch-Pass/releases/tag/v0.2.0) và thực hiện cài đặt.
 - **Bản Portable (.zip)**: Tải `TouchPass_windows_x64_portable.zip`, giải nén và mở trực tiếp `TouchPass.exe` (hoặc chạy `start_touchpass.bat`).
 
-#### 🍎 macOS (Universal: Tương thích cả Apple Silicon M-series & Intel)
-1. Tải `TouchPass_0.1.0_universal.dmg` từ [GitHub Releases](https://github.com/tody-agent/Touch-Pass/releases).
+#### 🍎 macOS (Apple Silicon & Intel)
+1. Tải bản `.dmg` tương ứng: `aarch64` cho Apple Silicon (M1/M2/M3/M4) hoặc `x64` cho Intel.
 2. Mở file `.dmg` và kéo thả ứng dụng **TouchPass.app** vào thư mục `/Applications`.
+3. Bản build hiện tại chưa ký số chứng chỉ Apple: Nhấn giữ Control + Click vào app và chọn **Open** trong lần mở đầu tiên.
 
 #### 🐧 Ubuntu / Debian Linux (x64)
 - **Gói cài đặt (.deb)**:
   ```bash
-  sudo dpkg -i touchpass_0.1.0_amd64.deb
+  sudo dpkg -i touchpass_0.2.0_amd64.deb
   sudo apt-get install -f
   ```
 - **AppImage (Chạy trực tiếp)**:
   ```bash
-  chmod +x touchpass_0.1.0_amd64.AppImage
-  ./touchpass_0.1.0_amd64.AppImage
+  chmod +x touchpass_0.2.0_amd64.AppImage
+  ./touchpass_0.2.0_amd64.AppImage
   ```
+
+Xem toàn bộ [Hướng dẫn cài đặt Desktop & Khởi tạo ban đầu (Tiếng Việt)](../DESKTOP_APP_GUIDE.vi.md) | [English Guide](../DESKTOP_APP_GUIDE.md).
 
 ---
 
