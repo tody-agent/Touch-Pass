@@ -196,4 +196,26 @@ describe('HandMap', () => {
     expect(screen.getByRole('progressbar').getAttribute('aria-valuenow')).toBe('2');
     expect(screen.getByRole('progressbar').getAttribute('aria-valuemax')).toBe('4');
   });
+
+  it('renders action preset shortcut badges with whitespace-nowrap and ml-auto', () => {
+    const profile = defaultProfiles()[0];
+    render(ActionPane, {
+      locale: 'en',
+      profile,
+      saving: false,
+      deviceConnected: true,
+      resetRevision: 0,
+      interactionLocked: false,
+      onSave: vi.fn(async () => profile),
+      onEnroll: vi.fn(async () => undefined),
+      onReset: vi.fn(async () => undefined),
+      onTest: vi.fn(async () => undefined),
+      onDirtyChange: vi.fn()
+    });
+
+    const badge = screen.getByText('y + ↵');
+    expect(badge).toBeTruthy();
+    expect(badge.className).toContain('whitespace-nowrap');
+    expect(badge.className).toContain('ml-auto');
+  });
 });

@@ -340,13 +340,13 @@
                 <span class="action-row-radio" aria-hidden="true">
                   {#if isSelected}<span></span>{/if}
                 </span>
-                <Icon size={16} aria-hidden="true" class={item.accentColor} />
+                <Icon size={16} aria-hidden="true" class="shrink-0 {item.accentColor}" />
                 <span class="action-row-copy">
                   <span class="text-xs font-semibold text-[var(--fg)]">{translate(locale, item.labelKey as any)}</span>
                   <small class="text-[10.5px] text-[var(--fg-muted)] font-normal">{translate(locale, item.descKey as any)}</small>
                 </span>
                 {#if item.badge}
-                  <span class="ml-auto shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-slate-500/10 dark:bg-slate-400/10 text-[var(--fg-muted)] border border-slate-500/20">
+                  <span class="ml-auto shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium whitespace-nowrap bg-slate-500/10 dark:bg-slate-400/10 text-[var(--fg-muted)] border border-slate-500/20">
                     {item.badge}
                   </span>
                 {/if}

@@ -18,9 +18,7 @@
 
 <header class="app-toolbar backdrop-blur-xl border-b px-4 py-2 h-12">
   <div class="flex min-w-0 items-center gap-2">
-    <span class="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-blue-500/15 text-blue-500 border border-blue-500/20 shadow-sm">
-      <Hand size={15} aria-hidden="true" />
-    </span>
+    <img src="/favicon.png" alt="TouchPass" class="h-6 w-6 shrink-0 rounded-md object-contain shadow-sm" />
     <span class="truncate text-sm font-semibold tracking-tight text-[var(--fg)]">TouchPass</span>
   </div>
 
