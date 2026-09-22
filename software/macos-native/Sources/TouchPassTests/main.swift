@@ -2,6 +2,7 @@ import Foundation
 import TouchPassCore
 import TouchPassSerial
 import TouchPassStorage
+import TouchPassSmartCard
 
 func assertTrue(_ condition: Bool, _ message: String = "") {
     if !condition {
@@ -129,15 +130,19 @@ struct TouchPassTestsMain {
         let slot1 = await profileStore.getProfile(slot: 1)
         assertEqual(slot1?.actionType, .aiAccept, "slot 1 default is aiAccept")
 
-        // Test Profile Update
         var modifiedSlot1 = slot1!
         modifiedSlot1.name = "Claude Approve"
         try await profileStore.updateProfile(modifiedSlot1)
         let reloadedSlot1 = await profileStore.getProfile(slot: 1)
         assertEqual(reloadedSlot1?.name, "Claude Approve", "updated profile name should persist")
-
         try? FileManager.default.removeItem(at: tempDir)
 
-        print("✅ Task 2, 3, 4, 5 tests passed successfully!")
+        // Test 11: SmartCard Wizard
+        let pairCmd = SmartCardPairingWizard.pairingCommand(username: "developer", identityHash: "A1B2C3D4")
+        assertTrue(pairCmd.contains("sc_auth pair -u developer -h A1B2C3D4"), "pair command syntax")
+        let unpairCmd = SmartCardPairingWizard.unpairCommand(username: "developer")
+        assertTrue(unpairCmd.contains("sc_auth unpair -u developer"), "unpair command syntax")
+
+        print("✅ Task 2, 3, 4, 5, 6 tests passed successfully!")
     }
 }
