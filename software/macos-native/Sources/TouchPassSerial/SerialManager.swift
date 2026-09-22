@@ -13,6 +13,20 @@ public actor SerialManager {
     public var onEnrollPrompt: (@Sendable (String) -> Void)?
     public var onRawLineReceived: (@Sendable (String) -> Void)?
 
+    public func setCallbacks(
+        onConnectionChanged: (@Sendable (Bool, TouchPassDevice?) -> Void)? = nil,
+        onStatusUpdated: (@Sendable (StatusLine) -> Void)? = nil,
+        onSensorEventReceived: (@Sendable (SensorEvent) -> Void)? = nil,
+        onEnrollPrompt: (@Sendable (String) -> Void)? = nil,
+        onRawLineReceived: (@Sendable (String) -> Void)? = nil
+    ) {
+        if let onConnectionChanged { self.onConnectionChanged = onConnectionChanged }
+        if let onStatusUpdated { self.onStatusUpdated = onStatusUpdated }
+        if let onSensorEventReceived { self.onSensorEventReceived = onSensorEventReceived }
+        if let onEnrollPrompt { self.onEnrollPrompt = onEnrollPrompt }
+        if let onRawLineReceived { self.onRawLineReceived = onRawLineReceived }
+    }
+
     public init() {}
 
     public func start() {

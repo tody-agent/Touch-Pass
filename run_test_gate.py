@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import importlib.util
+import platform
 import py_compile
 import subprocess
 import sys
@@ -129,6 +130,20 @@ def test_cli_sanity() -> bool:
     return True
 
 
+def test_macos_native() -> bool:
+    if platform.system() != "Darwin":
+        return True
+    log_stage(5, "macOS Native Test Suite Gate")
+    swift_cmd = ["swift", "run", "--package-path", "software/macos-native", "TouchPassTests"]
+    print(f"Running macOS native test runner: {' '.join(swift_cmd)}")
+    result = subprocess.run(swift_cmd, cwd=str(ROOT))
+    if result.returncode != 0:
+        print("\n[FAIL] Stage 5 macOS Native Gate failed.")
+        return False
+    print("\n[PASS] Stage 5 macOS Native Gate passed cleanly.")
+    return True
+
+
 def main() -> None:
     print("==================================================")
     print("[GATE] TouchPass Automated Quality Gate Starting...")
@@ -139,6 +154,7 @@ def main() -> None:
         ("Unit Test Suite Gate", run_unit_tests),
         ("Live API Gate", test_live_api),
         ("CLI Sanity Gate", test_cli_sanity),
+        ("macOS Native Suite Gate", test_macos_native),
     ]
 
     for name, gate_func in stages:

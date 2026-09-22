@@ -17,6 +17,10 @@ public actor SmartCardManager {
     private var isObserving = false
     public var onCardStateChanged: (@Sendable (Bool, SmartCardIdentity?) -> Void)?
 
+    public func setCardStateChangedCallback(_ callback: (@Sendable (Bool, SmartCardIdentity?) -> Void)?) {
+        self.onCardStateChanged = callback
+    }
+
     public init() {}
 
     public func startObserving() {

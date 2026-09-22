@@ -43,7 +43,7 @@
 - Consumes: Standard Apple SDKs (macOS 14.0+)
 - Produces: Build-ready multi-target Swift Package with modular separation of concerns.
 
-- [ ] **Step 1: Create `software/macos-native/Package.swift`**
+- [x] **Step 1: Create `software/macos-native/Package.swift`**
 
 ```swift
 // swift-tools-version: 6.0
@@ -96,7 +96,7 @@ let package = Package(
 )
 ```
 
-- [ ] **Step 2: Initialize module stubs and verify compilation**
+- [x] **Step 2: Initialize module stubs and verify compilation**
 
 Create directory structure:
 ```bash
@@ -112,7 +112,7 @@ Verify Swift build:
 Run: `swift build --package-path software/macos-native`
 Expected: `Build complete!` with zero warnings.
 
-- [ ] **Step 3: Commit scaffolding**
+- [x] **Step 3: Commit scaffolding**
 
 ```bash
 git add software/macos-native/
@@ -131,14 +131,14 @@ git commit -m "feat(macos): scaffold native Swift package structure for TouchPas
 - Consumes: Apple `CryptoKit` and `CommonCrypto`
 - Produces: `HMAC-SHA256` signer, `AES-128-CTR` stream cipher, session key derivation, and nonce replay filter.
 
-- [ ] **Step 1: Write unit tests for crypto operations matching firmware vectors**
+- [x] **Step 1: Write unit tests for crypto operations matching firmware vectors**
 
 Test cases in `CryptoTests.swift`:
 1. Known test vector for HMAC-SHA256: key `"41555448454e5449434154494f4e5f4b45595f54494e59544f5543485f323032"`, message `"SESSION|NONCE123"`.
 2. AES-128-CTR round-trip encryption & decryption for arbitrary action payload.
 3. Nonce replay filter: verifying that an incoming nonce within a 64-item sliding window is detected and rejected.
 
-- [ ] **Step 2: Implement `Crypto.swift`**
+- [x] **Step 2: Implement `Crypto.swift`**
 
 ```swift
 import Foundation
@@ -224,12 +224,12 @@ public actor NonceReplayFilter {
 }
 ```
 
-- [ ] **Step 3: Run crypto tests**
+- [x] **Step 3: Run crypto tests**
 
 Run: `swift test --package-path software/macos-native --filter CryptoTests`
 Expected: PASS (all cryptographic assertions match firmware test vectors).
 
-- [ ] **Step 4: Commit crypto module**
+- [x] **Step 4: Commit crypto module**
 
 ```bash
 git add software/macos-native/Sources/TouchPassCore/Crypto.swift software/macos-native/Tests/TouchPassCoreTests/CryptoTests.swift
@@ -250,7 +250,7 @@ git commit -m "feat(macos): implement hardware-compatible HMAC-SHA256 and AES-CT
 - Consumes: Firmware ASCII line streams
 - Produces: Typed `FirmwareLine` enums, action bytecode generation, and double-touch confirmation evaluation.
 
-- [ ] **Step 1: Write unit tests for protocol parsing and action serialization**
+- [x] **Step 1: Write unit tests for protocol parsing and action serialization**
 
 Test cases in `ProtocolTests.swift`:
 1. `OK STATUS mode=hid sensor=ok fingerprints=3 hid_key=configured keys=nvs` parses to `FirmwareLine.status(...)`.
@@ -258,19 +258,19 @@ Test cases in `ProtocolTests.swift`:
 3. `encodeAction` produces correct bytecode for `aiAccept` (`[0x01, 2, 0x01, 1, 0x79, 0x02, 0, 0x28]`).
 4. `TriggerGate` returns `.armed` on first touch and `.execute` on second touch within 3.0s window.
 
-- [ ] **Step 2: Implement `Protocol.swift`, `ActionEncoder.swift`, and `TriggerGate.swift`**
+- [x] **Step 2: Implement `Protocol.swift`, `ActionEncoder.swift`, and `TriggerGate.swift`**
 
 Implement:
 - `FirmwareLine`: Enum supporting `.status`, `.prompt`, `.configUnlockOk`, `.hidKeyOk`, `.modeOk`, `.enrollOk`, `.enrollErr`, `.deleteOk`, `.event(SensorEvent)`, `.unknown`.
 - `ActionEncoder`: Supports `aiAccept`, `password`, `enter`, `escape`, `custom(payload)`.
 - `TriggerGate`: Thread-safe gate with configurable expiration window (default: 3.0s).
 
-- [ ] **Step 3: Run protocol test suite**
+- [x] **Step 3: Run protocol test suite**
 
 Run: `swift test --package-path software/macos-native --filter ProtocolTests`
 Expected: PASS.
 
-- [ ] **Step 4: Commit protocol module**
+- [x] **Step 4: Commit protocol module**
 
 ```bash
 git add software/macos-native/Sources/TouchPassCore/
@@ -291,7 +291,7 @@ git commit -m "feat(macos): implement firmware protocol line parser and action b
 - Consumes: `IOKit`, POSIX serial APIs (`termios`, `open`, `read`, `write`, `tcsetattr`)
 - Produces: Asynchronous stream of connected TouchPass devices and parsed protocol lines with zero idle polling.
 
-- [ ] **Step 1: Implement `IOKitHotplugMonitor.swift`**
+- [x] **Step 1: Implement `IOKitHotplugMonitor.swift`**
 
 ```swift
 import Foundation
@@ -369,16 +369,16 @@ public final class IOKitHotplugMonitor: @unchecked Sendable {
 }
 ```
 
-- [ ] **Step 2: Implement non-blocking `AsyncSerialPort.swift`**
+- [x] **Step 2: Implement non-blocking `AsyncSerialPort.swift`**
 
 Implement POSIX termios configuration at 115,200 baud, 8N1 with an `AsyncStream<String>` yielding newline-terminated firmware strings.
 
-- [ ] **Step 3: Verify serial mock tests**
+- [x] **Step 3: Verify serial mock tests**
 
 Run: `swift test --package-path software/macos-native --filter SerialMockTests`
 Expected: PASS.
 
-- [ ] **Step 4: Commit serial engine**
+- [x] **Step 4: Commit serial engine**
 
 ```bash
 git add software/macos-native/Sources/TouchPassSerial/
@@ -399,14 +399,14 @@ git commit -m "feat(macos): implement zero-polling IOKit device hotplug and asyn
 - Consumes: macOS `Security.framework`, `LocalAuthentication.framework`
 - Produces: Secure credential access with optional Touch ID gating, atomic JSON profile store, and automatic migration from legacy `tinyTouch` directory.
 
-- [ ] **Step 1: Write unit tests for Keychain operations and profile migration**
+- [x] **Step 1: Write unit tests for Keychain operations and profile migration**
 
 Test cases in `StorageTests.swift`:
 1. Save and retrieve credentials for service `com.touchpass.desktop`.
 2. Fallback read from legacy `tinyTouch` Keychain service.
 3. Migrate `~/Library/Application Support/tinyTouch/profiles.json` into schema v2 format in `~/Library/Application Support/TouchPass/profiles.json`.
 
-- [ ] **Step 2: Implement `KeychainManager.swift` with Touch ID gating**
+- [x] **Step 2: Implement `KeychainManager.swift` with Touch ID gating**
 
 ```swift
 import Foundation
@@ -471,16 +471,16 @@ public struct KeychainManager {
 }
 ```
 
-- [ ] **Step 3: Implement `ProfileStore.swift` and migration adapter**
+- [x] **Step 3: Implement `ProfileStore.swift` and migration adapter**
 
 Ensure full compatibility with the 10 fingerprint slots, double-touch confirmation flags, and categorized presets.
 
-- [ ] **Step 4: Run storage tests**
+- [x] **Step 4: Run storage tests**
 
 Run: `swift test --package-path software/macos-native --filter StorageTests`
 Expected: PASS.
 
-- [ ] **Step 5: Commit storage module**
+- [x] **Step 5: Commit storage module**
 
 ```bash
 git add software/macos-native/Sources/TouchPassStorage/
@@ -499,15 +499,15 @@ git commit -m "feat(macos): implement Apple Keychain manager with Touch ID biome
 - Consumes: `CryptoTokenKit.framework`
 - Produces: Real-time PIV card status, slot 9A identity extraction, and automated `sc_auth` pairing for FileVault pre-boot login.
 
-- [ ] **Step 1: Implement `SmartCardManager.swift` using `TKSmartCardSlotManager`**
+- [x] **Step 1: Implement `SmartCardManager.swift` using `TKSmartCardSlotManager`**
 
 Observe insertion of TouchPass smart card, read certificate from container `0x5FC105` (slot `9A`), and extract SHA-1/SHA-256 certificate hash.
 
-- [ ] **Step 2: Implement pairing helper**
+- [x] **Step 2: Implement pairing helper**
 
 Provide Swift bridge to verify pairing with current local macOS user account (`sc_auth list <user>`) and automate pairing invocation (`sc_auth pair -u <user> -h <hash>`).
 
-- [ ] **Step 3: Commit smart card module**
+- [x] **Step 3: Commit smart card module**
 
 ```bash
 git add software/macos-native/Sources/TouchPassSmartCard/
@@ -527,15 +527,15 @@ git commit -m "feat(macos): implement CryptoTokenKit manager for PIV smart card 
 - Consumes: SwiftUI, Apple HIG materials (`.ultraThinMaterial`, `VisualEffectView`)
 - Produces: 10-finger interactive vector map with live biometric touch ripple animations.
 
-- [ ] **Step 1: Define macOS theme tokens in `Theme.swift`**
+- [x] **Step 1: Define macOS theme tokens in `Theme.swift`**
 
 Configure authentic dark surfaces (`#0e131f`), subtle borders, SF Symbols 6 icons, and spring animation curves.
 
-- [ ] **Step 2: Build `HandMapView.swift`**
+- [x] **Step 2: Build `HandMapView.swift`**
 
 Render left and right hands with 10 interactive biometric finger nodes (Slots 01 to 10). Support selection, status badge indicators (configured / empty), and animated glow pulse when a hardware touch event (`EV`) is received.
 
-- [ ] **Step 3: Commit HandMap UI**
+- [x] **Step 3: Commit HandMap UI**
 
 ```bash
 git add software/macos-native/Sources/TouchPassApp/UI/
@@ -555,7 +555,7 @@ git commit -m "feat(macos): implement authentic SwiftUI 10-finger vector HandMap
 - Consumes: `TouchPassStorage.ProfileStore`
 - Produces: 1-click preset library organized across 4 categories (AI Agent, macOS Navigation, Developer Automation, Security/Credentials).
 
-- [ ] **Step 1: Define presets catalog matching TouchPass desktop spec**
+- [x] **Step 1: Define presets catalog matching TouchPass desktop spec**
 
 Include:
 - 🤖 **AI Agent**: `ai_accept` (`y + Enter`), `ai_reject` (`n + Enter`), `/compact`, `/plan`, `/grill-me`.
@@ -563,11 +563,11 @@ Include:
 - 💻 **Terminal Automation**: `git status`, `git diff`, `clear`, `docker ps`.
 - 🔒 **Credentials**: Keychain OS password with Touch ID requirement toggle.
 
-- [ ] **Step 2: Implement `ActionPaneView.swift` and `ShortcutRecorderView.swift`**
+- [x] **Step 2: Implement `ActionPaneView.swift` and `ShortcutRecorderView.swift`**
 
 Create clean macOS inspector panel with toggle switch for double-touch confirmation, secret picker, and live keystroke capture.
 
-- [ ] **Step 3: Commit action editor**
+- [x] **Step 3: Commit action editor**
 
 ```bash
 git add software/macos-native/Sources/TouchPassApp/UI/Actions/
@@ -586,15 +586,15 @@ git commit -m "feat(macos): implement categorized preset library and native macO
 - Consumes: `TouchPassSerial.SerialManager` enrollment state machine
 - Produces: Step-by-step interactive enrollment modal with live finger placement instructions and raw UART console.
 
-- [ ] **Step 1: Implement `EnrollmentWizardView.swift`**
+- [x] **Step 1: Implement `EnrollmentWizardView.swift`**
 
 Handle 5-stage fingerprint sampling with animated sensor graphics, stage progress bar, and error recovery prompts (e.g. lift and touch again).
 
-- [ ] **Step 2: Implement `ConsoleView.swift`**
+- [x] **Step 2: Implement `ConsoleView.swift`**
 
 Add collapsible raw serial diagnostic monitor displaying bidirectional serial traffic (`STATUS`, `EV`, `ACT`, `ARM`).
 
-- [ ] **Step 3: Commit enrollment wizard**
+- [x] **Step 3: Commit enrollment wizard**
 
 ```bash
 git add software/macos-native/Sources/TouchPassApp/UI/Enrollment/ software/macos-native/Sources/TouchPassApp/UI/Diagnostics/
@@ -614,7 +614,7 @@ git commit -m "feat(macos): implement 5-stage interactive biometric enrollment w
 - Consumes: SwiftUI `MenuBarExtra`, `ServiceManagement.SMAppService`
 - Produces: Always-resident Menu Bar utility with dynamic status glyph, quick controls, and zero-overhead background operation.
 
-- [ ] **Step 1: Implement `TouchPassApp.swift`**
+- [x] **Step 1: Implement `TouchPassApp.swift`**
 
 ```swift
 import SwiftUI
@@ -643,11 +643,11 @@ struct TouchPassApp: App {
 }
 ```
 
-- [ ] **Step 2: Implement `LaunchAtLoginManager.swift` using `SMAppService.mainApp`**
+- [x] **Step 2: Implement `LaunchAtLoginManager.swift` using `SMAppService.mainApp`**
 
 Provide one-click toggle in Settings to register TouchPass in macOS Login Items via official Apple API without legacy plist scripting.
 
-- [ ] **Step 3: Commit app lifecycle**
+- [x] **Step 3: Commit app lifecycle**
 
 ```bash
 git add software/macos-native/Sources/TouchPassApp/
@@ -667,19 +667,19 @@ git commit -m "feat(macos): implement MenuBarExtra scene and modern SMAppService
 - Consumes: Xcode command-line tools, `codesign`, `create-dmg` / `hdiutil`
 - Produces: Universal 2 signed `TouchPass.app` and distribution `.dmg`.
 
-- [ ] **Step 1: Create `build-app.sh`**
+- [x] **Step 1: Create `build-app.sh`**
 
 Script to compile Universal 2 binary (`x86_64` + `arm64`) using `xcodebuild` or `swift build -c release --arch arm64 --arch x86_64`, assemble the `.app` bundle, inject `Info.plist`, entitlements, and AppIcon assets.
 
-- [ ] **Step 2: Create `package-dmg.sh`**
+- [x] **Step 2: Create `package-dmg.sh`**
 
 Script generating a polished drag-and-drop macOS disk image with custom background and symlink to `/Applications`.
 
-- [ ] **Step 3: Integrate into `run_test_gate.py`**
+- [x] **Step 3: Integrate into `run_test_gate.py`**
 
 Add macOS native build verification gate when executed on Darwin platform.
 
-- [ ] **Step 4: Commit build and packaging scripts**
+- [x] **Step 4: Commit build and packaging scripts**
 
 ```bash
 git add software/macos-native/scripts/ run_test_gate.py

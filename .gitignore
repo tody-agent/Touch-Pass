@@ -38,3 +38,4 @@ node_modules/
 
 
 software/macos-native/.build/
+software/macos-native/dist/
