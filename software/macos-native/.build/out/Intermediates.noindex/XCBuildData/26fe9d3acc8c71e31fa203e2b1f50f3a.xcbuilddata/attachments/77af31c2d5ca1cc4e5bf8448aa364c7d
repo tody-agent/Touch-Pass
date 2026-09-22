@@ -1,0 +1,19 @@
+{
+  "" : {
+    "diagnostics" : "/Users/todyle/multica_workspaces_desktop-api.multica.ai/todyle-7166eb614257/tod-14-a5d779e4fab1/workdir/Touch-Pass/software/macos-native/.build/out/Intermediates.noindex/TouchPassNative.build/Debug/TouchPassTests-p.build/Objects-normal/arm64/TouchPassTests-primary.dia",
+    "emit-module-dependencies" : "/Users/todyle/multica_workspaces_desktop-api.multica.ai/todyle-7166eb614257/tod-14-a5d779e4fab1/workdir/Touch-Pass/software/macos-native/.build/out/Intermediates.noindex/TouchPassNative.build/Debug/TouchPassTests-p.build/Objects-normal/arm64/TouchPassTests-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/todyle/multica_workspaces_desktop-api.multica.ai/todyle-7166eb614257/tod-14-a5d779e4fab1/workdir/Touch-Pass/software/macos-native/.build/out/Intermediates.noindex/TouchPassNative.build/Debug/TouchPassTests-p.build/Objects-normal/arm64/TouchPassTests-primary-emit-module.dia",
+    "pch" : "/Users/todyle/multica_workspaces_desktop-api.multica.ai/todyle-7166eb614257/tod-14-a5d779e4fab1/workdir/Touch-Pass/software/macos-native/.build/out/Intermediates.noindex/TouchPassNative.build/Debug/TouchPassTests-p.build/Objects-normal/arm64/TouchPassTests-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/todyle/multica_workspaces_desktop-api.multica.ai/todyle-7166eb614257/tod-14-a5d779e4fab1/workdir/Touch-Pass/software/macos-native/.build/out/Intermediates.noindex/TouchPassNative.build/Debug/TouchPassTests-p.build/Objects-normal/arm64/TouchPassTests-primary.swiftdeps"
+  },
+  "/Users/todyle/multica_workspaces_desktop-api.multica.ai/todyle-7166eb614257/tod-14-a5d779e4fab1/workdir/Touch-Pass/software/macos-native/Sources/TouchPassTests/main.swift" : {
+    "const-values" : "/Users/todyle/multica_workspaces_desktop-api.multica.ai/todyle-7166eb614257/tod-14-a5d779e4fab1/workdir/Touch-Pass/software/macos-native/.build/out/Intermediates.noindex/TouchPassNative.build/Debug/TouchPassTests-p.build/Objects-normal/arm64/main.swiftconstvalues",
+    "dependencies" : "/Users/todyle/multica_workspaces_desktop-api.multica.ai/todyle-7166eb614257/tod-14-a5d779e4fab1/workdir/Touch-Pass/software/macos-native/.build/out/Intermediates.noindex/TouchPassNative.build/Debug/TouchPassTests-p.build/Objects-normal/arm64/main.d",
+    "diagnostics" : "/Users/todyle/multica_workspaces_desktop-api.multica.ai/todyle-7166eb614257/tod-14-a5d779e4fab1/workdir/Touch-Pass/software/macos-native/.build/out/Intermediates.noindex/TouchPassNative.build/Debug/TouchPassTests-p.build/Objects-normal/arm64/main.dia",
+    "index-unit-output-path" : "/TouchPassNative.build/Debug/TouchPassTests-p.build/Objects-normal/arm64/main.o",
+    "llvm-bc" : "/Users/todyle/multica_workspaces_desktop-api.multica.ai/todyle-7166eb614257/tod-14-a5d779e4fab1/workdir/Touch-Pass/software/macos-native/.build/out/Intermediates.noindex/TouchPassNative.build/Debug/TouchPassTests-p.build/Objects-normal/arm64/main.bc",
+    "object" : "/Users/todyle/multica_workspaces_desktop-api.multica.ai/todyle-7166eb614257/tod-14-a5d779e4fab1/workdir/Touch-Pass/software/macos-native/.build/out/Intermediates.noindex/TouchPassNative.build/Debug/TouchPassTests-p.build/Objects-normal/arm64/main.o",
+    "swift-dependencies" : "/Users/todyle/multica_workspaces_desktop-api.multica.ai/todyle-7166eb614257/tod-14-a5d779e4fab1/workdir/Touch-Pass/software/macos-native/.build/out/Intermediates.noindex/TouchPassNative.build/Debug/TouchPassTests-p.build/Objects-normal/arm64/main.swiftdeps",
+    "swiftmodule" : "/Users/todyle/multica_workspaces_desktop-api.multica.ai/todyle-7166eb614257/tod-14-a5d779e4fab1/workdir/Touch-Pass/software/macos-native/.build/out/Intermediates.noindex/TouchPassNative.build/Debug/TouchPassTests-p.build/Objects-normal/arm64/main~partial.swiftmodule"
+  }
+}

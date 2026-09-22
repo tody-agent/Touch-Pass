@@ -1,0 +1,4 @@
+module TouchPassStorage {
+header "TouchPassStorage-Swift.h"
+export *
+}

@@ -1,0 +1,335 @@
+[
+  {
+    "isFramework" : true,
+    "moduleName" : "Combine",
+    "modulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/Combine-2AMPVWBYABV4V.swiftmodule"
+  },
+  {
+    "isFramework" : false,
+    "moduleName" : "CoreFoundation",
+    "modulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/CoreFoundation-35BWQWINSVKKG.swiftmodule"
+  },
+  {
+    "isFramework" : false,
+    "moduleName" : "Darwin",
+    "modulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/Darwin-3TNI17IJRUA6Y.swiftmodule"
+  },
+  {
+    "isFramework" : false,
+    "moduleName" : "Dispatch",
+    "modulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/Dispatch-25BH8R3G2RXD7.swiftmodule"
+  },
+  {
+    "isFramework" : true,
+    "moduleName" : "Foundation",
+    "modulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/Foundation-48K2C12TD746.swiftmodule"
+  },
+  {
+    "isFramework" : false,
+    "moduleName" : "IOKit",
+    "modulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/IOKit-1I120MZCFQV92.swiftmodule"
+  },
+  {
+    "isFramework" : false,
+    "moduleName" : "ObjectiveC",
+    "modulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/ObjectiveC-7F35VI6CLSHU.swiftmodule"
+  },
+  {
+    "isFramework" : false,
+    "moduleName" : "Observation",
+    "modulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/Observation-I06OBVUMGIUM.swiftmodule"
+  },
+  {
+    "isFramework" : false,
+    "moduleName" : "Swift",
+    "modulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/Swift-1MVYQ90FMYC7P.swiftmodule"
+  },
+  {
+    "isFramework" : false,
+    "moduleName" : "SwiftOnoneSupport",
+    "modulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/SwiftOnoneSupport-PTMYX1DLZWO9.swiftmodule"
+  },
+  {
+    "isFramework" : false,
+    "moduleName" : "System",
+    "modulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/System-24MGRHSM70C6Q.swiftmodule"
+  },
+  {
+    "isFramework" : false,
+    "moduleName" : "TouchPassCore",
+    "modulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/Products\/Debug\/TouchPassCore.swiftmodule\/arm64-apple-macos.swiftmodule"
+  },
+  {
+    "isFramework" : false,
+    "moduleName" : "XPC",
+    "modulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/XPC-2E5IS3QS0TI5W.swiftmodule"
+  },
+  {
+    "isFramework" : false,
+    "moduleName" : "_Builtin_float",
+    "modulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/_Builtin_float-1L5923D5D61V6.swiftmodule"
+  },
+  {
+    "isFramework" : false,
+    "moduleName" : "_Concurrency",
+    "modulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/_Concurrency-2PUQR98EKKN3S.swiftmodule"
+  },
+  {
+    "isFramework" : false,
+    "moduleName" : "_DarwinFoundation1",
+    "modulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/_DarwinFoundation1-172G6VNXS902V.swiftmodule"
+  },
+  {
+    "isFramework" : false,
+    "moduleName" : "_DarwinFoundation2",
+    "modulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/_DarwinFoundation2-2C3R0N4ZQF83G.swiftmodule"
+  },
+  {
+    "isFramework" : false,
+    "moduleName" : "_DarwinFoundation3",
+    "modulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/_DarwinFoundation3-2WPU42RX7CXIV.swiftmodule"
+  },
+  {
+    "isFramework" : false,
+    "moduleName" : "_StringProcessing",
+    "modulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/_StringProcessing-Z1Y7UW1MFNVC.swiftmodule"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/SDKs\/MacOSX27.0.sdk\/System\/Library\/Frameworks\/CFNetwork.framework\/Modules\/module.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/CFNetwork-9W1ZWW7KFY8L6Q58QB45LQPKN.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "CFNetwork"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/SDKs\/MacOSX27.0.sdk\/System\/Library\/Frameworks\/CoreFoundation.framework\/Modules\/module.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/CoreFoundation-9ZDHKRGDYMYXG07RNHNXU6SCH.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "CoreFoundation"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/SDKs\/MacOSX27.0.sdk\/System\/Library\/Frameworks\/CoreServices.framework\/Modules\/module.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/CoreServices-9FTTJIVS2OI01EODOIKDMS475.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "CoreServices"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/SDKs\/MacOSX27.0.sdk\/usr\/include\/Darwin.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/Darwin-EDNQFYE2THW4XZJOQMVN0I5JF.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "Darwin"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/SDKs\/MacOSX27.0.sdk\/System\/Library\/Frameworks\/DiskArbitration.framework\/Modules\/module.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/DiskArbitration-AUNP3M8YUNNSW764DJ1HGDN4J.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "DiskArbitration"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/SDKs\/MacOSX27.0.sdk\/usr\/include\/dispatch.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/Dispatch-58MYVQYYAYLGD5AXR7M4CS6HZ.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "Dispatch"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/SDKs\/MacOSX27.0.sdk\/System\/Library\/Frameworks\/Foundation.framework\/Modules\/module.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/Foundation-A0UNKT73MPPODJHYH0WKHS13K.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "Foundation"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/SDKs\/MacOSX27.0.sdk\/System\/Library\/Frameworks\/IOKit.framework\/Modules\/module.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/IOKit-AJT2AXIV0DSNH79FEEP7AHPJ2.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "IOKit"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/SDKs\/MacOSX27.0.sdk\/usr\/include\/DarwinBasic.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/MachO-6PN9DG9QFLRBOMKW3XWTJZ99R.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "MachO"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/SDKs\/MacOSX27.0.sdk\/usr\/include\/ObjectiveC.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/ObjectiveC-9B34CBJLDRPOF3KLT87K72S2K.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "ObjectiveC"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/SDKs\/MacOSX27.0.sdk\/System\/Library\/Frameworks\/Security.framework\/Modules\/module.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/Security-1XXTS50X06W2C16C2MFONSKE5.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "Security"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/SDKs\/MacOSX27.0.sdk\/usr\/lib\/swift\/shims\/module.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/SwiftShims-R5MRK3LRGWJSO9AQOD61XCZS.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "SwiftShims"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/SDKs\/MacOSX27.0.sdk\/usr\/include\/xpc.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/XPC-7EZ4USVF3UXWVM3B1FCD2LMV3.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "XPC"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/SDKs\/MacOSX27.0.sdk\/usr\/include\/DarwinFoundation1.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/_AvailabilityInternal-AZ7AAS8VQPYCD4BIEET3V8379.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "_AvailabilityInternal"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/usr\/lib\/clang\/21\/include\/module.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/_Builtin_float-1TEENI8QTYFDWKZ74J6HG10TX.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "_Builtin_float"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/usr\/lib\/clang\/21\/include\/module.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/_Builtin_inttypes-6D2IB8AC64LCW1E22W1WX61UV.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "_Builtin_inttypes"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/usr\/lib\/clang\/21\/include\/module.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/_Builtin_limits-1TDYJR6V28VDC6MO7JBWPASTW.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "_Builtin_limits"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/usr\/lib\/clang\/21\/include\/module.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/_Builtin_stdarg-4R1IO5K5503YTR2K41STJTGP6.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "_Builtin_stdarg"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/usr\/lib\/clang\/21\/include\/module.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/_Builtin_stdbool-UQM2R9M8L1GWE3XHEXFLSFHV.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "_Builtin_stdbool"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/usr\/lib\/clang\/21\/include\/module.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/_Builtin_stddef-DLVPEEI6JJNRMEVWC6FAFHY7A.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "_Builtin_stddef"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/usr\/lib\/clang\/21\/include\/module.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/_Builtin_stdint-2YLRUPDRJ26S3N9CALELQUGIJ.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "_Builtin_stdint"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/SDKs\/MacOSX27.0.sdk\/usr\/include\/DarwinFoundation1.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/_DarwinFoundation1-E0JXAQNZZ3E95HRQVEG4CIWGY.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "_DarwinFoundation1"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/SDKs\/MacOSX27.0.sdk\/usr\/include\/DarwinFoundation2.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/_DarwinFoundation2-3THM6RZWG0Z2PWL84GV954NZ6.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "_DarwinFoundation2"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/SDKs\/MacOSX27.0.sdk\/usr\/include\/DarwinFoundation3.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/_DarwinFoundation3-3012VKTASZKPEVXUFSYP85S7R.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "_DarwinFoundation3"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/SDKs\/MacOSX27.0.sdk\/usr\/lib\/swift\/shims\/module.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/_SwiftConcurrencyShims-3MUC67O6XL844ZCMDJYIJ94BH.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "_SwiftConcurrencyShims"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/SDKs\/MacOSX27.0.sdk\/usr\/include\/launch.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/launch-ADJ1ZZIPCJ4CIS0YWNP2J6BJG.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "launch"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/SDKs\/MacOSX27.0.sdk\/usr\/include\/libDER\/module.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/libDER-EKUQ57Y95GEM8TQGQKR7R905L.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "libDER"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/SDKs\/MacOSX27.0.sdk\/usr\/include\/libkern.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/libkern-2DTC0RDEKGIDK4LD1U8G6IW1B.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "libkern"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/SDKs\/MacOSX27.0.sdk\/usr\/include\/os.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/os_object-EWM8VHPAKU8PV69S5A28OJ4B5.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "os_object"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/SDKs\/MacOSX27.0.sdk\/usr\/include\/os.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/os_workgroup-BJ9Z9PET67C5JTTMCMZSKCA3G.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "os_workgroup"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/usr\/lib\/clang\/21\/include\/module.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/ptrauth-4HG7NPO14HEUV2EW4IVO74MQW.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "ptrauth"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/usr\/lib\/clang\/21\/include\/module.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/ptrcheck-7ZL6W4W6WJ0EZRWGFRDOPZZ2B.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "ptrcheck"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/SDKs\/MacOSX27.0.sdk\/usr\/include\/c_standard_library.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/string_h-EHTRL8UUA5NDJX9HA42BW3V12.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "string_h"
+  },
+  {
+    "clangModuleMapPath" : "\/Library\/Developer\/CommandLineTools\/SDKs\/MacOSX27.0.sdk\/usr\/include\/DarwinFoundation2.modulemap",
+    "clangModulePath" : "\/Users\/todyle\/multica_workspaces_desktop-api.multica.ai\/todyle-7166eb614257\/tod-14-a5d779e4fab1\/workdir\/Touch-Pass\/software\/macos-native\/.build\/out\/SDKExplicitPrecompiledModules\/sys_types-4TXT6IERWKA45L9MS3DA9MRUW.pcm",
+    "isBridgingHeaderDependency" : false,
+    "isFramework" : false,
+    "moduleName" : "sys_types"
+  }
+]
