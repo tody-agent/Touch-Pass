@@ -1,6 +1,7 @@
 import Foundation
 import TouchPassCore
 import TouchPassSerial
+import TouchPassStorage
 
 func assertTrue(_ condition: Bool, _ message: String = "") {
     if !condition {
@@ -120,6 +121,23 @@ struct TouchPassTestsMain {
         let discoveredDevices = IOKitHotplugMonitor.discoverDevices()
         print("ℹ️ IOKit discovered \(discoveredDevices.count) serial modem device(s).")
 
-        print("✅ Task 2, 3, 4 tests passed successfully!")
+        // Test 10: ProfileStore
+        let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        let profileStore = ProfileStore(storageURL: tempDir)
+        let allProfiles = await profileStore.getAllProfiles()
+        assertEqual(allProfiles.count, 10, "should have exactly 10 slots")
+        let slot1 = await profileStore.getProfile(slot: 1)
+        assertEqual(slot1?.actionType, .aiAccept, "slot 1 default is aiAccept")
+
+        // Test Profile Update
+        var modifiedSlot1 = slot1!
+        modifiedSlot1.name = "Claude Approve"
+        try await profileStore.updateProfile(modifiedSlot1)
+        let reloadedSlot1 = await profileStore.getProfile(slot: 1)
+        assertEqual(reloadedSlot1?.name, "Claude Approve", "updated profile name should persist")
+
+        try? FileManager.default.removeItem(at: tempDir)
+
+        print("✅ Task 2, 3, 4, 5 tests passed successfully!")
     }
 }
