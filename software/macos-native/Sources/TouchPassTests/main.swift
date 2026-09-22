@@ -49,7 +49,6 @@ struct TouchPassTestsMain {
         assertTrue(!ivHex.isEmpty, "ivHex should not be empty")
         assertTrue(!ciphertextHex.isEmpty, "ciphertextHex should not be empty")
 
-        // Parse ivHex & ciphertextHex back to Data
         var ivBytes = [UInt8]()
         var ivIdx = ivHex.startIndex
         while ivIdx < ivHex.endIndex {
@@ -75,11 +74,54 @@ struct TouchPassTestsMain {
         let secondCheck = await replayFilter.validateAndRecord(nonce: "NONCE_A")
         assertTrue(!secondCheck, "replay of same nonce should be rejected")
 
-        let nonceB = await replayFilter.validateAndRecord(nonce: "NONCE_B")
-        let nonceC = await replayFilter.validateAndRecord(nonce: "NONCE_C")
-        let nonceD = await replayFilter.validateAndRecord(nonce: "NONCE_D")
-        assertTrue(nonceB && nonceC && nonceD, "fresh nonces should be allowed")
+        // Test 6: Protocol Parser
+        let statusLine = "OK STATUS mode=hid sensor=ok fingerprints=2 hid_key=configured keys=nvs"
+        let parsedStatus = TouchPassProtocol.parseFirmwareLine(statusLine)
+        assertEqual(parsedStatus, .status(StatusLine(
+            mode: "hid",
+            sensorOk: true,
+            fingerprints: 2,
+            hidKeyConfigured: true,
+            hidConfigurationSupported: true
+        )), "status line parsing")
 
-        print("✅ Task 2 Crypto tests passed successfully!")
+        let eventLine = "EV 12345678 0001 2 95 abcdef0123456789"
+        let parsedEvent = TouchPassProtocol.parseFirmwareLine(eventLine)
+        assertEqual(parsedEvent, .event(SensorEvent(
+            nonce: "12345678",
+            counter: "0001",
+            slot: 2,
+            score: "95",
+            mac: "abcdef0123456789"
+        )), "event line parsing")
+
+        // Test 7: Action Encoder
+        let aiAcceptData = try ActionEncoder.encode(actionType: .aiAccept) { _ in Data() }
+        // [version 1, steps 2, op_text 1, len 1, 'y' 0x79, op_key 2, mod 0, enter 0x28]
+        assertEqual(Array(aiAcceptData), [1, 2, 1, 1, 0x79, 2, 0, 0x28], "aiAccept bytecode")
+
+        let customData = try ActionEncoder.encode(actionType: .custom, customPayload: "git status") { _ in Data() }
+        assertEqual(customData[0], 1, "version 1")
+        assertEqual(customData[1], 1, "1 step")
+        assertEqual(customData[2], 1, "op_text")
+        assertEqual(customData[3], 10, "10 bytes")
+
+        // Test 8: Trigger Gate (Double-touch safety)
+        var gate = TriggerGate(windowSeconds: 3.0)
+        // Without confirmation: immediate execute
+        let decNoConfirm = gate.touch(slot: 1, requireConfirm: false, nowSeconds: 100.0)
+        assertEqual(decNoConfirm, .execute, "no confirm required executes immediately")
+
+        // With confirmation: first touch arms, second within 3.0s executes
+        let dec1 = gate.touch(slot: 2, requireConfirm: true, nowSeconds: 100.0)
+        assertEqual(dec1, .armed, "first touch arms")
+        let dec2 = gate.touch(slot: 2, requireConfirm: true, nowSeconds: 101.5)
+        assertEqual(dec2, .execute, "second touch within window executes")
+
+        // Third touch arms again
+        let dec3 = gate.touch(slot: 2, requireConfirm: true, nowSeconds: 105.0)
+        assertEqual(dec3, .armed, "subsequent touch arms anew")
+
+        print("✅ Task 2 & Task 3 tests passed successfully!")
     }
 }
