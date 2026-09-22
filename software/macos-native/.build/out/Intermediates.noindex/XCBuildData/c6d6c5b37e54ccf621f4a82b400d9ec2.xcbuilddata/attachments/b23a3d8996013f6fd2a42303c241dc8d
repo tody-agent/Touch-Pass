@@ -1,4 +1,0 @@
-module TouchPassSmartCard {
-header "TouchPassSmartCard-Swift.h"
-export *
-}

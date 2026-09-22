@@ -1,4 +1,0 @@
-module TouchPassCore {
-header "TouchPassCore-Swift.h"
-export *
-}

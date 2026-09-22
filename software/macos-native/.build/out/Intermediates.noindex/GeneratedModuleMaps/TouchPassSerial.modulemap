@@ -1,4 +1,0 @@
-module TouchPassSerial {
-header "TouchPassSerial-Swift.h"
-export *
-}
