@@ -46,8 +46,12 @@ cat << 'EOF' > "${APP_BUNDLE}/Contents/Info.plist"
     <string>0.3.0</string>
     <key>CFBundleVersion</key>
     <string>1</string>
+    <key>CFBundleDisplayName</key>
+    <string>TouchPass</string>
     <key>LSMinimumSystemVersion</key>
     <string>14.0</string>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.utilities</string>
     <key>NSPrincipalClass</key>
     <string>NSApplication</string>
     <key>NSHighResolutionCapable</key>
@@ -55,5 +59,22 @@ cat << 'EOF' > "${APP_BUNDLE}/Contents/Info.plist"
 </dict>
 </plist>
 EOF
+
+# swift build linker-signs the bare executable only. Without a bundle
+# signature, Info.plist is not bound and LaunchServices sees a null
+# bundle identifier, so the app process starts with no openable UI.
+echo "🔏 Signing app bundle so Info.plist is bound..."
+codesign --force --sign - \
+    --identifier "com.touchpass.desktop" \
+    "${APP_BUNDLE}"
+
+# codesign -dv prints to stderr and can exit non-zero even when the
+# signature is readable, so do not use the pipeline status as the check.
+sign_info="$(codesign -dv "${APP_BUNDLE}" 2>&1 || true)"
+if [[ "${sign_info}" != *"Info.plist entries"* ]]; then
+    echo "ERROR: Info.plist was not bound into the signature." >&2
+    printf '%s\n' "${sign_info}" >&2
+    exit 1
+fi
 
 echo "✅ App bundle created successfully at ${APP_BUNDLE}!"

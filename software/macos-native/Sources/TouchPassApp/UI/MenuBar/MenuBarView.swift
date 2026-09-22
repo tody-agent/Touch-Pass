@@ -46,8 +46,9 @@ public struct MenuBarView: View {
             Divider()
 
             Button {
+                NSApp.setActivationPolicy(.regular)
                 openWindow(id: "main-window")
-                NSApp.activate(ignoringOtherApps: true)
+                NSApp.activate()
             } label: {
                 Label("Open Dashboard", systemImage: "macwindow")
                     .font(.caption)
