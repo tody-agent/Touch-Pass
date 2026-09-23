@@ -10,6 +10,7 @@
     LoaderCircle,
     Rocket,
     Shield,
+    Sparkles,
     Usb
   } from 'lucide-svelte';
   import { firmwareModeLabel, sensorStatusLabel, translate, workerStatusLabel, type Locale } from '../lib/i18n';
@@ -31,6 +32,7 @@
     onRefresh: () => Promise<void>;
     onConfigureHid: (repair: boolean) => Promise<void>;
     onClose: () => void;
+    onRestartOnboarding?: () => void;
   }
 
   let {
@@ -45,7 +47,8 @@
     onAutostartChange,
     onRefresh,
     onConfigureHid,
-    onClose
+    onClose,
+    onRestartOnboarding
   }: Props = $props();
 
   let category = $state<SettingsCategory>('general');
@@ -182,6 +185,28 @@
               </span>
             </label>
           </section>
+
+          <!-- Onboarding Guide Option -->
+          {#if onRestartOnboarding}
+            <section class="settings-card apple-card p-3" aria-labelledby="onboarding-gen-title">
+              <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                  <span class="p-2 rounded-lg bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30 shrink-0"><Sparkles size={17} /></span>
+                  <div class="min-w-0">
+                    <span id="onboarding-gen-title" class="block text-xs font-bold text-[var(--fg)] truncate">{translate(locale, 'onboarding.title')}</span>
+                    <span class="block text-[11px] text-[var(--fg-muted)] mt-0.5">{translate(locale, 'onboarding.restartHelpDesc')}</span>
+                  </div>
+                </div>
+                <button
+                  class="secondary-button text-xs py-1.5 px-3 shrink-0"
+                  onclick={onRestartOnboarding}
+                >
+                  <Sparkles size={13} class="text-blue-500" aria-hidden="true" />
+                  <span>{translate(locale, 'onboarding.restartButton')}</span>
+                </button>
+              </div>
+            </section>
+          {/if}
         {:else if category === 'device'}
           <section class="settings-card apple-card p-3" aria-labelledby="device-title">
             <div class="mb-3 flex items-center justify-between">

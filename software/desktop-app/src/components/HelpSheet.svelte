@@ -7,9 +7,10 @@
     open: boolean;
     locale: Locale;
     onClose: () => void;
+    onRestartOnboarding?: () => void;
   }
 
-  let { open, locale, onClose }: Props = $props();
+  let { open, locale, onClose, onRestartOnboarding }: Props = $props();
   let dialogElement: HTMLDivElement | undefined = $state();
   const steps = ['help.step1', 'help.step2', 'help.step3'] as const;
 
@@ -49,6 +50,25 @@
           </li>
         {/each}
       </ol>
+
+      {#if onRestartOnboarding}
+        <div class="mt-4 p-3 rounded-xl border border-blue-500/20 bg-blue-500/5 flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <h3 class="text-xs font-bold text-[var(--fg)] m-0 truncate">{translate(locale, 'onboarding.title')}</h3>
+            <p class="text-[11px] text-[var(--fg-muted)] m-0 mt-0.5 leading-tight">{translate(locale, 'onboarding.restartHelpDesc')}</p>
+          </div>
+          <button
+            class="secondary-button text-xs py-1 px-2.5 shrink-0"
+            onclick={() => {
+              onClose();
+              onRestartOnboarding();
+            }}
+          >
+            {translate(locale, 'onboarding.restartButton')}
+          </button>
+        </div>
+      {/if}
+
       <div class="mt-5 flex justify-end">
         <button class="primary-button text-xs py-1.5 px-3" onclick={onClose}><CheckCircle2 size={15} />{translate(locale, 'button.close')}</button>
       </div>

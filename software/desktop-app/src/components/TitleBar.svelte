@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Circle, CircleHelp, Hand, Moon, Settings, Sun } from 'lucide-svelte';
+  import { Circle, CircleHelp, Hand, Moon, Settings, Sparkles, Sun } from 'lucide-svelte';
   import { toolbarStatusLabel, translate, type Locale } from '../lib/i18n';
   import type { AppStatusResponse } from '../lib/types';
 
@@ -10,9 +10,10 @@
     onThemeToggle?: () => void;
     onSettings: () => void;
     onHelp: () => void;
+    onOnboarding?: () => void;
   }
 
-  let { locale, status, theme = 'dark', onThemeToggle, onSettings, onHelp }: Props = $props();
+  let { locale, status, theme = 'dark', onThemeToggle, onSettings, onHelp, onOnboarding }: Props = $props();
   const deviceReady = $derived(status.connected && status.sensorStatus === 'ok');
 </script>
 
@@ -55,6 +56,16 @@
         {:else}
           <Moon size={16} />
         {/if}
+      </button>
+    {/if}
+    {#if onOnboarding}
+      <button
+        class="icon-button"
+        title={translate(locale, 'onboarding.title')}
+        aria-label={translate(locale, 'onboarding.title')}
+        onclick={onOnboarding}
+      >
+        <Sparkles size={16} />
       </button>
     {/if}
     <button

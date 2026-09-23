@@ -6,6 +6,7 @@
   import HandMap from './components/HandMap.svelte';
   import HelpSheet from './components/HelpSheet.svelte';
   import HUDPill from './components/HUDPill.svelte';
+  import OnboardingModal from './components/OnboardingModal.svelte';
   import SettingsPane from './components/SettingsPane.svelte';
   import TitleBar from './components/TitleBar.svelte';
   import {
@@ -36,7 +37,7 @@
     subscribeEnrollProgress,
     subscribeFingerTouch
   } from './lib/tauriBridge';
-  import { defaultProfiles, defaultStatus, type AppStatusResponse, type FingerProfile } from './lib/types';
+  import { defaultProfiles, defaultStatus, type ActionType, type AppStatusResponse, type FingerProfile } from './lib/types';
   import { focusFirstInDialog, handleDialogKeydown } from './lib/focusTrap';
   import {
     beginInlineEnrollment,
@@ -61,6 +62,7 @@
   let loadError = $state(false);
   let hudMessage = $state<string | undefined>(undefined);
   let helpOpen = $state(false);
+  let onboardingOpen = $state(false);
   let autostartEnabled = $state(false);
   let autostartLoading = $state(false);
   let hidConfigurationLoading = $state(false);
@@ -149,6 +151,10 @@
       showCommandError(error);
     }
     await Promise.all([refresh(true), refreshAutostart()]);
+    const onboardingDone = typeof window !== 'undefined' && localStorage.getItem('touchpass_onboarding_completed') === 'true';
+    if (!onboardingDone) {
+      onboardingOpen = true;
+    }
   }
 
   async function refresh(showLoading = false) {
@@ -325,11 +331,63 @@
     editorResetRevision += 1;
     workspace = confirmPendingNavigation(workspace);
   }
+
+  function completeOnboarding() {
+    onboardingOpen = false;
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('touchpass_onboarding_completed', 'true');
+      } catch {}
+    }
+  }
+
+  function skipOnboarding() {
+    onboardingOpen = false;
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('touchpass_onboarding_completed', 'true');
+      } catch {}
+    }
+  }
+
+  function startOnboarding() {
+    onboardingOpen = true;
+  }
+
+  async function applyRecommendedPresets() {
+    const recommended: Array<{ id: number; actionType: ActionType; customPayload?: string }> = [
+      { id: 8, actionType: 'ai_accept' },
+      { id: 6, actionType: 'enter' },
+      { id: 2, actionType: 'custom', customPayload: 'Cmd+Tab' },
+      { id: 3, actionType: 'custom', customPayload: 'Cmd+Space' },
+      { id: 1, actionType: 'escape' }
+    ];
+    for (const rec of recommended) {
+      const p = profiles.find((item) => item.id === rec.id);
+      if (p) {
+        await saveProfile({
+          ...p,
+          actionType: rec.actionType,
+          customPayload: rec.customPayload,
+          requireConfirm: true
+        });
+      }
+    }
+    showHud(translate(locale, 'onboarding.appliedRecommended'));
+  }
 </script>
 
 <div class="app-stage {theme}" data-theme={theme}>
   <div class="apple-window relative {theme}" data-theme={theme}>
-    <TitleBar {locale} {status} {theme} onThemeToggle={toggleTheme} onSettings={requestSettings} onHelp={() => (helpOpen = true)} />
+    <TitleBar
+      {locale}
+      {status}
+      {theme}
+      onThemeToggle={toggleTheme}
+      onSettings={requestSettings}
+      onHelp={() => (helpOpen = true)}
+      onOnboarding={startOnboarding}
+    />
 
     <div class="workspace-shell">
       {#if workspace.mode === 'settings'}
@@ -349,6 +407,10 @@
           }}
           onConfigureHid={configureHid}
           onClose={closeSettings}
+          onRestartOnboarding={() => {
+            closeSettings();
+            startOnboarding();
+          }}
         />
       {:else if loading}
         <main class="workspace-state" aria-busy="true" aria-label={translate(locale, 'main.loading')}><div class="workspace-skeleton" aria-hidden="true"></div></main>
@@ -370,7 +432,37 @@
       {/if}
     </div>
 
-    <HelpSheet open={helpOpen} {locale} onClose={() => (helpOpen = false)} />
+    <HelpSheet
+      open={helpOpen}
+      {locale}
+      onClose={() => (helpOpen = false)}
+      onRestartOnboarding={() => {
+        helpOpen = false;
+        startOnboarding();
+      }}
+    />
+
+    <OnboardingModal
+      open={onboardingOpen}
+      {locale}
+      {status}
+      {profiles}
+      {autostartEnabled}
+      {autostartLoading}
+      autostartAvailable={isTauriRuntime()}
+      inlineEnrollment={workspace.inlineEnrollment}
+      onRefresh={async () => {
+        await refresh(false);
+      }}
+      onSaveProfile={saveProfile}
+      onEnroll={beginEnrollment}
+      onAutostartChange={changeAutostart}
+      onApplyRecommendedPresets={applyRecommendedPresets}
+      onClose={skipOnboarding}
+      onComplete={completeOnboarding}
+      onTestUnlock={testAction}
+    />
+
     {#if workspace.pendingNavigation}
       <div class="dialog-backdrop items-center justify-center p-4" role="presentation">
         <div bind:this={discardDialogElement} class="confirm-dialog max-w-md backdrop-blur-2xl bg-slate-900/90 border border-white/10 shadow-2xl rounded-2xl p-6" role="alertdialog" aria-modal="true" aria-labelledby="discard-title" aria-describedby="discard-description" tabindex="-1" onkeydown={(event) => handleDialogKeydown(event, discardDialogElement, () => (workspace = { ...workspace, pendingNavigation: undefined }))}>
