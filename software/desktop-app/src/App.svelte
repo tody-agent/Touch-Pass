@@ -28,6 +28,7 @@
     isTauriRuntime,
     listFingerProfiles,
     normalizeCommandError,
+    resetDevice,
     resetFingerProfile,
     saveFingerProfile,
     setAppLocale,
@@ -66,6 +67,7 @@
   let autostartEnabled = $state(false);
   let autostartLoading = $state(false);
   let hidConfigurationLoading = $state(false);
+  let resetLoading = $state(false);
   let editorResetRevision = $state(0);
   let discardDialogElement: HTMLDivElement | undefined = $state();
   let enrollTimer: number | undefined;
@@ -112,6 +114,7 @@
       status.port = payload.port;
       status.sensorStatus = payload.sensorStatus;
       status.firmwareMode = payload.firmwareMode;
+      status.fingerprintCount = payload.fingerprintCount ?? status.fingerprintCount;
       status.hidKeyConfigured = payload.hidKeyConfigured;
       status.hidConfigurationSupported = payload.hidConfigurationSupported;
       status.localPairingKeyConfigured = payload.localPairingKeyConfigured;
@@ -312,6 +315,19 @@
     }
   }
 
+  async function handleResetDevice() {
+    resetLoading = true;
+    try {
+      await resetDevice();
+      await refresh(false);
+      showHud(translate(locale, 'hud.deviceReset'));
+    } catch (error) {
+      showCommandError(error);
+    } finally {
+      resetLoading = false;
+    }
+  }
+
   function selectFinger(id: number) {
     if (workspace.inlineEnrollment?.state === 'scanning') return;
     workspace = requestFingerSelection(workspace, id);
@@ -398,6 +414,7 @@
           {autostartEnabled}
           {autostartLoading}
           {hidConfigurationLoading}
+          {resetLoading}
           autostartAvailable={isTauriRuntime()}
           onLocaleChange={changeLocale}
           onAutostartChange={changeAutostart}
@@ -406,6 +423,7 @@
             if (!loadError) showHud(translate(locale, 'hud.refreshed'));
           }}
           onConfigureHid={configureHid}
+          onResetDevice={handleResetDevice}
           onClose={closeSettings}
           onRestartOnboarding={() => {
             closeSettings();

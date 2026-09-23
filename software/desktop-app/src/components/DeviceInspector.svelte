@@ -79,6 +79,12 @@
           {sensorStatusLabel(locale, status.sensorStatus)}
         </dd>
       </div>
+      <div>
+        <dt><Fingerprint size={14} class="text-cyan-600 dark:text-cyan-400" aria-hidden="true" />{translate(locale, 'settings.chipFingerprints')}</dt>
+        <dd class="font-semibold text-xs {status.fingerprintCount > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--fg-muted)]'}">
+          {status.fingerprintCount > 0 ? translate(locale, 'settings.enrolledCount', { count: status.fingerprintCount }) : translate(locale, 'settings.noFingerprints')}
+        </dd>
+      </div>
     </dl>
   </section>
 
@@ -132,7 +138,11 @@
 
     {#if profile.configured && !scanning && !complete}
       <button class="secondary-button inspector-rescan mt-auto py-1.5 text-xs" disabled={!deviceReady || rescanDisabled} onclick={() => void onEnroll(profile.id)}>
-        <ScanLine size={14} aria-hidden="true" />{translate(locale, 'button.rescan')}
+        <ScanLine size={14} aria-hidden="true" />{translate(locale, 'button.reconfigureFingerprint')}
+      </button>
+    {:else if !scanning && !complete}
+      <button class="secondary-button inspector-rescan mt-auto py-1.5 text-xs" disabled={!deviceReady || rescanDisabled} onclick={() => void onEnroll(profile.id)}>
+        <ScanLine size={14} aria-hidden="true" />{translate(locale, 'button.enrollFingerprint')}
       </button>
     {/if}
   </section>

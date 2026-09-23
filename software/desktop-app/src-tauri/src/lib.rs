@@ -13,7 +13,7 @@ pub mod types;
 
 use commands::{
     configure_hid_mode, get_app_preferences, get_app_status, list_finger_profiles,
-    reset_finger_profile, save_finger_profile, set_app_locale, start_enrollment,
+    reset_device, reset_finger_profile, save_finger_profile, set_app_locale, start_enrollment,
 };
 use preferences::tray_labels;
 use state::AppState;
@@ -57,6 +57,7 @@ pub fn run() {
             list_finger_profiles,
             save_finger_profile,
             reset_finger_profile,
+            reset_device,
             start_enrollment,
             configure_hid_mode
         ])

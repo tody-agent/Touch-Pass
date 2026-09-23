@@ -44,6 +44,7 @@ export interface DeviceStatusChange {
   port?: string;
   sensorStatus: SensorStatus;
   firmwareMode: string;
+  fingerprintCount?: number;
   hidKeyConfigured: boolean;
   hidConfigurationSupported: boolean;
   localPairingKeyConfigured: boolean;

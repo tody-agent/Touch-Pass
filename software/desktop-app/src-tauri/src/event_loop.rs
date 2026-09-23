@@ -68,6 +68,8 @@ fn run_worker(app: AppHandle, state: AppState, rx: mpsc::Receiver<AdminCommand>)
                 > = None;
                 let mut pending_configure_reply: Option<mpsc::Sender<Result<(), CommandError>>> =
                     None;
+                let mut pending_reset_reply: Option<mpsc::Sender<Result<(), CommandError>>> =
+                    None;
                 let mut pending_pairing_key: Option<PreparedPairingKey> = None;
                 let mut pairing_key_sent = false;
                 let mut admin_started: Option<Instant> = None;
@@ -81,6 +83,7 @@ fn run_worker(app: AppHandle, state: AppState, rx: mpsc::Receiver<AdminCommand>)
                         }
                         let mut delete_reply = None;
                         let mut configure_reply = None;
+                        let mut reset_reply = None;
                         let (operation, start_result) = match command {
                             AdminCommand::Enroll(slot) => {
                                 let needs_setup = state
@@ -123,6 +126,12 @@ fn run_worker(app: AppHandle, state: AppState, rx: mpsc::Receiver<AdminCommand>)
                                 let result = admin_flow.start(operation).map_err(str::to_string);
                                 (operation, result)
                             }
+                            AdminCommand::ResetDevice { reply } => {
+                                reset_reply = Some(reply);
+                                let operation = AdminOperation::ResetDevice;
+                                let result = admin_flow.start(operation).map_err(str::to_string);
+                                (operation, result)
+                            }
                             AdminCommand::ConfigureHid { rotate, reply } => {
                                 configure_reply = Some(reply);
                                 let operation = AdminOperation::ConfigureHid { enroll_after: None };
@@ -159,6 +168,7 @@ fn run_worker(app: AppHandle, state: AppState, rx: mpsc::Receiver<AdminCommand>)
                             Ok(unlock) => {
                                 pending_delete_reply = delete_reply;
                                 pending_configure_reply = configure_reply;
+                                pending_reset_reply = reset_reply;
                                 if port
                                     .write_all(unlock.as_bytes())
                                     .and_then(|_| port.flush())
@@ -181,6 +191,7 @@ fn run_worker(app: AppHandle, state: AppState, rx: mpsc::Receiver<AdminCommand>)
                                         &mut enroll_step,
                                         &mut pending_delete_reply,
                                         &mut pending_configure_reply,
+                                        &mut pending_reset_reply,
                                     );
                                     admin_flow.clear();
                                 } else {
@@ -190,6 +201,7 @@ fn run_worker(app: AppHandle, state: AppState, rx: mpsc::Receiver<AdminCommand>)
                             Err(reason) => {
                                 let mut rejected_delete_reply = delete_reply;
                                 let mut rejected_configure_reply = configure_reply;
+                                let mut rejected_reset_reply = reset_reply;
                                 emit_admin_action(
                                     &app,
                                     &state,
@@ -200,6 +212,7 @@ fn run_worker(app: AppHandle, state: AppState, rx: mpsc::Receiver<AdminCommand>)
                                     &mut enroll_step,
                                     &mut rejected_delete_reply,
                                     &mut rejected_configure_reply,
+                                    &mut rejected_reset_reply,
                                 )
                             }
                         }
@@ -228,6 +241,7 @@ fn run_worker(app: AppHandle, state: AppState, rx: mpsc::Receiver<AdminCommand>)
                             &mut enroll_step,
                             &mut pending_delete_reply,
                             &mut pending_configure_reply,
+                            &mut pending_reset_reply,
                         );
                         admin_started = None;
                     }
@@ -252,6 +266,7 @@ fn run_worker(app: AppHandle, state: AppState, rx: mpsc::Receiver<AdminCommand>)
                                 &mut enroll_step,
                                 &mut pending_delete_reply,
                                 &mut pending_configure_reply,
+                                &mut pending_reset_reply,
                             );
                             break;
                         }
@@ -270,6 +285,7 @@ fn run_worker(app: AppHandle, state: AppState, rx: mpsc::Receiver<AdminCommand>)
                                 admin_flow: &mut admin_flow,
                                 pending_delete_reply: &mut pending_delete_reply,
                                 pending_configure_reply: &mut pending_configure_reply,
+                                pending_reset_reply: &mut pending_reset_reply,
                                 pending_pairing_key: &mut pending_pairing_key,
                                 pairing_key_sent: &mut pairing_key_sent,
                                 started,
@@ -299,6 +315,7 @@ fn run_worker(app: AppHandle, state: AppState, rx: mpsc::Receiver<AdminCommand>)
                                         &mut enroll_step,
                                         &mut pending_delete_reply,
                                         &mut pending_configure_reply,
+                                        &mut pending_reset_reply,
                                     );
                                     break;
                                 }
@@ -336,6 +353,7 @@ fn run_worker(app: AppHandle, state: AppState, rx: mpsc::Receiver<AdminCommand>)
                                     &mut enroll_step,
                                     &mut pending_delete_reply,
                                     &mut pending_configure_reply,
+                                    &mut pending_reset_reply,
                                 );
                                 break;
                             }
@@ -427,6 +445,12 @@ fn reject_admin_command(app: Option<&AppHandle>, command: AdminCommand, reason: 
                 reason,
             )));
         }
+        AdminCommand::ResetDevice { reply } => {
+            let _ = reply.send(Err(CommandError::with_detail(
+                ErrorCode::HardwareUnavailable,
+                reason,
+            )));
+        }
         AdminCommand::ConfigureHid { reply, .. } => {
             let _ = reply.send(Err(CommandError::with_detail(
                 ErrorCode::HardwareUnavailable,
@@ -445,6 +469,7 @@ struct LineContext<'a> {
     admin_flow: &'a mut AdminFlow,
     pending_delete_reply: &'a mut Option<mpsc::Sender<Result<FingerProfile, CommandError>>>,
     pending_configure_reply: &'a mut Option<mpsc::Sender<Result<(), CommandError>>>,
+    pending_reset_reply: &'a mut Option<mpsc::Sender<Result<(), CommandError>>>,
     pending_pairing_key: &'a mut Option<PreparedPairingKey>,
     pairing_key_sent: &'a mut bool,
     started: Instant,
@@ -460,6 +485,7 @@ fn handle_line(context: LineContext<'_>, line: &str) -> Option<String> {
         admin_flow,
         pending_delete_reply,
         pending_configure_reply,
+        pending_reset_reply,
         pending_pairing_key,
         pairing_key_sent,
         started,
@@ -498,6 +524,7 @@ fn handle_line(context: LineContext<'_>, line: &str) -> Option<String> {
                 enroll_step,
                 pending_delete_reply,
                 pending_configure_reply,
+                pending_reset_reply,
             );
             return None;
         }
@@ -557,6 +584,7 @@ fn handle_line(context: LineContext<'_>, line: &str) -> Option<String> {
             enroll_step,
             pending_delete_reply,
             pending_configure_reply,
+            pending_reset_reply,
         );
         return None;
     }
@@ -586,6 +614,7 @@ fn handle_line(context: LineContext<'_>, line: &str) -> Option<String> {
                     hid_configuration_supported: current.hid_configuration_supported,
                     local_pairing_key_configured: current.local_pairing_key_configured,
                     pairing_in_doubt: current.pairing_in_doubt,
+                    fingerprint_count: current.fingerprint_count,
                 })
             } else {
                 None
@@ -606,7 +635,9 @@ fn handle_line(context: LineContext<'_>, line: &str) -> Option<String> {
         | FirmwareLine::EnrollOk(_)
         | FirmwareLine::EnrollErr { .. }
         | FirmwareLine::DeleteOk(_)
-        | FirmwareLine::DeleteErr(_) => None,
+        | FirmwareLine::DeleteErr(_)
+        | FirmwareLine::DeleteAllOk
+        | FirmwareLine::DeleteAllErr => None,
         FirmwareLine::Event(event) => {
             let profiles = state.profiles.clone();
             let secret_store = state.secret_store.clone();
@@ -678,6 +709,7 @@ fn update_connection(
             hid_configuration_supported: status.hid_configuration_supported,
             local_pairing_key_configured: status.local_pairing_key_configured,
             pairing_in_doubt: status.pairing_in_doubt,
+            fingerprint_count: status.fingerprint_count,
         })
     } else {
         None
@@ -706,6 +738,7 @@ fn emit_admin_action(
     enroll_step: &mut u8,
     pending_delete_reply: &mut Option<mpsc::Sender<Result<FingerProfile, CommandError>>>,
     pending_configure_reply: &mut Option<mpsc::Sender<Result<(), CommandError>>>,
+    pending_reset_reply: &mut Option<mpsc::Sender<Result<(), CommandError>>>,
 ) {
     match action {
         AdminFlowAction::UnlockPrompt => {
@@ -764,6 +797,41 @@ fn emit_admin_action(
                 let _ = reply.send(result);
             }
         }
+        AdminFlowAction::Completed(AdminOperation::ResetDevice) => {
+            let profile_result = state
+                .profiles
+                .lock()
+                .map_err(|_| CommandError::internal("profile store lock poisoned"))
+                .map(|profiles| profiles.reset_all_profiles());
+            let secret_result = state
+                .secret_store
+                .clear_pairing_keys("default")
+                .map_err(CommandError::internal);
+            let status_change = if let Ok(mut status) = state.status.lock() {
+                status.fingerprint_count = 0;
+                status.local_pairing_key_configured = false;
+                status.pairing_in_doubt = false;
+                Some(DeviceStatusChange {
+                    connected: status.connected,
+                    port: status.port.clone(),
+                    sensor_status: status.sensor_status,
+                    firmware_mode: status.firmware_mode.clone(),
+                    fingerprint_count: 0,
+                    hid_key_configured: status.hid_key_configured,
+                    hid_configuration_supported: status.hid_configuration_supported,
+                    local_pairing_key_configured: false,
+                    pairing_in_doubt: false,
+                })
+            } else {
+                None
+            };
+            if let Some(change) = status_change {
+                let _ = app.emit("device_status_change", change);
+            }
+            if let Some(reply) = pending_reset_reply.take() {
+                let _ = reply.send(profile_result.and(secret_result));
+            }
+        }
         AdminFlowAction::Completed(AdminOperation::ConfigureHid { .. }) => {
             if let Ok(mut status) = state.status.lock() {
                 status.firmware_mode = "hid".to_string();
@@ -776,6 +844,7 @@ fn emit_admin_action(
         AdminFlowAction::Failed { operation, reason } => {
             let slot = match operation {
                 AdminOperation::Enroll(slot) | AdminOperation::Delete(slot) => Some(slot),
+                AdminOperation::ResetDevice => None,
                 AdminOperation::ConfigureHid { enroll_after } => enroll_after,
             };
             if let Some(slot) = slot {
@@ -783,6 +852,14 @@ fn emit_admin_action(
             }
             if matches!(operation, AdminOperation::Delete(_)) {
                 if let Some(reply) = pending_delete_reply.take() {
+                    let _ = reply.send(Err(CommandError::with_detail(
+                        ErrorCode::HardwareUnavailable,
+                        reason.clone(),
+                    )));
+                }
+            }
+            if matches!(operation, AdminOperation::ResetDevice) {
+                if let Some(reply) = pending_reset_reply.take() {
                     let _ = reply.send(Err(CommandError::with_detail(
                         ErrorCode::HardwareUnavailable,
                         reason.clone(),
@@ -927,5 +1004,18 @@ mod tests {
 
         let error = reply_rx.recv().unwrap().unwrap_err();
         assert_eq!(error.detail.as_deref(), Some("bootloader"));
+    }
+
+    #[test]
+    fn queued_reset_device_is_rejected_when_runtime_port_is_unusable() {
+        let (reply_tx, reply_rx) = mpsc::channel();
+        reject_admin_command(
+            None,
+            AdminCommand::ResetDevice { reply: reply_tx },
+            "sensor_unavailable",
+        );
+
+        let error = reply_rx.recv().unwrap().unwrap_err();
+        assert_eq!(error.detail.as_deref(), Some("sensor_unavailable"));
     }
 }

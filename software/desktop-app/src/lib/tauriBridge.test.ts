@@ -61,4 +61,12 @@ describe('profile bridge mock operations', () => {
     expect(reset.configured).toBe(false);
     expect(reset.actionType).toBe('enter');
   });
+
+  it('resets all profiles to default unconfigured state on resetDevice', async () => {
+    const { listFingerProfiles, resetDevice } = await import('./tauriBridge');
+    await resetDevice();
+    const profiles = await listFingerProfiles();
+    expect(profiles.every((p) => !p.configured)).toBe(true);
+    expect(profiles.length).toBe(10);
+  });
 });

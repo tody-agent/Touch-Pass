@@ -40,6 +40,7 @@ fn status_and_structured_error_contracts_use_stable_codes() {
         port: Some("COM5".to_string()),
         sensor_status: SensorStatus::Bootloader,
         firmware_mode: "bootloader".to_string(),
+        fingerprint_count: 0,
         hid_key_configured: false,
         hid_configuration_supported: false,
         local_pairing_key_configured: false,
@@ -47,6 +48,7 @@ fn status_and_structured_error_contracts_use_stable_codes() {
     };
     let status_json = serde_json::to_value(change).unwrap();
     assert_eq!(status_json["sensorStatus"], "bootloader");
+    assert_eq!(status_json["fingerprintCount"], 0);
 
     let error = CommandError::with_detail(ErrorCode::PersistenceFailed, "disk full");
     let error_json = serde_json::to_value(error).unwrap();

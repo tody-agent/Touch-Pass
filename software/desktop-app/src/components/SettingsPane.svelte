@@ -9,6 +9,7 @@
     Languages,
     LoaderCircle,
     Rocket,
+    RotateCcw,
     Shield,
     Sparkles,
     Usb
@@ -27,10 +28,12 @@
     autostartLoading: boolean;
     autostartAvailable: boolean;
     hidConfigurationLoading: boolean;
+    resetLoading?: boolean;
     onLocaleChange: (locale: Locale) => Promise<void>;
     onAutostartChange: (enabled: boolean) => Promise<void>;
     onRefresh: () => Promise<void>;
     onConfigureHid: (repair: boolean) => Promise<void>;
+    onResetDevice: () => Promise<void>;
     onClose: () => void;
     onRestartOnboarding?: () => void;
   }
@@ -43,10 +46,12 @@
     autostartLoading,
     autostartAvailable,
     hidConfigurationLoading,
+    resetLoading = false,
     onLocaleChange,
     onAutostartChange,
     onRefresh,
     onConfigureHid,
+    onResetDevice,
     onClose,
     onRestartOnboarding
   }: Props = $props();
@@ -54,8 +59,11 @@
   let category = $state<SettingsCategory>('general');
   let backButton: HTMLButtonElement | undefined = $state();
   let hidActionButton: HTMLButtonElement | undefined = $state();
+  let resetActionButton: HTMLButtonElement | undefined = $state();
   let repairDialog: HTMLDivElement | undefined = $state();
+  let resetDialog: HTMLDivElement | undefined = $state();
   let repairConfirmOpen = $state(false);
+  let resetConfirmOpen = $state(false);
 
   const deviceReady = $derived(status.connected && status.sensorStatus === 'ok');
   const hidFirmwareReady = $derived(status.firmwareMode === 'hid' && status.hidKeyConfigured);
@@ -94,6 +102,12 @@
   });
 
   $effect(() => {
+    if (!resetConfirmOpen || typeof document === 'undefined') return;
+    queueMicrotask(() => focusFirstInDialog(resetDialog));
+    return () => resetActionButton?.focus();
+  });
+
+  $effect(() => {
     if (!open || typeof window === 'undefined') return;
     window.addEventListener('keydown', handleKeydown);
     return () => window.removeEventListener('keydown', handleKeydown);
@@ -108,6 +122,11 @@
   async function confirmRepair() {
     await onConfigureHid(true);
     repairConfirmOpen = false;
+  }
+
+  async function confirmReset() {
+    await onResetDevice();
+    resetConfirmOpen = false;
   }
 </script>
 
@@ -225,6 +244,7 @@
               <div><dt>{translate(locale, 'settings.port')}</dt><dd class="mono text-xs font-semibold">{status.port ?? '—'}</dd></div>
               <div><dt>{translate(locale, 'settings.firmware')}</dt><dd class="font-semibold">{firmwareModeLabel(locale, status.firmwareMode)}</dd></div>
               <div><dt>{translate(locale, 'settings.sensor')}</dt><dd class="flex items-center justify-end gap-1.5 font-semibold"><span class="w-1.5 h-1.5 rounded-full {deviceReady ? 'bg-emerald-600 dark:bg-emerald-400' : 'bg-amber-600 dark:bg-amber-400'}"></span>{sensorStatusLabel(locale, status.sensorStatus)}</dd></div>
+              <div><dt>{translate(locale, 'settings.chipFingerprints')}</dt><dd class="font-semibold {status.fingerprintCount > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--fg-muted)]'}">{status.fingerprintCount > 0 ? translate(locale, 'settings.enrolledCount', { count: status.fingerprintCount }) : translate(locale, 'settings.noFingerprints')}</dd></div>
             </dl>
             <div class="mt-3 flex gap-2">
               <button class="secondary-button py-1 px-3 text-xs" onclick={() => void onRefresh()}>{translate(locale, 'settings.refresh')}</button>
@@ -250,6 +270,26 @@
                     {translate(locale, hidConfigurationLoading ? 'settings.configuringHid' : hidRepairRequired ? 'settings.repairHid' : 'settings.configureHid')}
                   </button>
                 {/if}
+              </div>
+            </div>
+          </section>
+
+          <section class="settings-card apple-card p-3 border border-red-500/20 bg-red-500/[0.03]" aria-labelledby="reset-device-title">
+            <div class="flex items-start gap-3">
+              <span class="p-1.5 rounded-lg bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/30 shrink-0"><RotateCcw size={17} /></span>
+              <div class="min-w-0 flex-1">
+                <h3 id="reset-device-title" class="text-xs font-bold text-red-600 dark:text-red-400 m-0">{translate(locale, 'settings.resetDevice')}</h3>
+                <p class="mt-0.5 text-[11px] text-[var(--fg-muted)] font-normal">{translate(locale, 'settings.resetDeviceDescription')}</p>
+                <button
+                  bind:this={resetActionButton}
+                  class="danger-button mt-3 py-1 px-3 text-xs"
+                  disabled={!deviceReady || resetLoading}
+                  aria-busy={resetLoading}
+                  onclick={() => (resetConfirmOpen = true)}
+                >
+                  {#if resetLoading}<LoaderCircle class="animate-spin" size={14} aria-hidden="true" />{/if}
+                  {translate(locale, resetLoading ? 'settings.resettingDevice' : 'settings.resetDevice')}
+                </button>
               </div>
             </div>
           </section>
@@ -314,6 +354,7 @@
           <div><dt><Usb size={14} class="text-blue-600 dark:text-blue-400" aria-hidden="true" />{translate(locale, 'settings.port')}</dt><dd class:ready={status.connected} class="mono text-xs font-semibold">{status.connected ? status.port ?? translate(locale, 'settings.connected') : translate(locale, 'settings.searching')}</dd></div>
           <div><dt><Cpu size={14} class="text-purple-600 dark:text-purple-400" aria-hidden="true" />{translate(locale, 'settings.firmware')}</dt><dd class="font-semibold">{firmwareModeLabel(locale, status.firmwareMode)}</dd></div>
           <div><dt><Fingerprint size={14} class="text-emerald-600 dark:text-emerald-400" aria-hidden="true" />{translate(locale, 'settings.sensor')}</dt><dd class:ready={deviceReady} class="flex items-center justify-end gap-1.5 font-semibold"><span class="w-1.5 h-1.5 rounded-full {deviceReady ? 'bg-emerald-600 dark:bg-emerald-400' : 'bg-amber-600 dark:bg-amber-400'}"></span>{sensorStatusLabel(locale, status.sensorStatus)}</dd></div>
+          <div><dt><Fingerprint size={14} class="text-cyan-600 dark:text-cyan-400" aria-hidden="true" />{translate(locale, 'settings.chipFingerprints')}</dt><dd class="font-semibold text-xs {status.fingerprintCount > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-[var(--fg-muted)]'}">{status.fingerprintCount > 0 ? translate(locale, 'settings.enrolledCount', { count: status.fingerprintCount }) : translate(locale, 'settings.noFingerprints')}</dd></div>
         </dl>
       </section>
       <section class="inspector-section settings-privacy-status apple-card p-2.5">
@@ -342,6 +383,28 @@
         <div class="mt-6 flex justify-end gap-2.5">
           <button class="secondary-button" disabled={hidConfigurationLoading} onclick={() => (repairConfirmOpen = false)}>{translate(locale, 'button.cancel')}</button>
           <button class="danger-button" disabled={hidConfigurationLoading} onclick={() => void confirmRepair()}>{translate(locale, 'settings.confirmRepairHid')}</button>
+        </div>
+      </div>
+    </div>
+  {/if}
+
+  {#if resetConfirmOpen}
+    <div class="dialog-backdrop items-center justify-center p-4" role="presentation">
+      <div
+        bind:this={resetDialog}
+        class="confirm-dialog max-w-md backdrop-blur-2xl bg-slate-900/90 border border-white/10 shadow-2xl rounded-2xl p-6"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="reset-device-modal-title"
+        aria-describedby="reset-device-modal-desc"
+        tabindex="-1"
+        onkeydown={(event) => handleDialogKeydown(event, resetDialog, () => (resetConfirmOpen = false))}
+      >
+        <h2 id="reset-device-modal-title" class="text-lg font-bold text-white">{translate(locale, 'settings.resetDeviceTitle')}</h2>
+        <p id="reset-device-modal-desc" class="mt-2 text-sm leading-relaxed text-slate-300">{translate(locale, 'settings.resetDeviceConfirm')}</p>
+        <div class="mt-6 flex justify-end gap-2.5">
+          <button class="secondary-button" disabled={resetLoading} onclick={() => (resetConfirmOpen = false)}>{translate(locale, 'button.cancel')}</button>
+          <button class="danger-button" disabled={resetLoading} onclick={() => void confirmReset()}>{translate(locale, 'settings.confirmResetDevice')}</button>
         </div>
       </div>
     </div>

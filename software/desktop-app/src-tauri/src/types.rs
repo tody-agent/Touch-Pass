@@ -84,6 +84,8 @@ pub struct DeviceStatusChange {
     pub hid_configuration_supported: bool,
     pub local_pairing_key_configured: bool,
     pub pairing_in_doubt: bool,
+    #[serde(default)]
+    pub fingerprint_count: usize,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]

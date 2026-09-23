@@ -16,6 +16,9 @@ pub enum AdminCommand {
         slot: usize,
         reply: mpsc::Sender<Result<FingerProfile, CommandError>>,
     },
+    ResetDevice {
+        reply: mpsc::Sender<Result<(), CommandError>>,
+    },
 }
 
 #[derive(Clone)]

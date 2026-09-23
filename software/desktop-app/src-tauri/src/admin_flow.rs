@@ -5,6 +5,7 @@ pub enum AdminOperation {
     Enroll(usize),
     Delete(usize),
     ConfigureHid { enroll_after: Option<usize> },
+    ResetDevice,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -122,6 +123,10 @@ impl AdminFlow {
                     self.phase = Some(AdminPhase::Running);
                     AdminFlowAction::Write(format!("DELETE {slot}\n"))
                 }
+                AdminOperation::ResetDevice => {
+                    self.phase = Some(AdminPhase::Running);
+                    AdminFlowAction::Write("DELETE_ALL\n".to_string())
+                }
                 AdminOperation::ConfigureHid { .. } => {
                     let Some(key_hex) = self.hid_key_hex.as_deref() else {
                         return self.cancel("pairing_key_unavailable");
@@ -236,6 +241,21 @@ impl AdminFlow {
                 AdminFlowAction::Failed {
                     operation,
                     reason: "delete_failed".to_string(),
+                }
+            }
+            (Some(AdminPhase::Running), FirmwareLine::DeleteAllOk)
+                if operation == AdminOperation::ResetDevice =>
+            {
+                self.clear();
+                AdminFlowAction::Completed(operation)
+            }
+            (Some(AdminPhase::Running), FirmwareLine::DeleteAllErr)
+                if operation == AdminOperation::ResetDevice =>
+            {
+                self.clear();
+                AdminFlowAction::Failed {
+                    operation,
+                    reason: "delete_all_failed".to_string(),
                 }
             }
             _ => AdminFlowAction::None,
@@ -463,5 +483,43 @@ mod tests {
             ));
             assert!(!flow.is_active());
         }
+    }
+
+    #[test]
+    fn reset_device_unlocks_and_sends_delete_all() {
+        let mut flow = AdminFlow::default();
+        let first = flow.start(AdminOperation::ResetDevice).unwrap();
+        assert_eq!(first, "CONFIG_UNLOCK\n");
+
+        let next = flow.handle(&parse_firmware_line(
+            "OK CONFIG_UNLOCK first_setup seconds=120",
+        ));
+        assert_eq!(next, AdminFlowAction::Write("DELETE_ALL\n".to_string()));
+
+        let complete = flow.handle(&parse_firmware_line("OK DELETE_ALL"));
+        assert_eq!(
+            complete,
+            AdminFlowAction::Completed(AdminOperation::ResetDevice)
+        );
+        assert!(!flow.is_active());
+    }
+
+    #[test]
+    fn reset_device_handles_failure() {
+        let mut flow = AdminFlow::default();
+        flow.start(AdminOperation::ResetDevice).unwrap();
+        flow.handle(&parse_firmware_line(
+            "OK CONFIG_UNLOCK fingerprint seconds=120",
+        ));
+
+        let failed = flow.handle(&parse_firmware_line("ERR DELETE_ALL"));
+        assert_eq!(
+            failed,
+            AdminFlowAction::Failed {
+                operation: AdminOperation::ResetDevice,
+                reason: "delete_all_failed".to_string(),
+            }
+        );
+        assert!(!flow.is_active());
     }
 }

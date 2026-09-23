@@ -151,3 +151,43 @@ pub async fn configure_hid_mode(
     .await
     .map_err(CommandError::internal)?
 }
+
+#[tauri::command]
+pub async fn reset_device(
+    force_local: Option<bool>,
+    state: State<'_, AppState>,
+) -> Result<(), CommandError> {
+    let is_connected = state
+        .status
+        .lock()
+        .map(|status| status.connected)
+        .unwrap_or(false);
+
+    if force_local.unwrap_or(false) || !is_connected {
+        let profiles = state
+            .profiles
+            .lock()
+            .map_err(|_| CommandError::internal("profile store lock poisoned"))?;
+        profiles.reset_all_profiles()?;
+        if let Ok(mut status) = state.status.lock() {
+            status.fingerprint_count = 0;
+        }
+        return Ok(());
+    }
+
+    let (reply_tx, reply_rx) = std::sync::mpsc::channel();
+    state
+        .admin_tx
+        .send(AdminCommand::ResetDevice { reply: reply_tx })
+        .map_err(|_| CommandError::new(ErrorCode::HardwareUnavailable))?;
+
+    tauri::async_runtime::spawn_blocking(move || {
+        reply_rx
+            .recv_timeout(std::time::Duration::from_secs(130))
+            .map_err(|_| {
+                CommandError::with_detail(ErrorCode::HardwareUnavailable, "reset_timeout")
+            })?
+    })
+    .await
+    .map_err(CommandError::internal)?
+}

@@ -129,6 +129,16 @@ impl ProfileStore {
         Ok(profiles[id - 1].clone())
     }
 
+    pub fn reset_all_profiles(&self) -> Result<Vec<FingerProfile>, CommandError> {
+        for id in 1..=MAX_FINGERS {
+            let reference = format!("slot-{}", id);
+            let _ = self.secret_store.delete(&reference);
+        }
+        let defaults = default_profiles();
+        self.save(&defaults)?;
+        Ok(defaults)
+    }
+
     pub fn mark_enrolled(&self, id: usize) -> Result<FingerProfile, CommandError> {
         Self::validate_id(id)?;
         let mut profiles = self.list_profiles()?;
@@ -442,5 +452,30 @@ mod tests {
 
         assert_eq!(error.code, ErrorCode::PersistenceFailed);
         assert_eq!(std::fs::read_to_string(path).unwrap(), malformed);
+    }
+
+    #[test]
+    fn reset_all_profiles_restores_default_unconfigured_state() {
+        let dir = tempdir().unwrap();
+        let path = dir.path().join("profiles.json");
+        let secret_store = test_secret_store("touchpass-test-reset-all");
+        let store = ProfileStore::new(path, secret_store.clone());
+
+        let mut profile = default_profile(1);
+        profile.action_type = ActionType::Password;
+        store
+            .save_profile(profile, Some("secret123".to_string()))
+            .unwrap();
+        store.mark_enrolled(2).unwrap();
+
+        assert!(secret_store.exists("slot-1"));
+        assert!(store.get_profile(2).unwrap().configured);
+
+        let reset = store.reset_all_profiles().unwrap();
+        assert_eq!(reset.len(), MAX_FINGERS);
+        assert!(!reset[0].configured);
+        assert!(!reset[0].secret_configured);
+        assert!(!reset[1].configured);
+        assert!(!secret_store.exists("slot-1"));
     }
 }

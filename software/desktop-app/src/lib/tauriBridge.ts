@@ -132,6 +132,17 @@ export async function resetFingerProfile(fingerId: number, forceLocal?: boolean)
   return invoke<FingerProfile>('reset_finger_profile', { fingerId, forceLocal });
 }
 
+export async function resetDevice(forceLocal?: boolean): Promise<void> {
+  if (!isTauriRuntime()) {
+    const defaults = defaultProfiles();
+    for (let i = 0; i < mockProfiles.length; i++) {
+      mockProfiles[i] = clone(defaults[i]);
+    }
+    return;
+  }
+  return invoke<void>('reset_device', { forceLocal });
+}
+
 export async function startEnrollment(fingerId: number): Promise<void> {
   if (!isTauriRuntime()) {
     return;

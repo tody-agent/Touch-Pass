@@ -48,6 +48,8 @@ pub enum FirmwareLine {
     },
     DeleteOk(usize),
     DeleteErr(usize),
+    DeleteAllOk,
+    DeleteAllErr,
     Event(SensorEvent),
     Other(String),
 }
@@ -104,6 +106,12 @@ pub fn parse_firmware_line(line: &str) -> FirmwareLine {
             stage: token_value(line, "stage").map(str::to_string),
             confirm: token_value(line, "confirm").and_then(parse_hex_byte),
         };
+    }
+    if line.starts_with("OK DELETE_ALL") {
+        return FirmwareLine::DeleteAllOk;
+    }
+    if line.starts_with("ERR DELETE_ALL") {
+        return FirmwareLine::DeleteAllErr;
     }
     if line.starts_with("OK DELETE") {
         return FirmwareLine::DeleteOk(slot_from_line(line));
@@ -362,6 +370,22 @@ mod tests {
         assert!(matches!(
             parse_firmware_line("ERR MODE mode=piv"),
             FirmwareLine::ModeErr(mode) if mode == "piv"
+        ));
+        assert!(matches!(
+            parse_firmware_line("OK DELETE slot=3"),
+            FirmwareLine::DeleteOk(3)
+        ));
+        assert!(matches!(
+            parse_firmware_line("ERR DELETE slot=3"),
+            FirmwareLine::DeleteErr(3)
+        ));
+        assert!(matches!(
+            parse_firmware_line("OK DELETE_ALL"),
+            FirmwareLine::DeleteAllOk
+        ));
+        assert!(matches!(
+            parse_firmware_line("ERR DELETE_ALL"),
+            FirmwareLine::DeleteAllErr
         ));
     }
 

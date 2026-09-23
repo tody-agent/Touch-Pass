@@ -24,6 +24,7 @@ function settingsProps() {
     onAutostartChange: vi.fn(async () => undefined),
     onRefresh: vi.fn(async () => undefined),
     onConfigureHid: vi.fn(async (_repair: boolean) => undefined),
+    onResetDevice: vi.fn(async () => undefined),
     onClose: vi.fn()
   };
 }
@@ -181,5 +182,29 @@ describe('SettingsPane', () => {
     await rerender({ open: false });
     expect(document.activeElement).toBe(opener);
     opener.remove();
+  });
+
+  it('confirms before resetting the device', async () => {
+    const user = userEvent.setup();
+    const props = settingsProps();
+    render(SettingsPane, { props });
+
+    await user.click(screen.getByRole('button', { name: 'Device' }));
+    await user.click(screen.getByRole('button', { name: 'Reset device' }));
+    expect(screen.getByRole('alertdialog', { name: 'Reset device completely?' })).toBeTruthy();
+    expect(props.onResetDevice).not.toHaveBeenCalled();
+
+    await user.click(screen.getByRole('button', { name: 'Erase & Reset' }));
+    expect(props.onResetDevice).toHaveBeenCalledOnce();
+  });
+
+  it('displays chip fingerprint count in device settings', async () => {
+    const user = userEvent.setup();
+    const props = settingsProps();
+    props.status.fingerprintCount = 3;
+    render(SettingsPane, { props });
+
+    await user.click(screen.getByRole('button', { name: 'Device' }));
+    expect(screen.getAllByText('3 enrolled').length).toBeGreaterThan(0);
   });
 });

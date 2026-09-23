@@ -134,6 +134,11 @@ impl SecretStore {
         self.delete(&pending_pairing_account(device_id))
     }
 
+    pub fn clear_pairing_keys(&self, device_id: &str) -> Result<(), String> {
+        let _ = self.delete(&pending_pairing_account(device_id));
+        self.delete(&pairing_account(device_id))
+    }
+
     pub fn has_live_pairing_key(&self, device_id: &str) -> bool {
         self.get_optional(&pairing_account(device_id))
             .ok()
@@ -216,7 +221,10 @@ fn parse_pairing_key(value: &[u8]) -> Option<Vec<u8>> {
 
 #[cfg(test)]
 mod tests {
-    use super::{parse_pairing_key, prepare_pairing_key};
+    use super::{
+        pairing_account, parse_pairing_key, pending_pairing_account, prepare_pairing_key,
+        SecretStore,
+    };
     use std::cell::Cell;
 
     #[test]
@@ -311,5 +319,19 @@ mod tests {
         assert_eq!(prepared.key, vec![0x20; 32]);
         assert_eq!(prepared.old_key, Some(vec![0x10; 32]));
         assert!(prepared.needs_commit);
+    }
+
+    #[test]
+    fn clear_pairing_keys_removes_both_live_and_pending() {
+        let store = SecretStore::mock("test-clear");
+        let live_account = pairing_account("dev1");
+        let pending_account = pending_pairing_account("dev1");
+        store.set(&live_account, "00".repeat(32).as_bytes()).unwrap();
+        store.set(&pending_account, "11".repeat(32).as_bytes()).unwrap();
+        assert!(store.has_live_pairing_key("dev1"));
+
+        store.clear_pairing_keys("dev1").unwrap();
+        assert!(!store.has_live_pairing_key("dev1"));
+        assert!(!store.has_pending_pairing_key("dev1"));
     }
 }
