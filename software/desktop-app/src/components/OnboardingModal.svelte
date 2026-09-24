@@ -93,6 +93,13 @@
   let isApplyingPresets = $state(false);
   let appliedPresets = $state(false);
 
+  const steps = $derived([
+    { id: 1 as const, label: translate(locale, 'onboarding.step1Title') },
+    { id: 2 as const, label: translate(locale, 'onboarding.step2Title') },
+    { id: 3 as const, label: translate(locale, 'onboarding.step3Title') },
+    { id: 4 as const, label: translate(locale, 'onboarding.step4Title') }
+  ]);
+
   const deviceReady = $derived(status.connected && status.sensorStatus === 'ok');
   const targetProfile = $derived(profiles.find((p) => p.id === selectedFingerId) ?? profiles[6]);
   const isEnrolling = $derived(inlineEnrollment?.fingerId === selectedFingerId && inlineEnrollment.state === 'scanning');
@@ -169,7 +176,7 @@
   <div class="dialog-backdrop items-center justify-center p-4 z-50" role="presentation">
     <div
       bind:this={dialogElement}
-      class="confirm-dialog max-w-2xl w-full backdrop-blur-2xl bg-[var(--bg)] border border-[var(--border)] shadow-2xl rounded-2xl p-6 flex flex-col max-h-[92vh] overflow-hidden"
+      class="onboarding-dialog max-w-2xl w-full backdrop-blur-2xl bg-[var(--bg)] border border-[var(--border)] shadow-2xl rounded-2xl p-6 flex flex-col max-h-[92vh] overflow-hidden"
       role="dialog"
       aria-modal="true"
       aria-labelledby="onboarding-title"
@@ -179,59 +186,56 @@
       <!-- Modal Header -->
       <header class="flex items-center justify-between gap-3 pb-3 border-b border-[var(--border)] shrink-0">
         <div class="flex items-center gap-2.5 min-w-0">
-          <img src="/favicon.png" alt="TouchPass" class="h-6 w-6 shrink-0 rounded-md object-contain shadow-sm" />
-          <h1 id="onboarding-title" class="text-sm font-bold text-[var(--fg)] truncate m-0">
-            {translate(locale, 'onboarding.title')}
-          </h1>
+          <div class="w-8 h-8 rounded-lg bg-[var(--card-strong)] border border-[var(--border)] flex items-center justify-center p-1.5 shrink-0 shadow-xs">
+            <img src="/favicon.png" alt="TouchPass" class="w-full h-full object-contain" />
+          </div>
+          <div>
+            <h1 id="onboarding-title" class="text-sm font-bold text-[var(--fg)] tracking-tight m-0">
+              {translate(locale, 'onboarding.title')}
+            </h1>
+            <p class="text-[11px] text-[var(--fg-muted)] m-0">
+              {translate(locale, 'onboarding.stepIndicator', { step: currentStep, total: 4 })}
+            </p>
+          </div>
         </div>
-        <div class="flex items-center gap-2 shrink-0">
-          <span class="mono text-[11px] font-semibold text-[var(--fg-muted)] px-2 py-0.5 rounded-full bg-[var(--card)] border border-[var(--border)]">
-            {translate(locale, 'onboarding.stepIndicator', { step: currentStep, total: 4 })}
-          </span>
-          <button
-            class="secondary-button text-xs py-1 px-2.5 text-[var(--fg-muted)] hover:text-[var(--fg)]"
-            title={translate(locale, 'onboarding.skip')}
-            onclick={onClose}
-          >
-            <X size={14} aria-hidden="true" />
-            <span>{translate(locale, 'onboarding.skip')}</span>
-          </button>
-        </div>
+        <button
+          type="button"
+          class="p-1.5 rounded-lg text-[var(--fg-muted)] hover:text-[var(--fg)] hover:bg-[var(--card-hover)] transition-colors cursor-pointer"
+          aria-label={translate(locale, 'button.close')}
+          title={translate(locale, 'button.close')}
+          onclick={onClose}
+        >
+          <X size={16} aria-hidden="true" />
+        </button>
       </header>
 
-      <!-- Step Navigation Pills -->
-      <nav class="flex items-center gap-1.5 py-3 border-b border-[var(--border-subtle)] shrink-0 overflow-x-auto" aria-label="Onboarding Steps">
-        <button
-          class="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all {currentStep === 1 ? 'bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30' : 'text-[var(--fg-muted)] hover:text-[var(--fg)] hover:bg-[var(--card)] border border-transparent'}"
-          onclick={() => (currentStep = 1)}
-        >
-          <span class="w-4 h-4 rounded-full text-[10px] grid place-items-center {currentStep === 1 ? 'bg-blue-600 text-white' : 'bg-[var(--card-strong)] text-[var(--fg-muted)]'}">1</span>
-          <span>{translate(locale, 'onboarding.step1Title')}</span>
-        </button>
-        <span class="text-[var(--border)] text-xs">/</span>
-        <button
-          class="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all {currentStep === 2 ? 'bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/30' : 'text-[var(--fg-muted)] hover:text-[var(--fg)] hover:bg-[var(--card)] border border-transparent'}"
-          onclick={() => (currentStep = 2)}
-        >
-          <span class="w-4 h-4 rounded-full text-[10px] grid place-items-center {currentStep === 2 ? 'bg-purple-600 text-white' : 'bg-[var(--card-strong)] text-[var(--fg-muted)]'}">2</span>
-          <span>{translate(locale, 'onboarding.step2Title')}</span>
-        </button>
-        <span class="text-[var(--border)] text-xs">/</span>
-        <button
-          class="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all {currentStep === 3 ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30' : 'text-[var(--fg-muted)] hover:text-[var(--fg)] hover:bg-[var(--card)] border border-transparent'}"
-          onclick={() => (currentStep = 3)}
-        >
-          <span class="w-4 h-4 rounded-full text-[10px] grid place-items-center {currentStep === 3 ? 'bg-amber-600 text-white' : 'bg-[var(--card-strong)] text-[var(--fg-muted)]'}">3</span>
-          <span>{translate(locale, 'onboarding.step3Title')}</span>
-        </button>
-        <span class="text-[var(--border)] text-xs">/</span>
-        <button
-          class="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all {currentStep === 4 ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30' : 'text-[var(--fg-muted)] hover:text-[var(--fg)] hover:bg-[var(--card)] border border-transparent'}"
-          onclick={() => (currentStep = 4)}
-        >
-          <span class="w-4 h-4 rounded-full text-[10px] grid place-items-center {currentStep === 4 ? 'bg-emerald-600 text-white' : 'bg-[var(--card-strong)] text-[var(--fg-muted)]'}">4</span>
-          <span>{translate(locale, 'onboarding.step4Title')}</span>
-        </button>
+      <!-- Clean 4-Column Segmented Stepper -->
+      <nav class="py-3 border-b border-[var(--border-subtle)] shrink-0" aria-label="Onboarding Steps">
+        <div class="grid grid-cols-4 gap-2">
+          {#each steps as step}
+            <button
+              type="button"
+              class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all text-left truncate cursor-pointer {currentStep === step.id ? 'bg-[var(--accent-bg)] text-[var(--accent)] border border-[var(--accent)]/30' : step.id < currentStep ? 'text-[var(--fg)] hover:bg-[var(--card)] border border-transparent' : 'text-[var(--fg-subtle)] hover:text-[var(--fg-muted)] border border-transparent'}"
+              onclick={() => (currentStep = step.id)}
+            >
+              <span class="w-5 h-5 rounded-full shrink-0 flex items-center justify-center text-[10px] font-bold {currentStep === step.id ? 'bg-[var(--accent)] text-white shadow-xs' : step.id < currentStep ? 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30' : 'bg-[var(--card-strong)] text-[var(--fg-muted)]'}">
+                {#if step.id < currentStep}
+                  <Check size={11} strokeWidth={2.5} />
+                {:else}
+                  {step.id}
+                {/if}
+              </span>
+              <span class="truncate text-[11.5px]">{step.label}</span>
+            </button>
+          {/each}
+        </div>
+        <!-- Sleek segmented progress line -->
+        <div class="w-full bg-[var(--border-subtle)] h-1 rounded-full mt-2.5 overflow-hidden">
+          <div
+            class="bg-[var(--accent)] h-full transition-all duration-300 rounded-full"
+            style={`width: ${(currentStep / 4) * 100}%`}
+          ></div>
+        </div>
       </nav>
 
       <!-- Step Content Area (Scrollable) -->
@@ -240,26 +244,34 @@
         {#if currentStep === 1}
           <div class="space-y-4">
             <!-- Connection Hero Status -->
-            <div class="apple-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 {deviceReady ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-amber-500/30 bg-amber-500/5'}">
-              <div class="flex items-start gap-3">
-                <div class="p-2.5 rounded-xl shrink-0 {deviceReady ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400' : 'bg-amber-500/15 text-amber-600 dark:text-amber-400'}">
+            <div class="apple-card p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 {deviceReady ? 'border-emerald-500/30 bg-emerald-500/8' : 'border-amber-500/30 bg-amber-500/8'}">
+              <div class="flex items-start gap-3 min-w-0">
+                <div class="p-2.5 rounded-xl shrink-0 {deviceReady ? 'bg-emerald-500/15 text-emerald-500' : 'bg-amber-500/15 text-amber-500'}">
                   {#if deviceReady}
                     <CheckCircle2 size={24} aria-hidden="true" />
                   {:else}
-                    <LoaderCircle size={24} class="animate-spin" aria-hidden="true" />
+                    <LoaderCircle size={24} class="animate-spin text-amber-500" aria-hidden="true" />
                   {/if}
                 </div>
-                <div>
-                  <h2 class="text-sm font-bold text-[var(--fg)] m-0">
-                    {translate(locale, deviceReady ? 'onboarding.deviceDetected' : 'onboarding.deviceSearching')}
-                  </h2>
+                <div class="min-w-0">
+                  <div class="flex items-center gap-2">
+                    <h2 class="text-sm font-bold text-[var(--fg)] m-0">
+                      {translate(locale, deviceReady ? 'onboarding.deviceDetected' : 'onboarding.deviceSearching')}
+                    </h2>
+                    {#if deviceReady}
+                      <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
+                        {status.port ?? 'USB CDC'}
+                      </span>
+                    {/if}
+                  </div>
                   <p class="text-xs text-[var(--fg-muted)] mt-1 m-0 leading-relaxed">
                     {translate(locale, 'onboarding.connSub')}
                   </p>
                 </div>
               </div>
               <button
-                class="secondary-button text-xs py-1.5 px-3 shrink-0 self-start sm:self-center"
+                type="button"
+                class="secondary-button text-xs py-1.5 px-3 shrink-0 self-start sm:self-center flex items-center gap-1.5"
                 disabled={refreshing}
                 onclick={handleRefresh}
               >
@@ -275,20 +287,20 @@
               </h3>
               <ol class="space-y-2.5 list-none p-0 m-0">
                 <li class="flex items-start gap-3 text-xs leading-relaxed text-[var(--fg)]">
-                  <div class="p-1 rounded bg-blue-500/15 text-blue-500 border border-blue-500/30 shrink-0 mt-0.5">
-                    <Usb size={13} />
+                  <div class="w-5 h-5 rounded-full bg-blue-500/15 text-blue-500 border border-blue-500/30 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
+                    1
                   </div>
                   <span>{translate(locale, 'onboarding.guideStep1')}</span>
                 </li>
                 <li class="flex items-start gap-3 text-xs leading-relaxed text-[var(--fg)]">
-                  <div class="p-1 rounded bg-purple-500/15 text-purple-500 border border-purple-500/30 shrink-0 mt-0.5">
-                    <Cpu size={13} />
+                  <div class="w-5 h-5 rounded-full bg-purple-500/15 text-purple-500 border border-purple-500/30 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
+                    2
                   </div>
                   <span>{translate(locale, 'onboarding.guideStep2')}</span>
                 </li>
                 <li class="flex items-start gap-3 text-xs leading-relaxed text-[var(--fg)]">
-                  <div class="p-1 rounded bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 shrink-0 mt-0.5">
-                    <ShieldCheck size={13} />
+                  <div class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-500 border border-emerald-500/30 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
+                    3
                   </div>
                   <span>{translate(locale, 'onboarding.guideStep3')}</span>
                 </li>
@@ -688,21 +700,24 @@
       </main>
 
       <!-- Modal Footer -->
-      <footer class="pt-3 border-t border-[var(--border)] flex items-center justify-between gap-3 shrink-0">
+      <footer class="pt-3.5 border-t border-[var(--border)] flex items-center justify-between gap-3 shrink-0">
         <div>
           {#if currentStep > 1}
             <button
-              class="secondary-button text-xs py-1.5 px-3"
+              type="button"
+              class="secondary-button text-xs py-1.5 px-3 flex items-center gap-1 cursor-pointer"
               onclick={() => (currentStep = (currentStep - 1) as any)}
             >
-              {translate(locale, 'onboarding.back')}
+              <span>←</span>
+              <span>{translate(locale, 'onboarding.back')}</span>
             </button>
           {:else}
             <button
-              class="secondary-button text-xs py-1.5 px-3 text-[var(--fg-muted)]"
+              type="button"
+              class="secondary-button text-xs py-1.5 px-3 text-[var(--fg-muted)] hover:text-[var(--fg)] cursor-pointer"
               onclick={onClose}
             >
-              {translate(locale, 'onboarding.skip')}
+              {translate(locale, 'onboarding.skipSetup')}
             </button>
           {/if}
         </div>
@@ -710,23 +725,42 @@
         <div class="flex items-center gap-2">
           {#if currentStep === 2}
             <button
-              class="secondary-button text-xs py-1.5 px-3"
+              type="button"
+              class="secondary-button text-xs py-1.5 px-3 text-[var(--fg-muted)] cursor-pointer"
               onclick={() => (currentStep = 3)}
             >
               {translate(locale, 'onboarding.skipStep')}
             </button>
           {/if}
 
-          {#if currentStep < 4}
+          {#if currentStep === 1}
             <button
-              class="primary-button text-xs py-1.5 px-4"
-              onclick={() => (currentStep = (currentStep + 1) as any)}
+              type="button"
+              class="primary-button text-xs py-1.5 px-4 cursor-pointer"
+              onclick={() => (currentStep = 2)}
             >
-              <span>{translate(locale, 'onboarding.next')}</span>
+              <span>{translate(locale, 'onboarding.step1Next')}</span>
+            </button>
+          {:else if currentStep === 2}
+            <button
+              type="button"
+              class="primary-button text-xs py-1.5 px-4 cursor-pointer"
+              onclick={() => (currentStep = 3)}
+            >
+              <span>{translate(locale, 'onboarding.step2Next')}</span>
+            </button>
+          {:else if currentStep === 3}
+            <button
+              type="button"
+              class="primary-button text-xs py-1.5 px-4 cursor-pointer"
+              onclick={() => (currentStep = 4)}
+            >
+              <span>{translate(locale, 'onboarding.step3Next')}</span>
             </button>
           {:else}
             <button
-              class="primary-button text-xs py-1.5 px-4 bg-emerald-600 hover:bg-emerald-500 border-0"
+              type="button"
+              class="primary-button text-xs py-2 px-5 bg-emerald-600 hover:bg-emerald-500 border-0 flex items-center gap-1.5 font-bold shadow-md shadow-emerald-600/20 cursor-pointer"
               onclick={onComplete}
             >
               <Rocket size={14} aria-hidden="true" />

@@ -43,8 +43,8 @@ describe('OnboardingModal', () => {
     expect(screen.getByRole('dialog')).toBeTruthy();
     expect(screen.getByText('Hướng dẫn cài đặt TouchPass')).toBeTruthy();
     expect(screen.getByText('Thiết bị đã kết nối sẵn sàng')).toBeTruthy();
-    expect(screen.getByText('/dev/cu.usbmodem1101')).toBeTruthy();
-    expect(screen.getByText('Chuẩn đoán phần cứng')).toBeTruthy();
+    expect(screen.getAllByText('/dev/cu.usbmodem1101').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText('Chẩn đoán phần cứng')).toBeTruthy();
 
     // Recheck connection
     const recheckBtn = screen.getByRole('button', { name: /Kiểm tra lại kết nối/i });
@@ -63,7 +63,7 @@ describe('OnboardingModal', () => {
     const props = onboardingProps();
     render(OnboardingModal, { props });
 
-    const nextBtn = screen.getByRole('button', { name: 'Tiếp tục' });
+    const nextBtn = screen.getByRole('button', { name: /Tiếp tục/i });
     await user.click(nextBtn);
 
     // Step 2 content
@@ -78,7 +78,7 @@ describe('OnboardingModal', () => {
     render(OnboardingModal, { props });
 
     // Go to step 2
-    await user.click(screen.getByRole('button', { name: 'Tiếp tục' }));
+    await user.click(screen.getByRole('button', { name: /Tiếp tục/i }));
 
     // Try clicking enroll without entering password
     const enrollBtn = screen.getByRole('button', { name: /Lưu & Quét vân tay/i });
@@ -112,7 +112,7 @@ describe('OnboardingModal', () => {
     render(OnboardingModal, { props });
 
     // Switch to step 2 by clicking navigation pill
-    const step2Pill = screen.getByRole('button', { name: /2\. Mở khóa Mac bằng vân tay/i });
+    const step2Pill = screen.getByRole('button', { name: /2.*Mở khóa Mac/i });
     await user.click(step2Pill);
 
     expect(screen.getByRole('progressbar')).toBeTruthy();
@@ -129,7 +129,7 @@ describe('OnboardingModal', () => {
     render(OnboardingModal, { props });
 
     // Go to step 2
-    await user.click(screen.getByRole('button', { name: /2\. Mở khóa Mac bằng vân tay/i }));
+    await user.click(screen.getByRole('button', { name: /2.*Mở khóa Mac/i }));
 
     expect(screen.getByText(/Đã liên kết vân tay thành công/i)).toBeTruthy();
     const testBtn = screen.getByRole('button', { name: /Thử nghiệm mở khóa/i });
@@ -143,7 +143,7 @@ describe('OnboardingModal', () => {
     render(OnboardingModal, { props });
 
     // Jump directly to step 3
-    await user.click(screen.getByRole('button', { name: /3\. Siêu phím tắt & AI/i }));
+    await user.click(screen.getByRole('button', { name: /3.*Phím tắt & AI/i }));
 
     expect(screen.getByText('Siêu năng lực cho các ngón tay còn lại')).toBeTruthy();
     expect(screen.getByText('AI Coding')).toBeTruthy();
@@ -163,7 +163,7 @@ describe('OnboardingModal', () => {
     render(OnboardingModal, { props });
 
     // Jump to step 4
-    await user.click(screen.getByRole('button', { name: /4\. Hoàn tất & Sẵn sàng/i }));
+    await user.click(screen.getByRole('button', { name: /4.*Sẵn sàng/i }));
 
     expect(screen.getByText('Sẵn sàng trải nghiệm TouchPass!')).toBeTruthy();
     expect(screen.getByText('100% Local')).toBeTruthy();
@@ -179,14 +179,18 @@ describe('OnboardingModal', () => {
     expect(props.onComplete).toHaveBeenCalledOnce();
   });
 
-  it('allows skipping onboarding at any point via skip button or Escape', async () => {
+  it('allows skipping onboarding at any point via skip button or close button', async () => {
     const user = userEvent.setup();
     const props = onboardingProps();
     render(OnboardingModal, { props });
 
-    const skipBtn = screen.getAllByRole('button', { name: 'Bỏ qua' })[0];
+    const skipBtn = screen.getByRole('button', { name: 'Bỏ qua thiết lập' });
     await user.click(skipBtn);
     expect(props.onClose).toHaveBeenCalledOnce();
+
+    const closeBtn = screen.getByRole('button', { name: 'Đóng' });
+    await user.click(closeBtn);
+    expect(props.onClose).toHaveBeenCalledTimes(2);
   });
 
   it('renders localized copy in English and Chinese', () => {
